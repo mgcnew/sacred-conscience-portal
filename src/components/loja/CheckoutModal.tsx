@@ -8,7 +8,7 @@ import { Label } from '@/components/ui/label';
 import { ArrowLeft, CheckCircle2, Copy, CreditCard, Loader2, Minus, Plus, ShoppingBag } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
-import { useIsMobile } from '@/hooks/useIsMobile';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { APP_CONFIG } from '@/config/app';
 import PaymentMethodSelector from '@/components/payment/PaymentMethodSelector';
 import type { Produto } from '@/types';

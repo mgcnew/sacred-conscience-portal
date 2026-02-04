@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useSearchParams } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -50,7 +50,7 @@ const Loja: React.FC = () => {
   const [isCheckoutModalOpen, setIsCheckoutModalOpen] = useState(false);
   const [productToEdit, setProductToEdit] = useState<Produto | null>(null);
   const [productToView, setProductToView] = useState<Produto | null>(null);
-  const [productToCheckout, setProductToCheckout] = useState<Produto | null>(null);
+  const [productToCheckout, productToCheckoutSet] = useState<Produto | null>(null);
   const [showRapeInstructions, setShowRapeInstructions] = useState(false);
 
   // Tratar retorno do Mercado Pago
@@ -78,31 +78,31 @@ const Loja: React.FC = () => {
     }
   }, [searchParams, setSearchParams]);
 
-  const handleComprar = useCallback((produto: Produto) => {
+  const handleComprar = (produto: Produto) => {
     if (!user) {
       toast.error('Faça login para comprar', {
         description: 'Você precisa estar logado para realizar compras.',
       });
       return;
     }
-    setProductToCheckout(produto);
+    productToCheckoutSet(produto);
     setIsCheckoutModalOpen(true);
-  }, [user]);
+  };
 
-  const handleViewInfo = useCallback((produto: Produto) => {
+  const handleViewInfo = (produto: Produto) => {
     setProductToView(produto);
     setIsInfoModalOpen(true);
-  }, []);
+  };
 
-  const handleCloseInfo = useCallback(() => {
+  const handleCloseInfo = () => {
     setIsInfoModalOpen(false);
     setProductToView(null);
-  }, []);
+  };
 
-  const handleCloseCheckout = useCallback(() => {
+  const handleCloseCheckout = () => {
     setIsCheckoutModalOpen(false);
-    setProductToCheckout(null);
-  }, []);
+    productToCheckoutSet(null);
+  };
 
   // Buscar produtos
   const { data: produtos, isLoading } = useQuery({
@@ -451,7 +451,7 @@ const Loja: React.FC = () => {
         onClose={handleCloseCheckout}
         produto={productToCheckout}
         userEmail={user?.email || ''}
-        userName={user?.email || ''}
+        userName={user?.user_metadata?.full_name || ''}
       />
 
       {/* Modal de Informações do Produto */}
