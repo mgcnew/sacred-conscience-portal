@@ -1005,7 +1005,7 @@ export const FluxoCaixaTab: React.FC = () => {
                                     <Paperclip className="w-4 h-4" />
                                   </Button>
                                 )}
-                                {t.referencia_tipo === 'manual' && (
+                                {t.referencia_tipo === 'manual' || t.referencia_tipo === 'inscricao' ? (
                                   <AlertDialog>
                                     <AlertDialogTrigger asChild>
                                       <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive">
@@ -1015,7 +1015,7 @@ export const FluxoCaixaTab: React.FC = () => {
                                     <AlertDialogContent>
                                       <AlertDialogHeader>
                                         <AlertDialogTitle>Excluir transação?</AlertDialogTitle>
-                                        <AlertDialogDescription>Esta ação não pode ser desfeita.</AlertDialogDescription>
+                                        <AlertDialogDescription>Esta ação não pode ser desfeita e o valor será removido do saldo total.</AlertDialogDescription>
                                       </AlertDialogHeader>
                                       <AlertDialogFooter>
                                         <AlertDialogCancel>Cancelar</AlertDialogCancel>
@@ -1025,7 +1025,7 @@ export const FluxoCaixaTab: React.FC = () => {
                                       </AlertDialogFooter>
                                     </AlertDialogContent>
                                   </AlertDialog>
-                                )}
+                                ) : null}
                               </div>
                             </TableCell>
                           </TableRow>
@@ -1140,7 +1140,7 @@ export const FluxoCaixaTab: React.FC = () => {
                                 </Button>
                               </>
                             )}
-                            {t.referencia_tipo === 'manual' && (
+                            {t.referencia_tipo === 'manual' || t.referencia_tipo === 'inscricao' ? (
                               <AlertDialog>
                                 <AlertDialogTrigger asChild>
                                   <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive">
@@ -1150,7 +1150,7 @@ export const FluxoCaixaTab: React.FC = () => {
                                 <AlertDialogContent>
                                   <AlertDialogHeader>
                                     <AlertDialogTitle>Excluir transação?</AlertDialogTitle>
-                                    <AlertDialogDescription>Esta ação não pode ser desfeita.</AlertDialogDescription>
+                                    <AlertDialogDescription>Esta ação não pode ser desfeita e o valor será removido do saldo total.</AlertDialogDescription>
                                   </AlertDialogHeader>
                                   <AlertDialogFooter>
                                     <AlertDialogCancel>Cancelar</AlertDialogCancel>
@@ -1160,7 +1160,7 @@ export const FluxoCaixaTab: React.FC = () => {
                                   </AlertDialogFooter>
                                 </AlertDialogContent>
                               </AlertDialog>
-                            )}
+                            ) : null}
                           </div>
                         </div>
                       </div>
