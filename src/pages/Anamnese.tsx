@@ -34,6 +34,7 @@ import {
   Phone,
   Shield,
   MessageCircle,
+  RotateCcw,
 } from 'lucide-react';
 import {
   Dialog,
