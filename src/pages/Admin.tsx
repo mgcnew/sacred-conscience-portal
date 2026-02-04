@@ -250,13 +250,14 @@ const Admin: React.FC = () => {
 
   // Mutation para atualizar status de pagamento
   const togglePaymentMutation = useMutation({
-    mutationFn: async ({ inscricaoId, pago, valor, cerimoniaId, userId, formaPagamento }: { 
+    mutationFn: async ({ inscricaoId, pago, valor, cerimoniaId, userId, formaPagamento, nomeParticipante }: { 
       inscricaoId: string; 
       pago: boolean;
       valor?: number;
       cerimoniaId?: string;
       userId?: string;
       formaPagamento?: string | null;
+      nomeParticipante?: string;
     }) => {
       setUpdatingPaymentId(inscricaoId);
       
@@ -277,7 +278,7 @@ const Admin: React.FC = () => {
           .from('transacoes_financeiras')
           .insert({
             tipo: 'entrada',
-            descricao: `Pagamento Inscrição - ${inscricaoId}`,
+            descricao: `Pagamento Inscrição - ${nomeParticipante || inscricaoId}`,
             valor: valor, // valor já vem em centavos
             data: new Date().toISOString().split('T')[0],
             categoria_id: categoriaCerimonias?.id || null,
@@ -2097,6 +2098,7 @@ const Admin: React.FC = () => {
                   cerimoniaId: paymentConfirmDialog.cerimoniaId!,
                   userId: paymentConfirmDialog.userId!,
                   formaPagamento: paymentConfirmDialog.formaPagamento,
+                  nomeParticipante: paymentConfirmDialog.nomeParticipante,
                 });
               }}
               disabled={togglePaymentMutation.isPending}
