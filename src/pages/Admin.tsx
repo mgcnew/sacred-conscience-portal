@@ -720,8 +720,8 @@ const Admin: React.FC = () => {
               <SelectContent 
                 align="end" 
                 position="popper" 
-                sideOffset={8}
-                className="rounded-xl border-muted shadow-2xl w-[200px] md:w-[240px] max-h-[80vh] overflow-y-auto scrollbar-none"
+                sideOffset={4}
+                className="rounded-xl border-muted shadow-2xl w-[200px] md:w-[240px] max-h-[80vh] overflow-y-auto scrollbar-none data-[state=open]:animate-none data-[state=closed]:animate-none"
               >
                 <div className="p-1 space-y-1">
                   {availableTabs.map((tab) => (
