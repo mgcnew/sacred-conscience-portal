@@ -17,11 +17,13 @@ export function useOneSignal() {
   // Inicializar OneSignal
   useEffect(() => {
     const init = async () => {
-      await initOneSignal();
-      setIsInitialized(true);
+      const success = await initOneSignal();
+      setIsInitialized(success);
       
-      const enabled = await isPushEnabled();
-      setPermissionGranted(enabled);
+      if (success) {
+        const enabled = await isPushEnabled();
+        setPermissionGranted(enabled);
+      }
     };
     
     init();

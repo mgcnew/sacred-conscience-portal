@@ -46,10 +46,13 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { z } from 'zod';
 import { APP_CONFIG } from '@/config/app';
+import SignatureCanvas from 'react-signature-canvas';
 
 const anamneseSchema = z.object({
   nome_completo: z.string().min(3, 'Nome deve ter pelo menos 3 caracteres'),
   data_nascimento: z.string().min(1, 'Data de nascimento é obrigatória'),
+  documento_tipo: z.enum(['cpf', 'rg'], { required_error: 'Selecione o tipo de documento' }),
+  documento_valor: z.string().min(5, 'Documento inválido'),
   telefone: z.string().min(10, 'Telefone deve ter pelo menos 10 dígitos'),
   contato_emergencia: z.string().min(10, 'Contato de emergência é obrigatório'),
   nome_contato_emergencia: z.string().min(2, 'Nome do contato de emergência é obrigatório'),
@@ -94,6 +97,7 @@ const anamneseSchema = z.object({
   aceite_termo_responsabilidade: z.boolean().refine(val => val === true, 'Você deve aceitar o termo de responsabilidade'),
   aceite_permanencia: z.boolean().refine(val => val === true, 'Você deve aceitar permanecer no templo até estar bem'),
   aceite_uso_imagem: z.boolean(),
+  assinatura: z.string().min(100, 'A assinatura é obrigatória'),
 });
 
 type AnamneseFormData = z.infer<typeof anamneseSchema>;
@@ -102,6 +106,7 @@ const Anamnese: React.FC = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const sigPad = useRef<SignatureCanvas>(null);
 
   const [step, setStep] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
@@ -118,6 +123,8 @@ const Anamnese: React.FC = () => {
   const [formData, setFormData] = useState<AnamneseFormData>({
     nome_completo: '',
     data_nascimento: '',
+    documento_tipo: 'cpf',
+    documento_valor: '',
     telefone: '',
     contato_emergencia: '',
     nome_contato_emergencia: '',
@@ -157,6 +164,7 @@ const Anamnese: React.FC = () => {
     aceite_termo_responsabilidade: false,
     aceite_permanencia: false,
     aceite_uso_imagem: false,
+    assinatura: '',
   });
 
   useEffect(() => {
@@ -189,6 +197,8 @@ const Anamnese: React.FC = () => {
         const mapped: AnamneseFormData = {
           nome_completo: data.nome_completo,
           data_nascimento: data.data_nascimento,
+          documento_tipo: data.documento_tipo || 'cpf',
+          documento_valor: data.documento_valor || '',
           telefone: data.telefone,
           contato_emergencia: data.contato_emergencia,
           nome_contato_emergencia: data.nome_contato_emergencia || '',
@@ -228,6 +238,7 @@ const Anamnese: React.FC = () => {
           aceite_termo_responsabilidade: data.aceite_termo_responsabilidade ?? false,
           aceite_permanencia: data.aceite_permanencia ?? false,
           aceite_uso_imagem: data.aceite_uso_imagem ?? false,
+          assinatura: data.assinatura || '',
         };
         setFormData(mapped);
         setExistingAnamnese(mapped);
@@ -270,21 +281,25 @@ const Anamnese: React.FC = () => {
     const requiredFields = [
       formData.nome_completo,
       formData.data_nascimento,
+      formData.documento_valor,
       formData.telefone,
       formData.contato_emergencia,
       formData.nome_contato_emergencia,
     ];
     const filledRequired = requiredFields.filter(f => f && f.length > 0).length;
-    const baseProgress = (filledRequired / requiredFields.length) * 60; // 60% para campos obrigatórios
+    const baseProgress = (filledRequired / requiredFields.length) * 50; // 50% para campos obrigatórios
     
     // 20% para saúde (se marcou sem_doencas ou alguma condição)
-    const healthProgress = (formData.sem_doencas || formData.pressao_alta || formData.problemas_cardiacos) ? 20 : 0;
+    const healthProgress = (formData.sem_doencas || formData.pressao_alta || formData.problemas_cardiacos) ? 15 : 0;
     
     // 20% para consentimentos
-    const consentProgress = (formData.aceite_contraindicacoes && formData.aceite_livre_vontade && formData.aceite_termo_responsabilidade) ? 20 : 
-      ((formData.aceite_contraindicacoes ? 7 : 0) + (formData.aceite_livre_vontade ? 7 : 0) + (formData.aceite_termo_responsabilidade ? 6 : 0));
+    const consentProgress = (formData.aceite_contraindicacoes && formData.aceite_livre_vontade && formData.aceite_termo_responsabilidade) ? 15 : 
+      ((formData.aceite_contraindicacoes ? 5 : 0) + (formData.aceite_livre_vontade ? 5 : 0) + (formData.aceite_termo_responsabilidade ? 5 : 0));
     
-    return Math.min(100, Math.round(baseProgress + healthProgress + consentProgress));
+    // 20% para assinatura
+    const signatureProgress = formData.assinatura ? 20 : 0;
+    
+    return Math.min(100, Math.round(baseProgress + healthProgress + consentProgress + signatureProgress));
   };
 
   // Load form data from localStorage
@@ -384,6 +399,81 @@ const Anamnese: React.FC = () => {
     } finally {
       setIsUploadingAvatar(false);
     }
+  };
+
+  const nextStep = () => {
+    // Validar campos do passo atual antes de prosseguir
+    const currentErrors: Record<string, string> = {};
+    
+    if (step === 1) {
+      if (!formData.nome_completo || formData.nome_completo.length < 3) 
+        currentErrors.nome_completo = 'Nome deve ter pelo menos 3 caracteres';
+      if (!formData.data_nascimento) 
+        currentErrors.data_nascimento = 'Data de nascimento é obrigatória';
+      if (!formData.documento_valor || formData.documento_valor.length < 5)
+        currentErrors.documento_valor = 'Documento inválido';
+      if (!formData.telefone || formData.telefone.length < 10) 
+        currentErrors.telefone = 'Telefone inválido';
+      if (!formData.nome_contato_emergencia || formData.nome_contato_emergencia.length < 2) 
+        currentErrors.nome_contato_emergencia = 'Nome do contato é obrigatório';
+      if (!formData.contato_emergencia || formData.contato_emergencia.length < 10) 
+        currentErrors.contato_emergencia = 'Telefone de emergência inválido';
+      if (!formData.como_conheceu) 
+        currentErrors.como_conheceu = 'Informe como nos conheceu';
+    }
+
+    if (step === 2) {
+      if (!formData.sem_doencas && 
+          !formData.pressao_alta && 
+          !formData.problemas_cardiacos && 
+          !formData.historico_convulsivo && 
+          !formData.diabetes && 
+          !formData.problemas_respiratorios && 
+          !formData.problemas_renais && 
+          !formData.problemas_hepaticos && 
+          !formData.transtorno_psiquiatrico && 
+          !formData.gestante_lactante) {
+        toast.error('Informação de saúde necessária', {
+          description: 'Por favor, selecione "Não possuo nenhuma das condições acima" ou marque as opções que se aplicam.',
+        });
+        return;
+      }
+    }
+
+    if (step === 4) {
+      if (!formData.intencao || formData.intencao.trim().length < 5) {
+        currentErrors.intencao = 'Por favor, descreva brevemente sua intenção';
+      }
+    }
+
+    if (step === 5) {
+      if (!formData.aceite_contraindicacoes || !formData.aceite_livre_vontade || !formData.aceite_termo_responsabilidade || !formData.aceite_permanencia) {
+        toast.error('Termos obrigatórios', {
+          description: 'Você deve aceitar todos os termos obrigatórios antes de assinar.',
+        });
+        return;
+      }
+    }
+
+    if (step === 6) {
+      if (!formData.assinatura || formData.assinatura.length < 100) {
+        toast.error('Assinatura obrigatória', {
+          description: 'Por favor, assine no campo indicado.',
+        });
+        return;
+      }
+    }
+
+    if (Object.keys(currentErrors).length > 0) {
+      setErrors(currentErrors);
+      toast.error('Campos obrigatórios', {
+        description: 'Por favor, preencha todos os campos obrigatórios antes de prosseguir.',
+      });
+      return;
+    }
+
+    setErrors({});
+    setStep(step + 1);
   };
 
   const handleSubmit = async () => {
@@ -490,11 +580,12 @@ const Anamnese: React.FC = () => {
   }
 
   const steps = [
-    { number: 1, title: 'Dados Pessoais', icon: User },
+    { number: 1, title: 'Dados', icon: User },
     { number: 2, title: 'Saúde', icon: Heart },
-    { number: 3, title: 'Substâncias', icon: Pill },
+    { number: 3, title: 'Hábitos', icon: Pill },
     { number: 4, title: 'Experiência', icon: Sparkles },
-    { number: 5, title: 'Consentimento', icon: CheckCircle2 },
+    { number: 5, title: 'Termos', icon: FileText },
+    { number: 6, title: 'Assinatura', icon: Check },
   ];
 
   // Formatar data para exibição
@@ -686,6 +777,11 @@ const Anamnese: React.FC = () => {
               <CardContent>
                 <InfoItem label="Nome Completo" value={formData.nome_completo} icon={User} />
                 <InfoItem label="Data de Nascimento" value={formatDate(formData.data_nascimento)} icon={Calendar} />
+                <InfoItem 
+                  label={formData.documento_tipo?.toUpperCase() || 'Documento'} 
+                  value={formData.documento_valor} 
+                  icon={Shield} 
+                />
                 <InfoItem label="Telefone" value={formData.telefone} icon={Phone} />
                 <InfoItem label="Contato de Emergência" value={formData.nome_contato_emergencia} icon={User} />
                 <InfoItem label="Telefone de Emergência" value={formData.contato_emergencia} icon={Phone} />
@@ -811,7 +907,7 @@ const Anamnese: React.FC = () => {
                   Termos de Consentimento
                 </CardTitle>
               </CardHeader>
-              <CardContent>
+              <CardContent className="space-y-6">
                 <div className="space-y-2">
                   <div className="flex items-center gap-2 text-green-600 dark:text-green-400">
                     <Check className="w-4 h-4" />
@@ -834,6 +930,24 @@ const Anamnese: React.FC = () => {
                     <span>Uso de imagem {formData.aceite_uso_imagem ? 'autorizado' : 'não autorizado'}</span>
                   </div>
                 </div>
+
+                {formData.assinatura && (
+                  <div className="pt-6 border-t border-border">
+                    <p className="text-xs text-muted-foreground mb-2">Assinado digitalmente em:</p>
+                    <div className="bg-white rounded-lg border p-4 flex flex-col items-center">
+                      <img 
+                        src={formData.assinatura} 
+                        alt="Assinatura" 
+                        className="max-h-24 object-contain"
+                      />
+                      <div className="mt-2 w-full border-t border-slate-200 pt-2 text-center">
+                        <p className="text-[10px] text-slate-500 font-mono uppercase">
+                          ID: {user?.id.substring(0, 8)} | Hash: {formData.assinatura.substring(formData.assinatura.length - 12)}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </CardContent>
             </Card>
           </div>
@@ -981,29 +1095,59 @@ const Anamnese: React.FC = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="nome">Nome Completo *</Label>
+                  <Label htmlFor="nome" className={errors.nome_completo ? "text-destructive" : ""}>Nome Completo *</Label>
                   <Input
                     id="nome"
                     value={formData.nome_completo}
                     onChange={(e) => updateField('nome_completo', e.target.value)}
                     placeholder="Seu nome completo"
                     autoComplete="name"
+                    className={errors.nome_completo ? "border-destructive focus-visible:ring-destructive" : ""}
                   />
-                  {errors.nome_completo && <p className="text-sm text-destructive">{errors.nome_completo}</p>}
+                  {errors.nome_completo && <p className="text-xs font-medium text-destructive animate-fade-in">{errors.nome_completo}</p>}
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="nascimento">Data de Nascimento *</Label>
+                  <Label htmlFor="nascimento" className={errors.data_nascimento ? "text-destructive" : ""}>Data de Nascimento *</Label>
                   <Input
                     id="nascimento"
                     type="date"
                     value={formData.data_nascimento}
                     onChange={(e) => updateField('data_nascimento', e.target.value)}
                     autoComplete="bday"
+                    className={errors.data_nascimento ? "border-destructive focus-visible:ring-destructive" : ""}
                   />
-                  {errors.data_nascimento && <p className="text-sm text-destructive">{errors.data_nascimento}</p>}
+                  {errors.data_nascimento && <p className="text-xs font-medium text-destructive animate-fade-in">{errors.data_nascimento}</p>}
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="documento_tipo">Tipo de Documento *</Label>
+                    <select
+                      id="documento_tipo"
+                      value={formData.documento_tipo}
+                      onChange={(e) => updateField('documento_tipo', e.target.value as 'cpf' | 'rg')}
+                      className="w-full h-10 px-3 rounded-md border border-input bg-background text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+                    >
+                      <option value="cpf">CPF</option>
+                      <option value="rg">RG</option>
+                    </select>
+                  </div>
+                  <div className="md:col-span-2 space-y-2">
+                    <Label htmlFor="documento_valor" className={errors.documento_valor ? "text-destructive" : ""}>
+                      Número do {formData.documento_tipo?.toUpperCase()} *
+                    </Label>
+                    <Input
+                      id="documento_valor"
+                      value={formData.documento_valor}
+                      onChange={(e) => updateField('documento_valor', e.target.value)}
+                      placeholder={`Digite seu ${formData.documento_tipo?.toUpperCase()}`}
+                      className={errors.documento_valor ? "border-destructive focus-visible:ring-destructive" : ""}
+                    />
+                    {errors.documento_valor && <p className="text-xs font-medium text-destructive animate-fade-in">{errors.documento_valor}</p>}
+                  </div>
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="telefone">Telefone *</Label>
+                  <Label htmlFor="telefone" className={errors.telefone ? "text-destructive" : ""}>Telefone *</Label>
                   <Input
                     id="telefone"
                     type="tel"
@@ -1012,21 +1156,23 @@ const Anamnese: React.FC = () => {
                     onChange={(e) => updateField('telefone', e.target.value)}
                     placeholder="(00) 00000-0000"
                     autoComplete="tel"
+                    className={errors.telefone ? "border-destructive focus-visible:ring-destructive" : ""}
                   />
-                  {errors.telefone && <p className="text-sm text-destructive">{errors.telefone}</p>}
+                  {errors.telefone && <p className="text-xs font-medium text-destructive animate-fade-in">{errors.telefone}</p>}
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="nome_contato_emergencia">Nome do Contato de Emergência *</Label>
+                  <Label htmlFor="nome_contato_emergencia" className={errors.nome_contato_emergencia ? "text-destructive" : ""}>Nome do Contato de Emergência *</Label>
                   <Input
                     id="nome_contato_emergencia"
                     value={formData.nome_contato_emergencia}
                     onChange={(e) => updateField('nome_contato_emergencia', e.target.value)}
                     placeholder="Nome completo do contato"
+                    className={errors.nome_contato_emergencia ? "border-destructive focus-visible:ring-destructive" : ""}
                   />
-                  {errors.nome_contato_emergencia && <p className="text-sm text-destructive">{errors.nome_contato_emergencia}</p>}
+                  {errors.nome_contato_emergencia && <p className="text-xs font-medium text-destructive animate-fade-in">{errors.nome_contato_emergencia}</p>}
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="emergencia">Telefone do Contato de Emergência *</Label>
+                  <Label htmlFor="emergencia" className={errors.contato_emergencia ? "text-destructive" : ""}>Telefone do Contato de Emergência *</Label>
                   <Input
                     id="emergencia"
                     type="tel"
@@ -1034,8 +1180,9 @@ const Anamnese: React.FC = () => {
                     value={formData.contato_emergencia}
                     onChange={(e) => updateField('contato_emergencia', e.target.value)}
                     placeholder="(00) 00000-0000"
+                    className={errors.contato_emergencia ? "border-destructive focus-visible:ring-destructive" : ""}
                   />
-                  {errors.contato_emergencia && <p className="text-sm text-destructive">{errors.contato_emergencia}</p>}
+                  {errors.contato_emergencia && <p className="text-xs font-medium text-destructive animate-fade-in">{errors.contato_emergencia}</p>}
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="parentesco">Parentesco/Relação</Label>
@@ -1424,14 +1571,15 @@ const Anamnese: React.FC = () => {
                 )}
 
                 <div className="space-y-2">
-                  <Label htmlFor="intencao">Qual sua intenção ao participar? *</Label>
+                  <Label htmlFor="intencao" className={errors.intencao ? "text-destructive" : ""}>Qual sua intenção ao participar? *</Label>
                   <Textarea
                     id="intencao"
                     value={formData.intencao}
                     onChange={(e) => updateField('intencao', e.target.value)}
                     placeholder="O que você busca nesta jornada? Qual sua intenção? O que te motivou a participar?"
-                    className="min-h-[100px]"
+                    className={`min-h-[100px] ${errors.intencao ? "border-destructive focus-visible:ring-destructive" : ""}`}
                   />
+                  {errors.intencao && <p className="text-xs font-medium text-destructive animate-fade-in">{errors.intencao}</p>}
                 </div>
 
                 <div className="space-y-2">
@@ -1576,6 +1724,67 @@ const Anamnese: React.FC = () => {
             </>
           )}
 
+          {/* Step 6: Assinatura */}
+          {step === 6 && (
+            <>
+              <CardHeader>
+                <CardTitle className="font-display text-xl flex items-center gap-2">
+                  <CheckCircle2 className="w-5 h-5 text-primary" />
+                  Assinatura Digital
+                </CardTitle>
+                <CardDescription>
+                  Para finalizar, por favor assine no campo abaixo para validar sua ficha.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div className="p-4 bg-muted/50 rounded-xl border-2 border-dashed border-border flex flex-col items-center gap-4">
+                  <div className="bg-white rounded-lg border shadow-inner overflow-hidden w-full max-w-[500px]">
+                    <SignatureCanvas 
+                      ref={sigPad}
+                      penColor='black'
+                      canvasProps={{
+                        width: 500, 
+                        height: 200, 
+                        className: 'signature-canvas w-full h-[200px] cursor-crosshair'
+                      }}
+                      onEnd={() => {
+                        if (sigPad.current) {
+                          updateField('assinatura', sigPad.current.toDataURL());
+                        }
+                      }}
+                    />
+                  </div>
+                  
+                  <div className="flex w-full justify-between items-center gap-4">
+                    <p className="text-xs text-muted-foreground">
+                      Use o mouse ou o dedo para assinar no campo branco acima.
+                    </p>
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      onClick={() => {
+                        sigPad.current?.clear();
+                        updateField('assinatura', '');
+                      }}
+                      className="text-xs"
+                    >
+                      <RotateCcw className="w-3 h-3 mr-1" />
+                      Limpar
+                    </Button>
+                  </div>
+                </div>
+
+                <div className="p-4 bg-primary/5 rounded-lg border border-primary/10">
+                  <p className="text-xs leading-relaxed text-muted-foreground">
+                    Ao assinar, você confirma que todas as informações prestadas são verdadeiras e que 
+                    compreende os termos e responsabilidades aceitos nos passos anteriores. Esta assinatura 
+                    tem validade para identificação interna e segurança nos atendimentos do templo.
+                  </p>
+                </div>
+              </CardContent>
+            </>
+          )}
+
           {/* Navigation Buttons */}
           <div className="flex justify-between p-6 pt-0">
             <Button
@@ -1587,18 +1796,18 @@ const Anamnese: React.FC = () => {
               Anterior
             </Button>
 
-            {step < 5 ? (
-              <Button onClick={() => setStep(step + 1)}>
+            {step < 6 ? (
+              <Button onClick={nextStep}>
                 Próximo
                 <ChevronRight className="w-4 h-4 ml-2" />
               </Button>
             ) : (
-              <Button onClick={handleSubmit} disabled={isLoading}>
+              <Button onClick={handleSubmit} disabled={isLoading || !formData.assinatura}>
                 {isLoading ? (
                   <Loader2 className="w-4 h-4 animate-spin" />
                 ) : (
                   <>
-                    {existingAnamnese ? 'Atualizar Ficha' : 'Salvar Ficha'}
+                    {existingAnamnese ? 'Atualizar e Finalizar' : 'Salvar e Finalizar'}
                     <CheckCircle2 className="w-4 h-4 ml-2" />
                   </>
                 )}
