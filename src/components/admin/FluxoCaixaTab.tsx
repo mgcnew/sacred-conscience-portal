@@ -612,25 +612,40 @@ export const FluxoCaixaTab: React.FC = () => {
 
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as any)} className="w-full">
-        <div className="relative">
-          <TabsList className="w-full flex md:inline-flex h-auto p-1 bg-muted/50 overflow-x-auto scrollbar-none justify-start md:justify-center">
-            <TabsTrigger value="resumo" className="flex-shrink-0 min-w-[100px] md:min-w-0 md:flex-1 text-xs md:text-sm py-2">
+        <div className="relative mb-6">
+          <TabsList className="w-full h-auto p-0 bg-transparent border-b rounded-none justify-start overflow-x-auto scrollbar-none flex-nowrap md:justify-center">
+            <TabsTrigger 
+              value="resumo" 
+              className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary data-[state=active]:bg-transparent py-3 text-xs md:text-sm font-bold uppercase tracking-wider transition-all px-4"
+            >
               <BarChart3 className="w-4 h-4 md:mr-2" />
               <span>Painel</span>
             </TabsTrigger>
-            <TabsTrigger value="transacoes" className="flex-shrink-0 min-w-[100px] md:min-w-0 md:flex-1 text-xs md:text-sm py-2">
+            <TabsTrigger 
+              value="transacoes" 
+              className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary data-[state=active]:bg-transparent py-3 text-xs md:text-sm font-bold uppercase tracking-wider transition-all px-4"
+            >
               <DollarSign className="w-4 h-4 md:mr-2" />
               <span>Extrato</span>
             </TabsTrigger>
-            <TabsTrigger value="recorrentes" className="flex-shrink-0 min-w-[100px] md:min-w-0 md:flex-1 text-xs md:text-sm py-2">
+            <TabsTrigger 
+              value="recorrentes" 
+              className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary data-[state=active]:bg-transparent py-3 text-xs md:text-sm font-bold uppercase tracking-wider transition-all px-4"
+            >
               <RefreshCw className="w-4 h-4 md:mr-2" />
               <span>Fixos</span>
             </TabsTrigger>
-            <TabsTrigger value="categorias" className="flex-shrink-0 min-w-[100px] md:min-w-0 md:flex-1 text-xs md:text-sm py-2">
+            <TabsTrigger 
+              value="categorias" 
+              className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary data-[state=active]:bg-transparent py-3 text-xs md:text-sm font-bold uppercase tracking-wider transition-all px-4"
+            >
               <Tag className="w-4 h-4 md:mr-2" />
               <span>Tags</span>
             </TabsTrigger>
-            <TabsTrigger value="metas" className="flex-shrink-0 min-w-[100px] md:min-w-0 md:flex-1 text-xs md:text-sm py-2">
+            <TabsTrigger 
+              value="metas" 
+              className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary data-[state=active]:bg-transparent py-3 text-xs md:text-sm font-bold uppercase tracking-wider transition-all px-4"
+            >
               <Target className="w-4 h-4 md:mr-2" />
               <span>Metas</span>
             </TabsTrigger>

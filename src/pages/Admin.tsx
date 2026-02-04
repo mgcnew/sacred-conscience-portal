@@ -669,73 +669,104 @@ const Admin: React.FC = () => {
         </div>
 
         <Tabs defaultValue="dashboard" className="space-y-6">
-          {/* Mobile: flex-wrap para quebrar em linhas | Desktop: scroll horizontal */}
-          <TabsList className={`flex flex-wrap md:inline-flex md:flex-nowrap md:overflow-x-auto md:w-max h-auto gap-1 p-1 ${isMobile ? 'justify-start' : ''}`}>
-            <TabsTrigger value="dashboard" className="text-xs md:text-sm px-2 py-2">
-              {isMobile ? 'Home' : 'Dashboard'}
-            </TabsTrigger>
-            {temPermissao('ver_consagradores') && (
-              <TabsTrigger value="consagradores" className="text-xs md:text-sm px-2 py-2">
-                {isMobile ? 'Usuários' : 'Consagradores'}
+          <div className="relative mb-6">
+            <TabsList className={cn(
+              "w-full h-auto p-0 bg-transparent border-b rounded-none justify-start overflow-x-auto scrollbar-none flex-nowrap",
+              isMobile ? "flex" : "inline-flex"
+            )}>
+              <TabsTrigger 
+                value="dashboard" 
+                className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary data-[state=active]:bg-transparent py-3 text-xs md:text-sm font-bold uppercase tracking-wider transition-all px-4"
+              >
+                {isMobile ? 'Home' : 'Dashboard'}
               </TabsTrigger>
-            )}
-            {temPermissao('gerenciar_pagamentos') && (
-              <TabsTrigger value="inscricoes" className="text-xs md:text-sm px-2 py-2">
-                Inscrições
-              </TabsTrigger>
-            )}
-            {temPermissao('aprovar_depoimentos') && (
-              <TabsTrigger value="depoimentos" className="relative text-xs md:text-sm px-2 py-2">
-                {isMobile ? 'Partilhas' : 'Partilhas'}
-                {depoimentosPendentes && depoimentosPendentes.length > 0 && (
-                  <span className="absolute -top-1 -right-1 w-4 h-4 md:w-5 md:h-5 rounded-full bg-amber-500 text-white text-[10px] md:text-xs flex items-center justify-center font-bold">
-                    {depoimentosPendentes.length}
-                  </span>
-                )}
-              </TabsTrigger>
-            )}
-            {temPermissao('ver_cerimonias') && (
-              <TabsTrigger value="cerimonias" className="text-xs md:text-sm px-2 py-2">
-                {isMobile ? 'Eventos' : 'Cerimônias'}
-              </TabsTrigger>
-            )}
-            {isSuperAdmin() && (
-              <TabsTrigger value="cursos" className="text-xs md:text-sm px-2 py-2">
-                <GraduationCap className="w-3 h-3 mr-1" />
-                {isMobile ? 'Cursos' : 'Cursos/Eventos'}
-              </TabsTrigger>
-            )}
-            {isSuperAdmin() && (
-              <TabsTrigger value="financeiro" className="text-xs md:text-sm px-2 py-2">
-                <Wallet className="w-3 h-3 mr-1" />
-                {isMobile ? 'Caixa' : 'Fluxo de Caixa'}
-              </TabsTrigger>
-            )}
-            {isSuperAdmin() && (
-              <TabsTrigger value="vendas" className="text-xs md:text-sm px-2 py-2">
-                <ShoppingBag className="w-3 h-3 mr-1" />
-                {isMobile ? 'Vendas' : 'Vendas Loja'}
-              </TabsTrigger>
-            )}
-            {isSuperAdmin() && (
-              <TabsTrigger value="permissoes" className="text-xs md:text-sm px-2 py-2">
-                <Shield className="w-3 h-3 mr-1" />
-                {isMobile ? 'Perms' : 'Permissões'}
-              </TabsTrigger>
-            )}
-            {temPermissaoExplicita('ver_logs') && (
-              <TabsTrigger value="logs" className="text-xs md:text-sm px-2 py-2">
-                <Activity className="w-3 h-3 mr-1" />
-                {isMobile ? 'Logs' : 'Logs'}
-              </TabsTrigger>
-            )}
-            {isSuperAdmin() && (
-              <TabsTrigger value="taxas" className="text-xs md:text-sm px-2 py-2">
-                <Percent className="w-3 h-3 mr-1" />
-                {isMobile ? 'Taxas' : 'Taxas MP'}
-              </TabsTrigger>
-            )}
-          </TabsList>
+              {temPermissao('ver_consagradores') && (
+                <TabsTrigger 
+                  value="consagradores" 
+                  className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary data-[state=active]:bg-transparent py-3 text-xs md:text-sm font-bold uppercase tracking-wider transition-all px-4"
+                >
+                  {isMobile ? 'Usuários' : 'Consagradores'}
+                </TabsTrigger>
+              )}
+              {temPermissao('gerenciar_pagamentos') && (
+                <TabsTrigger 
+                  value="inscricoes" 
+                  className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary data-[state=active]:bg-transparent py-3 text-xs md:text-sm font-bold uppercase tracking-wider transition-all px-4"
+                >
+                  Inscrições
+                </TabsTrigger>
+              )}
+              {temPermissao('aprovar_depoimentos') && (
+                <TabsTrigger 
+                  value="depoimentos" 
+                  className="relative rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary data-[state=active]:bg-transparent py-3 text-xs md:text-sm font-bold uppercase tracking-wider transition-all px-4"
+                >
+                  {isMobile ? 'Partilhas' : 'Partilhas'}
+                  {depoimentosPendentes && depoimentosPendentes.length > 0 && (
+                    <span className="ml-1 px-1.5 py-0.5 rounded-full bg-amber-500 text-white text-[10px] font-bold">
+                      {depoimentosPendentes.length}
+                    </span>
+                  )}
+                </TabsTrigger>
+              )}
+              {temPermissao('ver_cerimonias') && (
+                <TabsTrigger 
+                  value="cerimonias" 
+                  className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary data-[state=active]:bg-transparent py-3 text-xs md:text-sm font-bold uppercase tracking-wider transition-all px-4"
+                >
+                  {isMobile ? 'Eventos' : 'Cerimônias'}
+                </TabsTrigger>
+              )}
+              {isSuperAdmin() && (
+                <TabsTrigger 
+                  value="cursos" 
+                  className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary data-[state=active]:bg-transparent py-3 text-xs md:text-sm font-bold uppercase tracking-wider transition-all px-4"
+                >
+                  {isMobile ? 'Cursos' : 'Cursos/Eventos'}
+                </TabsTrigger>
+              )}
+              {isSuperAdmin() && (
+                <TabsTrigger 
+                  value="financeiro" 
+                  className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary data-[state=active]:bg-transparent py-3 text-xs md:text-sm font-bold uppercase tracking-wider transition-all px-4"
+                >
+                  {isMobile ? 'Caixa' : 'Financeiro'}
+                </TabsTrigger>
+              )}
+              {isSuperAdmin() && (
+                <TabsTrigger 
+                  value="vendas" 
+                  className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary data-[state=active]:bg-transparent py-3 text-xs md:text-sm font-bold uppercase tracking-wider transition-all px-4"
+                >
+                  {isMobile ? 'Loja' : 'Vendas Loja'}
+                </TabsTrigger>
+              )}
+              {isSuperAdmin() && (
+                <TabsTrigger 
+                  value="permissoes" 
+                  className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary data-[state=active]:bg-transparent py-3 text-xs md:text-sm font-bold uppercase tracking-wider transition-all px-4"
+                >
+                  {isMobile ? 'Perms' : 'Permissões'}
+                </TabsTrigger>
+              )}
+              {temPermissaoExplicita('ver_logs') && (
+                <TabsTrigger 
+                  value="logs" 
+                  className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary data-[state=active]:bg-transparent py-3 text-xs md:text-sm font-bold uppercase tracking-wider transition-all px-4"
+                >
+                  Logs
+                </TabsTrigger>
+              )}
+              {isSuperAdmin() && (
+                <TabsTrigger 
+                  value="taxas" 
+                  className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary data-[state=active]:bg-transparent py-3 text-xs md:text-sm font-bold uppercase tracking-wider transition-all px-4"
+                >
+                  Taxas
+                </TabsTrigger>
+              )}
+            </TabsList>
+          </div>
 
           {/* DASHBOARD TAB */}
           <TabsContent value="dashboard" className="space-y-6">

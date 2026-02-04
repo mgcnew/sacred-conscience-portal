@@ -5,6 +5,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Calendar, Plus, Users } from 'lucide-react';
 import { PageHeader, PageContainer } from '@/components/shared';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import { useAuth } from '@/contexts/AuthContext';
 import { TOAST_MESSAGES, ROUTES } from '@/constants';
@@ -326,21 +327,35 @@ const Cerimonias: React.FC = () => {
       )}
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className={`grid w-full max-w-lg mb-6 ${podeVerListaPresentes ? 'grid-cols-3' : 'grid-cols-2'}`}>
-          <TabsTrigger value="proximas" className="text-xs sm:text-sm">
-            <Calendar className="w-4 h-4 mr-1 sm:mr-2 hidden sm:inline" />
-            Próximas
-          </TabsTrigger>
-          <TabsTrigger value="historico" className="text-xs sm:text-sm">
-            Histórico
-          </TabsTrigger>
-          {podeVerListaPresentes && (
-            <TabsTrigger value="presentes" className="text-xs sm:text-sm">
-              <Users className="w-4 h-4 mr-1 sm:mr-2 hidden sm:inline" />
-              Presentes
+        <div className="relative mb-6">
+          <TabsList className={cn(
+            "w-full h-auto p-0 bg-transparent border-b rounded-none justify-start overflow-x-auto scrollbar-none",
+            podeVerListaPresentes ? "grid grid-cols-3 md:inline-flex" : "grid grid-cols-2 md:inline-flex"
+          )}>
+            <TabsTrigger 
+              value="proximas" 
+              className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary data-[state=active]:bg-transparent py-3 text-xs sm:text-sm font-bold uppercase tracking-wider transition-all"
+            >
+              <Calendar className="w-4 h-4 mr-2 hidden sm:inline" />
+              Próximas
             </TabsTrigger>
-          )}
-        </TabsList>
+            <TabsTrigger 
+              value="historico" 
+              className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary data-[state=active]:bg-transparent py-3 text-xs sm:text-sm font-bold uppercase tracking-wider transition-all"
+            >
+              Histórico
+            </TabsTrigger>
+            {podeVerListaPresentes && (
+              <TabsTrigger 
+                value="presentes" 
+                className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary data-[state=active]:bg-transparent py-3 text-xs sm:text-sm font-bold uppercase tracking-wider transition-all"
+              >
+                <Users className="w-4 h-4 mr-2 hidden sm:inline" />
+                Presentes
+              </TabsTrigger>
+            )}
+          </TabsList>
+        </div>
 
         <TabsContent value="proximas">
           <CerimoniasFilters
