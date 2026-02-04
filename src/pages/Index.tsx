@@ -158,9 +158,20 @@ const Index: React.FC = () => {
       {/* Hero Section Mobile - Compacto com Stories */}
       <div className="md:hidden pt-4 px-4 bg-background border-b border-border/40 pb-2 mb-4">
         <div className="flex items-center justify-between mb-4">
-          <div>
-            <h1 className="font-display text-xl font-bold text-primary">Consciência Divinal</h1>
-            <p className="text-xs text-muted-foreground">Portal de Medicinas Sagradas</p>
+          <div className="flex items-center gap-2">
+            <div>
+              <h1 className="font-display text-xl font-bold text-primary">Consciência Divinal</h1>
+              <p className="text-xs text-muted-foreground">Portal de Medicinas Sagradas</p>
+            </div>
+            {(hasAnamnese === false || isAnamneseComplete === false) && (
+              <button 
+                onClick={() => navigate(ROUTES.ANAMNESE)}
+                className="w-5 h-5 rounded-full bg-amber-500 text-white flex items-center justify-center animate-pulse hover:bg-amber-600 transition-colors"
+                title="Atenção: Cadastro Pendente"
+              >
+                <span className="text-xs font-bold">!</span>
+              </button>
+            )}
           </div>
           <Button 
             size="icon" 
