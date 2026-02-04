@@ -122,6 +122,7 @@ const Anamnese: React.FC = () => {
   const [updatedAt, setUpdatedAt] = useState<string | null>(null);
   const [showContraindicacaoModal, setShowContraindicacaoModal] = useState(false);
   const [isIncomplete, setIsIncomplete] = useState(false);
+  const [isFullScreenSignature, setIsFullScreenSignature] = useState(false);
 
   const [formData, setFormData] = useState<AnamneseFormData>({
     nome_completo: '',
@@ -573,6 +574,103 @@ const Anamnese: React.FC = () => {
     }
   };
 
+  const renderFullScreenSignature = () => {
+    if (!isFullScreenSignature) return null;
+
+    return (
+      <div className="fixed inset-0 z-[100] bg-background flex flex-col items-center justify-center animate-in fade-in duration-300 overflow-hidden">
+        {/* Container que rotaciona no mobile */}
+        <div className="w-full h-full flex flex-col p-4 md:p-10 gap-4 max-w-5xl">
+          <div className="flex justify-between items-center px-2">
+            <div className="flex flex-col">
+              <h3 className="font-display text-xl font-semibold flex items-center gap-2">
+                <Shield className="w-5 h-5 text-primary" />
+                Assinatura Digital
+              </h3>
+              <p className="text-xs text-muted-foreground hidden md:block">
+                Assine no campo abaixo de forma clara.
+              </p>
+            </div>
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              onClick={() => setIsFullScreenSignature(false)}
+              className="rounded-full hover:bg-destructive/10 hover:text-destructive transition-colors"
+            >
+              <X className="w-6 h-6" />
+            </Button>
+          </div>
+
+          <div className="flex-1 bg-white rounded-3xl border-4 border-muted shadow-2xl overflow-hidden relative group cursor-crosshair">
+            {/* Background informativo */}
+            <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-[0.03] select-none">
+              <FileText className="w-64 h-64 -rotate-12" />
+            </div>
+            
+            <SignatureCanvas 
+              ref={sigPad}
+              penColor='black'
+              canvasProps={{
+                className: 'signature-canvas w-full h-full'
+              }}
+            />
+
+            {/* Guia visual para mobile portrait */}
+            <div className="absolute inset-0 flex md:hidden items-center justify-center pointer-events-none">
+              <div className="flex flex-col items-center gap-2 opacity-20 portrait:rotate-90">
+                <RotateCcw className="w-8 h-8 animate-pulse" />
+                <span className="text-sm font-medium uppercase tracking-tighter">Vire o celular para assinar melhor</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="flex flex-col md:flex-row justify-between items-center gap-4 px-2">
+            <div className="flex items-center gap-2 order-2 md:order-1">
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => sigPad.current?.clear()}
+                className="gap-2 border-primary/20 hover:bg-primary/5"
+              >
+                <RotateCcw className="w-4 h-4" />
+                Limpar
+              </Button>
+            </div>
+            
+            <div className="flex items-center gap-3 w-full md:w-auto order-1 md:order-2">
+              <Button 
+                variant="ghost" 
+                className="flex-1 md:flex-none"
+                onClick={() => setIsFullScreenSignature(false)}
+              >
+                Cancelar
+              </Button>
+              <Button 
+                onClick={() => {
+                  if (sigPad.current && !sigPad.current.isEmpty()) {
+                    updateField('assinatura', sigPad.current.toDataURL());
+                    setIsFullScreenSignature(false);
+                    toast.success('Assinatura salva!', {
+                      description: 'Sua assinatura foi capturada com sucesso.'
+                    });
+                  } else {
+                    toast.error('Assinatura vazia', {
+                      description: 'Por favor, faça sua assinatura antes de salvar.'
+                    });
+                  }
+                }}
+                className="flex-1 md:flex-none gap-2 px-10 bg-primary hover:bg-primary/90 shadow-lg shadow-primary/20"
+              >
+                Salvar Assinatura
+                <Check className="w-4 h-4" />
+              </Button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   // WhatsApp do líder facilitador para contraindicações (da configuração centralizada)
   const whatsappLider = APP_CONFIG.contacts.whatsappLider;
   const mensagemWhatsApp = encodeURIComponent(
@@ -994,6 +1092,7 @@ const Anamnese: React.FC = () => {
 
   return (
     <>
+      {renderFullScreenSignature()}
       {renderContraindicacaoModal()}
       <div className="min-h-screen py-4 md:py-6">
         <div className="container max-w-2xl mx-auto">
@@ -1759,61 +1858,90 @@ const Anamnese: React.FC = () => {
             </>
           )}
 
-          {/* Step 6: Assinatura */}
+          {/* Step 6: Assinatura e Confirmação */}
           {step === 6 && (
             <>
               <CardHeader>
                 <CardTitle className="font-display text-xl flex items-center gap-2">
                   <CheckCircle2 className="w-5 h-5 text-primary" />
-                  Assinatura Digital
+                  Confirmação e Assinatura
                 </CardTitle>
                 <CardDescription>
-                  Para finalizar, por favor assine no campo abaixo para validar sua ficha.
+                  Revise seus dados básicos e assine para finalizar.
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
-                <div className="p-4 bg-muted/50 rounded-xl border-2 border-dashed border-border flex flex-col items-center gap-4">
-                  <div className="bg-white rounded-lg border shadow-inner overflow-hidden w-full max-w-[500px]">
-                    <SignatureCanvas 
-                      ref={sigPad}
-                      penColor='black'
-                      canvasProps={{
-                        width: 500, 
-                        height: 200, 
-                        className: 'signature-canvas w-full h-[200px] cursor-crosshair'
-                      }}
-                      onEnd={() => {
-                        if (sigPad.current) {
-                          updateField('assinatura', sigPad.current.toDataURL());
-                        }
-                      }}
-                    />
+                {/* Resumo Rápido para Confirmação */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-muted/30 rounded-xl border text-sm">
+                  <div className="space-y-1">
+                    <p className="text-muted-foreground text-xs uppercase tracking-wider font-semibold">Identificação</p>
+                    <p><strong>Nome:</strong> {formData.nome_completo}</p>
+                    <p><strong>{formData.documento_tipo?.toUpperCase()}:</strong> {formData.documento_valor}</p>
+                    <p><strong>Nascimento:</strong> {formatDate(formData.data_nascimento)}</p>
                   </div>
+                  <div className="space-y-1">
+                    <p className="text-muted-foreground text-xs uppercase tracking-wider font-semibold">Contato</p>
+                    <p><strong>Telefone:</strong> {formData.telefone}</p>
+                    <p><strong>Emergência:</strong> {formData.nome_contato_emergencia} ({formData.contato_emergencia})</p>
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  <Label>Assinatura Digital *</Label>
                   
-                  <div className="flex w-full justify-between items-center gap-4">
-                    <p className="text-xs text-muted-foreground">
-                      Use o mouse ou o dedo para assinar no campo branco acima.
-                    </p>
+                  {!formData.assinatura ? (
                     <Button 
+                      type="button"
                       variant="outline" 
-                      size="sm" 
-                      onClick={() => {
-                        sigPad.current?.clear();
-                        updateField('assinatura', '');
-                      }}
-                      className="text-xs"
+                      className="w-full h-32 border-2 border-dashed border-primary/30 bg-primary/5 hover:bg-primary/10 flex flex-col gap-2 transition-all group"
+                      onClick={() => setIsFullScreenSignature(true)}
                     >
-                      <RotateCcw className="w-3 h-3 mr-1" />
-                      Limpar
+                      <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center group-hover:scale-110 transition-transform">
+                        <Camera className="w-6 h-6 text-primary" />
+                      </div>
+                      <span className="font-medium text-primary">Clique aqui para assinar</span>
+                      <span className="text-xs text-muted-foreground">(A tela mudará para horizontal para facilitar)</span>
                     </Button>
-                  </div>
+                  ) : (
+                    <div className="relative group">
+                      <div className="bg-white rounded-xl border-2 border-primary/20 p-4 flex flex-col items-center shadow-inner overflow-hidden">
+                        <img 
+                          src={formData.assinatura} 
+                          alt="Sua assinatura" 
+                          className="max-h-32 object-contain"
+                        />
+                        <div className="mt-2 w-full border-t border-slate-100 pt-2 text-center">
+                          <p className="text-[10px] text-slate-400 font-mono uppercase">
+                            Assinado digitalmente em {new Date().toLocaleDateString('pt-BR')}
+                          </p>
+                        </div>
+                      </div>
+                      <Button 
+                        size="icon" 
+                        variant="destructive" 
+                        className="absolute -top-2 -right-2 w-8 h-8 rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition-opacity"
+                        onClick={() => updateField('assinatura', '')}
+                      >
+                        <X className="w-4 h-4" />
+                      </Button>
+                      <p className="text-center mt-2">
+                        <Button 
+                          variant="link" 
+                          size="sm" 
+                          className="text-xs"
+                          onClick={() => setIsFullScreenSignature(true)}
+                        >
+                          Refazer assinatura
+                        </Button>
+                      </p>
+                    </div>
+                  )}
                 </div>
 
                 <div className="p-4 bg-primary/5 rounded-lg border border-primary/10">
                   <p className="text-xs leading-relaxed text-muted-foreground">
-                    Ao assinar, você confirma que todas as informações prestadas são verdadeiras e que 
-                    compreende os termos e responsabilidades aceitos nos passos anteriores. Esta assinatura 
-                    tem validade para identificação interna e segurança nos atendimentos do templo.
+                    Ao finalizar, você confirma que todas as informações prestadas são verdadeiras e que 
+                    compreende os termos e responsabilidades aceitos.
                   </p>
                 </div>
               </CardContent>
