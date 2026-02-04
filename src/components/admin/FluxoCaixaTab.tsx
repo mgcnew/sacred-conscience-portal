@@ -15,7 +15,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   Plus, Trash2, TrendingUp, TrendingDown, DollarSign, ArrowUpCircle, ArrowDownCircle,
   BarChart3, PieChart, Wallet, Tag, RefreshCw, Download, FileText, Target, AlertTriangle, Settings,
-  Paperclip, Upload, Eye, File, CheckCircle, Circle, CheckCheck
+  Paperclip, Upload, Eye, File, CheckCircle, Circle, CheckCheck, CheckCircle2, Calendar as CalendarIcon,
+  TrendingDown as TrendingDownIcon, // Just in case, but TrendingDown is already there
 } from 'lucide-react';
 import { format, startOfMonth, endOfMonth, subMonths } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
