@@ -125,7 +125,7 @@ const Index: React.FC = () => {
       </button>
 
       <button 
-        onClick={() => navigate(ROUTES.DEPOIMENTOS)}
+        onClick={() => navigate(ROUTES.PARTILHAS)}
         className="flex flex-col items-center gap-2 min-w-[72px] group"
       >
         <div className="w-[68px] h-[68px] rounded-full p-[2px] bg-gradient-to-tr from-gray-300 via-gray-400 to-gray-300 group-active:scale-95 transition-transform">
