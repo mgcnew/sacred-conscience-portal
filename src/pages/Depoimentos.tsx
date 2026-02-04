@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
@@ -14,14 +14,28 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Skeleton } from '@/components/ui/skeleton';
-import { MessageSquareQuote, PenLine, Clock, CheckCircle2, Sparkles, Loader2, Quote, Calendar, Instagram, Share2, MessageCircle, User } from 'lucide-react';
+import { 
+    MessageSquareQuote, 
+    PenLine, 
+    Clock, 
+    CheckCircle2, 
+    Sparkles, 
+    Loader2, 
+    Quote, 
+    Calendar, 
+    Instagram, 
+    Share2, 
+    MessageCircle, 
+    User,
+    Heart,
+    Star
+} from 'lucide-react';
 import { PageHeader, PageContainer } from '@/components/shared';
 import { toast } from 'sonner';
 import { TOAST_MESSAGES } from '@/constants/messages';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { formatDateBR } from '@/lib/date-utils';
-import { Virtuoso, VirtuosoHandle } from 'react-virtuoso';
 import { 
     useDepoimentosInfinito, 
     useCerimoniasSelect, 
@@ -30,6 +44,117 @@ import {
     useUserRoles,
     getUserRoleFromData
 } from '@/hooks/queries';
+
+// Componente para o Card de Depoimento individual
+const TestimonialCard = ({ 
+    depoimento, 
+    user, 
+    canShareAll, 
+    index,
+    isNew = false
+}: { 
+    depoimento: any; 
+    user: any; 
+    canShareAll: boolean;
+    index: number;
+    isNew?: boolean;
+}) => {
+    return (
+        <div className={cn(
+            "mb-6 break-inside-avoid",
+            isNew && "animate-in fade-in slide-in-from-bottom-4 duration-500"
+        )} style={{ animationDelay: isNew ? `${(index % 10) * 50}ms` : undefined }}>
+            <Card className="group relative overflow-hidden border-none shadow-sm hover:shadow-xl transition-all duration-500 bg-card/50 backdrop-blur-sm border-white/10">
+                {/* Efeito de luz sutil no hover */}
+                <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                
+                <CardContent className="p-6 relative">
+                    <div className="flex flex-col gap-4">
+                        {/* Ícone de Aspas Superior */}
+                        <div className="flex justify-between items-start">
+                            <Quote className="w-10 h-10 text-primary/10 -ml-2" />
+                            {depoimento.autoriza_instagram && (
+                                <Badge variant="secondary" className="bg-pink-500/10 text-pink-500 border-none text-[10px] h-5 px-2">
+                                    <Instagram className="w-3 h-3 mr-1" /> Instagram
+                                </Badge>
+                            )}
+                        </div>
+
+                        {/* Texto da Partilha */}
+                        <p className="text-foreground/90 leading-relaxed font-body text-base italic whitespace-pre-wrap">
+                            {depoimento.texto}
+                        </p>
+
+                        {/* Rodapé do Card */}
+                        <div className="flex flex-col gap-4 pt-4 border-t border-primary/10">
+                            <div className="flex items-center justify-between gap-2">
+                                <div className="flex items-center gap-3">
+                                    <Avatar className="w-10 h-10 border-2 border-primary/20">
+                                        <AvatarImage src={depoimento.profiles?.avatar_url || undefined} alt={depoimento.profiles?.full_name || 'Avatar'} />
+                                        <AvatarFallback className="bg-primary/10 text-primary font-medium">
+                                            {depoimento.profiles?.full_name?.charAt(0).toUpperCase() || <User className="w-4 h-4" />}
+                                        </AvatarFallback>
+                                    </Avatar>
+                                    <div className="flex flex-col">
+                                        <span className="text-sm font-semibold text-foreground">
+                                            {depoimento.profiles?.full_name || 'Anônimo'}
+                                        </span>
+                                        <span className="text-[10px] text-muted-foreground uppercase tracking-wider font-medium">
+                                            {format(new Date(depoimento.created_at), "dd 'de' MMMM 'de' yyyy", { locale: ptBR })}
+                                        </span>
+                                    </div>
+                                </div>
+
+                                {/* Ações */}
+                                {(canShareAll || depoimento.user_id === user?.id) && (
+                                    <div className="flex items-center gap-1 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity duration-300">
+                                        <Button
+                                            variant="ghost"
+                                            size="sm"
+                                            className="h-8 w-8 p-0 text-green-600 hover:text-green-700 hover:bg-green-50 rounded-full"
+                                            title="Compartilhar no WhatsApp"
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                const shareText = `"${depoimento.texto}"\n\n- ${depoimento.profiles?.full_name || 'Anônimo'}\n\n🌿 Templo Xamânico Consciência Divinal`;
+                                                window.open(`https://wa.me/?text=${encodeURIComponent(shareText)}`, '_blank');
+                                            }}
+                                        >
+                                            <MessageCircle className="w-4 h-4" />
+                                        </Button>
+                                        <Button
+                                            variant="ghost"
+                                            size="sm"
+                                            className="h-8 w-8 p-0 text-pink-600 hover:text-pink-700 hover:bg-pink-50 rounded-full"
+                                            title="Copiar para Instagram"
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                const shareText = `"${depoimento.texto}"\n\n- ${depoimento.profiles?.full_name || 'Anônimo'}\n\n🌿 @temploxamaniconscienciadivinal`;
+                                                navigator.clipboard.writeText(shareText);
+                                                toast.success('Texto copiado!', {
+                                                    description: 'Cole no Instagram para compartilhar.',
+                                                });
+                                            }}
+                                        >
+                                            <Instagram className="w-4 h-4" />
+                                        </Button>
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* Cerimônia Relacionada */}
+                            {depoimento.cerimonias && (
+                                <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground font-medium">
+                                    <Sparkles className="w-3 h-3 text-primary" />
+                                    <span>{depoimento.cerimonias.nome || depoimento.cerimonias.medicina_principal}</span>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </CardContent>
+            </Card>
+        </div>
+    );
+};
 
 // Componente do Modal de Compartilhar
 function ShareExperienceModal({
@@ -174,7 +299,7 @@ const Depoimentos: React.FC = () => {
     const [texto, setTexto] = useState('');
     const [cerimoniaId, setCerimoniaId] = useState<string>('livre');
     const [autorizaInstagram, setAutorizaInstagram] = useState(false);
-    const virtuosoRef = React.useRef<VirtuosoHandle>(null);
+    const observerTarget = useRef<HTMLDivElement>(null);
 
     // Infinite Query para depoimentos aprovados (Requirements: 6.2)
     const {
@@ -186,6 +311,24 @@ const Depoimentos: React.FC = () => {
     } = useDepoimentosInfinito();
 
     const allDepoimentos = data?.pages.flatMap((page) => page.data) || [];
+
+    // Intersection Observer para Infinite Scroll infinito (Substituindo Virtuoso para maior estabilidade)
+    useEffect(() => {
+        const observer = new IntersectionObserver(
+            (entries) => {
+                if (entries[0].isIntersecting && hasNextPage && !isFetchingNextPage) {
+                    fetchNextPage();
+                }
+            },
+            { threshold: 0.1 }
+        );
+
+        if (observerTarget.current) {
+            observer.observe(observerTarget.current);
+        }
+
+        return () => observer.disconnect();
+    }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
     // Query para cerimônias (para o select) (Requirements: 6.2)
     const { data: cerimonias } = useCerimoniasSelect();
@@ -243,18 +386,30 @@ const Depoimentos: React.FC = () => {
     };
 
     return (
-        <PageContainer maxWidth="lg">
-                {/* Header */}
+        <PageContainer maxWidth="xl" className="relative overflow-visible">
+            {/* Elementos Decorativos de Fundo */}
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-4xl h-96 bg-gradient-to-b from-primary/5 to-transparent blur-3xl -z-10 pointer-events-none" />
+            
+            <div className="pt-8 md:pt-12">
+                {/* Header Centralizado e Elegante */}
                 <PageHeader
+                    centered
                     icon={MessageSquareQuote}
                     title="Partilhas"
-                    description="Experiências transformadoras compartilhadas por nossa comunidade."
+                    description="Um espaço sagrado para compartilhar as curas, insights e transformações vivenciadas em nossa jornada."
+                    className="mb-12"
                 >
                     {user && (
-                        <>
-                            <Button className="bg-primary hover:bg-primary/90" onClick={() => setIsDialogOpen(true)}>
-                                <PenLine className="w-4 h-4 mr-2" /> Compartilhar Experiência
+                        <div className="mt-8 flex justify-center">
+                            <Button 
+                                size="lg"
+                                className="bg-primary hover:bg-primary/90 shadow-lg shadow-primary/20 gap-2 px-8 rounded-full transition-all hover:scale-105 active:scale-95" 
+                                onClick={() => setIsDialogOpen(true)}
+                            >
+                                <PenLine className="w-5 h-5" /> 
+                                Escrever Minha Partilha
                             </Button>
+                            
                             <ShareExperienceModal
                                 isOpen={isDialogOpen}
                                 onClose={() => setIsDialogOpen(false)}
@@ -269,164 +424,134 @@ const Depoimentos: React.FC = () => {
                                 handleSubmit={handleSubmit}
                                 isPending={createMutation.isPending}
                             />
-                        </>
+                        </div>
                     )}
                 </PageHeader>
 
                 {/* Aviso de depoimento pendente */}
                 {meusDepoimentos && meusDepoimentos.length > 0 && (
-                    <Card className="mb-6 border-amber-200 bg-amber-50/50 dark:bg-amber-950/20 dark:border-amber-900 animate-in fade-in slide-in-from-top-4">
-                        <CardContent className="py-4 flex items-center gap-3">
-                            <Clock className="w-5 h-5 text-amber-600" />
-                            <p className="text-sm text-amber-800 dark:text-amber-200">
-                                Você tem <strong>{meusDepoimentos.length}</strong> partilha(s) aguardando aprovação.
-                            </p>
-                        </CardContent>
-                    </Card>
-                )}
-
-                {/* Lista de depoimentos com Virtualização */}
-                <div className="space-y-6">
-                    {isLoading ? (
-                        // Skeleton Loading Inicial
-                        Array.from({ length: 3 }).map((_, i) => (
-                            <Card key={i} className="overflow-hidden mb-6">
-                                <CardContent className="p-6">
-                                    <div className="flex items-start gap-4">
-                                        <Skeleton className="w-8 h-8 rounded-full shrink-0" />
-                                        <div className="flex-1 space-y-4">
-                                            <div className="space-y-2">
-                                                <Skeleton className="h-4 w-full" />
-                                                <Skeleton className="h-4 w-[90%]" />
-                                                <Skeleton className="h-4 w-[80%]" />
-                                            </div>
-                                            <div className="flex items-center justify-between pt-2 border-t border-border/50">
-                                                <div className="flex items-center gap-2">
-                                                    <Skeleton className="w-8 h-8 rounded-full" />
-                                                    <div className="space-y-1">
-                                                        <Skeleton className="h-3 w-24" />
-                                                        <Skeleton className="h-3 w-16" />
-                                                    </div>
-                                                </div>
-                                                <Skeleton className="h-5 w-20 rounded-full" />
-                                            </div>
-                                        </div>
-                                    </div>
-                                </CardContent>
-                            </Card>
-                        ))
-                    ) : allDepoimentos.length === 0 ? (
-                        <Card className="text-center py-12 border-dashed border-2 bg-card/50">
-                            <CardContent>
-                                <Quote className="w-12 h-12 text-muted-foreground mx-auto mb-4 opacity-50" />
-                                <p className="text-xl text-muted-foreground font-display">
-                                    Ainda não há partilhas publicadas.
+                    <div className="max-w-2xl mx-auto mb-12">
+                        <Card className="border-amber-200/50 bg-amber-50/30 dark:bg-amber-950/10 backdrop-blur-sm animate-in fade-in slide-in-from-top-4">
+                            <CardContent className="py-3 px-4 flex items-center justify-center gap-3">
+                                <Clock className="w-4 h-4 text-amber-600 animate-pulse" />
+                                <p className="text-xs text-amber-800 dark:text-amber-200 font-medium">
+                                    Você tem <strong>{meusDepoimentos.length}</strong> partilha(s) em processo de revisão.
                                 </p>
-                                {user && (
-                                    <p className="text-sm text-muted-foreground mt-2">
-                                        Seja o primeiro a compartilhar sua experiência!
-                                    </p>
-                                )}
                             </CardContent>
                         </Card>
-                    ) : (
-                        <Virtuoso
-                            ref={virtuosoRef}
-                            useWindowScroll
-                            data={allDepoimentos}
-                            endReached={() => {
-                                if (hasNextPage && !isFetchingNextPage) {
-                                    fetchNextPage();
-                                }
-                            }}
-                            itemContent={(index, depoimento) => (
-                                <div className="pb-6 px-1">
-                                    <Card className="overflow-hidden hover:shadow-lg transition-shadow duration-300">
+                    </div>
+                )}
+
+                {/* Grid de Depoimentos (Manual Columns para evitar pulos no Masonry) */}
+                <div className="relative">
+                    {isLoading ? (
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                            {Array.from({ length: 6 }).map((_, i) => (
+                                <div key={i} className="mb-6">
+                                    <Card className="overflow-hidden border-none bg-card/50">
                                         <CardContent className="p-6">
-                                            <div className="flex items-start gap-4">
-                                                <Quote className="w-8 h-8 text-primary/30 shrink-0 mt-1" />
-                                                <div className="flex-1 space-y-4">
-                                                    <p className="text-foreground leading-relaxed italic">
-                                                        "{depoimento.texto}"
-                                                    </p>
-
-                                                    <div className="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-border/50">
-                                                        <div className="flex items-center gap-2">
-                                                            <Avatar className="w-8 h-8">
-                                                                <AvatarImage src={depoimento.profiles?.avatar_url || undefined} alt={depoimento.profiles?.full_name || 'Avatar'} />
-                                                                <AvatarFallback className="bg-primary/10 text-primary text-sm">
-                                                                    {depoimento.profiles?.full_name?.charAt(0).toUpperCase() || <User className="w-4 h-4" />}
-                                                                </AvatarFallback>
-                                                            </Avatar>
-                                                            <div>
-                                                                <p className="text-sm font-medium">
-                                                                    {depoimento.profiles?.full_name || 'Anônimo'}
-                                                                </p>
-                                                                <p className="text-xs text-muted-foreground">
-                                                                    {format(new Date(depoimento.created_at), "dd 'de' MMMM 'de' yyyy", { locale: ptBR })}
-                                                                </p>
-                                                            </div>
-                                                        </div>
-
-                                                        <div className="flex items-center gap-2">
-                                                            {depoimento.cerimonias && (
-                                                                <Badge variant="outline" className="text-xs">
-                                                                    <Calendar className="w-3 h-3 mr-1" />
-                                                                    {depoimento.cerimonias.nome || depoimento.cerimonias.medicina_principal}
-                                                                </Badge>
-                                                            )}
-                                                            {/* Botões de compartilhar - só aparece para dono ou admin/guardião */}
-                                                            {(canShareAll || depoimento.user_id === user?.id) && (
-                                                                <div className="flex items-center gap-1">
-                                                                    <Button
-                                                                        variant="ghost"
-                                                                        size="sm"
-                                                                        className="h-7 w-7 p-0 text-green-600 hover:text-green-700 hover:bg-green-50"
-                                                                        title="Compartilhar no WhatsApp"
-                                                                        onClick={() => {
-                                                                            const shareText = `"${depoimento.texto}"\n\n- ${depoimento.profiles?.full_name || 'Anônimo'}\n\n🌿 Templo Xamânico Consciência Divinal`;
-                                                                            window.open(`https://wa.me/?text=${encodeURIComponent(shareText)}`, '_blank');
-                                                                        }}
-                                                                    >
-                                                                        <MessageCircle className="w-4 h-4" />
-                                                                    </Button>
-                                                                    <Button
-                                                                        variant="ghost"
-                                                                        size="sm"
-                                                                        className="h-7 w-7 p-0 text-pink-600 hover:text-pink-700 hover:bg-pink-50"
-                                                                        title="Copiar para Instagram"
-                                                                        onClick={() => {
-                                                                            const shareText = `"${depoimento.texto}"\n\n- ${depoimento.profiles?.full_name || 'Anônimo'}\n\n🌿 @temploxamaniconscienciadivinal`;
-                                                                            navigator.clipboard.writeText(shareText);
-                                                                            toast.success('Texto copiado!', {
-                                                                                description: 'Cole no Instagram para compartilhar.',
-                                                                            });
-                                                                        }}
-                                                                    >
-                                                                        <Instagram className="w-4 h-4" />
-                                                                    </Button>
-                                                                </div>
-                                                            )}
-                                                        </div>
+                                            <div className="space-y-4">
+                                                <Skeleton className="h-4 w-10" />
+                                                <div className="space-y-2">
+                                                    <Skeleton className="h-4 w-full" />
+                                                    <Skeleton className="h-4 w-[90%]" />
+                                                    <Skeleton className="h-4 w-[80%]" />
+                                                </div>
+                                                <div className="flex items-center gap-3 pt-4 border-t border-primary/5">
+                                                    <Skeleton className="w-10 h-10 rounded-full" />
+                                                    <div className="space-y-1">
+                                                        <Skeleton className="h-3 w-24" />
+                                                        <Skeleton className="h-2 w-16" />
                                                     </div>
                                                 </div>
                                             </div>
                                         </CardContent>
                                     </Card>
                                 </div>
+                            ))}
+                        </div>
+                    ) : allDepoimentos.length === 0 ? (
+                        <div className="max-w-md mx-auto text-center py-20">
+                            <div className="w-20 h-20 bg-muted rounded-full flex items-center justify-center mx-auto mb-6">
+                                <Quote className="w-10 h-10 text-muted-foreground opacity-20" />
+                            </div>
+                            <h3 className="text-xl font-display font-medium mb-2">O silêncio das águas...</h3>
+                            <p className="text-muted-foreground mb-8">
+                                Ainda não há partilhas publicadas. Que tal ser o primeiro a manifestar sua voz?
+                            </p>
+                            {user && (
+                                <Button variant="outline" onClick={() => setIsDialogOpen(true)} className="rounded-full px-8">
+                                    Começar agora
+                                </Button>
                             )}
-                            components={{
-                                Footer: () => (
-                                    isFetchingNextPage ? (
-                                        <div className="flex justify-center py-4">
-                                            <Loader2 className="w-6 h-6 animate-spin text-primary" />
-                                        </div>
-                                    ) : null
-                                )
-                            }}
-                        />
+                        </div>
+                    ) : (
+                        <>
+                            <div className="flex flex-col md:flex-row gap-6">
+                                {/* Coluna 1 */}
+                                <div className="flex-1 flex flex-col">
+                                    {allDepoimentos.filter((_, i) => i % (isMobile ? 1 : 3) === 0).map((depoimento, index) => (
+                                        <TestimonialCard 
+                                            key={depoimento.id} 
+                                            depoimento={depoimento} 
+                                            user={user} 
+                                            canShareAll={canShareAll}
+                                            index={index * 3}
+                                            isNew={index > 3} // Apenas anima os que não são os primeiros
+                                        />
+                                    ))}
+                                </div>
+                                {/* Coluna 2 */}
+                                {!isMobile && (
+                                    <div className="flex-1 flex flex-col">
+                                        {allDepoimentos.filter((_, i) => i % 3 === 1).map((depoimento, index) => (
+                                            <TestimonialCard 
+                                                key={depoimento.id} 
+                                                depoimento={depoimento} 
+                                                user={user} 
+                                                canShareAll={canShareAll}
+                                                index={index * 3 + 1}
+                                                isNew={index > 3}
+                                            />
+                                        ))}
+                                    </div>
+                                )}
+                                {/* Coluna 3 */}
+                                {!isMobile && (
+                                    <div className="flex-1 flex flex-col">
+                                        {allDepoimentos.filter((_, i) => i % 3 === 2).map((depoimento, index) => (
+                                            <TestimonialCard 
+                                                key={depoimento.id} 
+                                                depoimento={depoimento} 
+                                                user={user} 
+                                                canShareAll={canShareAll}
+                                                index={index * 3 + 2}
+                                                isNew={index > 3}
+                                            />
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* Alvo do Observer para Infinite Scroll */}
+                            <div ref={observerTarget} className="w-full h-20 flex items-center justify-center mt-8">
+                                {isFetchingNextPage && (
+                                    <div className="flex flex-col items-center gap-2">
+                                        <Loader2 className="w-6 h-6 animate-spin text-primary" />
+                                        <span className="text-xs text-muted-foreground animate-pulse">Buscando mais luz...</span>
+                                    </div>
+                                )}
+                                {!hasNextPage && allDepoimentos.length > 0 && (
+                                    <div className="flex flex-col items-center gap-2 opacity-50">
+                                        <div className="h-px w-24 bg-gradient-to-r from-transparent via-primary/30 to-transparent" />
+                                        <span className="text-[10px] uppercase tracking-widest font-bold text-primary">Fim das Partilhas</span>
+                                    </div>
+                                )}
+                            </div>
+                        </>
                     )}
                 </div>
+            </div>
         </PageContainer>
     );
 };
