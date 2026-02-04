@@ -157,6 +157,7 @@ const Admin: React.FC = () => {
   const [dateTo, setDateTo] = useState<string>('');
   const [anamneseFilter, setAnamneseFilter] = useState<AnamneseFilterType>('todos');
   const [expandedCerimonias, setExpandedCerimonias] = useState<Set<string>>(new Set());
+  const [selectedCerimoniaId, setSelectedCerimoniaId] = useState<string>('todas');
   
   // State para cancelamento de inscrição
   const [cancelInscricaoDialog, setCancelInscricaoDialog] = useState<{
@@ -520,14 +521,48 @@ const Admin: React.FC = () => {
     )
   }), [filteredProfiles, consagradoresPage]);
 
+  // Filtrar inscrições baseado na cerimônia selecionada
+  const inscricoesFiltradas = useMemo(() => {
+    if (!inscricoes) return [];
+    
+    // Filtro por cerimônia
+    if (selectedCerimoniaId !== 'todas') {
+      return inscricoes.filter(i => i.cerimonia_id === selectedCerimoniaId);
+    }
+    
+    // Se "todas", ordenar por data da cerimônia (mais próxima primeiro)
+    return [...inscricoes].sort((a, b) => {
+      const dataA = new Date(a.cerimonias?.data || 0).getTime();
+      const dataB = new Date(b.cerimonias?.data || 0).getTime();
+      return dataB - dataA; // Decrescente (mais recente primeiro)
+    });
+  }, [inscricoes, selectedCerimoniaId]);
+
+  // Encontrar a próxima cerimônia ativa para selecionar por padrão
+  React.useEffect(() => {
+    if (cerimonias && cerimonias.length > 0 && selectedCerimoniaId === 'todas') {
+      const hoje = new Date();
+      hoje.setHours(0, 0, 0, 0);
+      
+      // Encontrar a próxima cerimônia (data >= hoje)
+      const proximaCerimonia = cerimonias
+        .filter(c => new Date(c.data) >= hoje)
+        .sort((a, b) => new Date(a.data).getTime() - new Date(b.data).getTime())[0];
+        
+      if (proximaCerimonia) {
+        setSelectedCerimoniaId(proximaCerimonia.id);
+      }
+    }
+  }, [cerimonias]); // Executar apenas quando as cerimônias forem carregadas
+
   // Paginated Inscricoes (memoized)
   const { totalInscricoesPages, paginatedInscricoes } = useMemo(() => ({
-    totalInscricoesPages: Math.ceil((inscricoes?.length || 0) / ITEMS_PER_PAGE),
-    paginatedInscricoes: inscricoes?.slice(
+    totalInscricoesPages: Math.ceil((inscricoesFiltradas?.length || 0) / ITEMS_PER_PAGE),
+    paginatedInscricoes: inscricoesFiltradas?.slice(
       (inscricoesPage - 1) * ITEMS_PER_PAGE,
       inscricoesPage * ITEMS_PER_PAGE
     )
-  }), [inscricoes, inscricoesPage]);
+  }), [inscricoesFiltradas, inscricoesPage]);
 
   // Helper to get anamnese for a user
   const getAnamnese = (userId: string) => {
@@ -650,52 +685,6 @@ const Admin: React.FC = () => {
     return substancias;
   };
 
-  // Filtrar inscrições baseado na cerimônia selecionada
-  const [selectedCerimoniaId, setSelectedCerimoniaId] = useState<string>('todas');
-
-  const inscricoesFiltradas = useMemo(() => {
-    if (!inscricoes) return [];
-    
-    // Filtro por cerimônia
-    if (selectedCerimoniaId !== 'todas') {
-      return inscricoes.filter(i => i.cerimonia_id === selectedCerimoniaId);
-    }
-    
-    // Se "todas", ordenar por data da cerimônia (mais próxima primeiro)
-    return [...inscricoes].sort((a, b) => {
-      const dataA = new Date(a.cerimonias?.data || 0).getTime();
-      const dataB = new Date(b.cerimonias?.data || 0).getTime();
-      return dataB - dataA; // Decrescente (mais recente primeiro)
-    });
-  }, [inscricoes, selectedCerimoniaId]);
-
-  // Encontrar a próxima cerimônia ativa para selecionar por padrão
-  React.useEffect(() => {
-    if (cerimonias && cerimonias.length > 0 && selectedCerimoniaId === 'todas') {
-      const hoje = new Date();
-      hoje.setHours(0, 0, 0, 0);
-      
-      // Encontrar a próxima cerimônia (data >= hoje)
-      const proximaCerimonia = cerimonias
-        .filter(c => new Date(c.data) >= hoje)
-        .sort((a, b) => new Date(a.data).getTime() - new Date(b.data).getTime())[0];
-        
-      if (proximaCerimonia) {
-        setSelectedCerimoniaId(proximaCerimonia.id);
-      }
-    }
-  }, [cerimonias]); // Executar apenas quando as cerimônias forem carregadas
-
-  // Paginação de inscrições
-  const [inscricoesPage, setInscricoesPage] = useState(1);
-  const inscricoesPerPage = 10;
-  const totalInscricoesPages = Math.ceil((inscricoesFiltradas?.length || 0) / inscricoesPerPage);
-  
-  const paginatedInscricoes = useMemo(() => {
-    const startIndex = (inscricoesPage - 1) * inscricoesPerPage;
-    return inscricoesFiltradas?.slice(startIndex, startIndex + inscricoesPerPage);
-  }, [inscricoesFiltradas, inscricoesPage]);
-
   const [activeTab, setActiveTab] = useState('dashboard');
 
   // Define available tabs based on permissions
@@ -774,7 +763,7 @@ const Admin: React.FC = () => {
                     <SelectItem 
                       key={tab.value} 
                       value={tab.value}
-                      className="rounded-lg focus:bg-primary/10 focus:text-primary transition-colors py-2.5 px-3 cursor-pointer"
+                      className="rounded-lg focus:bg-primary/10 focus:text-primary transition-colors py-2.5 pl-10 pr-3 cursor-pointer"
                     >
                       <div className="flex items-center justify-between w-full gap-3">
                         <span className="text-sm font-medium">{tab.label}</span>
@@ -1623,9 +1612,10 @@ const Admin: React.FC = () => {
 
           {/* INSCRICOES TAB */}
           <TabsContent value="inscricoes" className="space-y-6 ">
-            <div className="flex flex-col md:flex-row justify-between gap-4">
+            <div className="flex flex-col md:flex-row justify-between gap-4 items-end">
               {/* Filtro de Cerimônia */}
-              <div className="w-full md:w-[300px]">
+              <div className="w-full md:w-[300px] space-y-1.5">
+                <Label className="text-sm text-muted-foreground ml-1">Filtrar por Cerimônia</Label>
                 <Select value={selectedCerimoniaId} onValueChange={(value) => {
                   setSelectedCerimoniaId(value);
                   setInscricoesPage(1);
