@@ -71,8 +71,11 @@ import {
   Wallet,
   Info,
   Activity,
-  Percent
+  Percent,
+  RotateCcw,
+  Save,
 } from 'lucide-react';
+import { useCategoriasFinanceiras, useCreateTransacao } from '@/hooks/queries/useFluxoCaixa';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { toast } from 'sonner';
@@ -167,10 +170,32 @@ const Admin: React.FC = () => {
   const { data: anamneses } = useAnamneses();
   const { data: cerimonias, isLoading: isLoadingCerimonias } = useCerimoniasAdmin();
   const { data: inscricoes, isLoading: isLoadingInscricoes } = useInscricoesAdmin();
+  const { data: categoriasFinanceiras } = useCategoriasFinanceiras();
 
   const { data: depoimentosPendentes, isLoading: isLoadingDepoimentos, error: depoimentosError } = useDepoimentosPendentes();
   const { data: pagamentosProdutos, isLoading: isLoadingPagamentos } = usePagamentosProdutos();
   
+  // Estado para confirmação de pagamento e valor
+  const [paymentConfirmDialog, setPaymentConfirmDialog] = useState<{
+    open: boolean;
+    inscricaoId: string | null;
+    valor: string;
+    nomeParticipante: string;
+    nomeCerimonia: string;
+    cerimoniaId: string | null;
+    userId: string | null;
+    formaPagamento: string | null;
+  }>({
+    open: false,
+    inscricaoId: null,
+    valor: '',
+    nomeParticipante: '',
+    nomeCerimonia: '',
+    cerimoniaId: null,
+    userId: null,
+    formaPagamento: null,
+  });
+
   // Permissões
   const { temPermissao, temPermissaoExplicita, isSuperAdmin } = useCheckPermissao();
 
@@ -223,22 +248,64 @@ const Admin: React.FC = () => {
 
   // Mutation para atualizar status de pagamento
   const togglePaymentMutation = useMutation({
-    mutationFn: async ({ inscricaoId, pago }: { inscricaoId: string; pago: boolean }) => {
+    mutationFn: async ({ inscricaoId, pago, valor, cerimoniaId, userId, formaPagamento }: { 
+      inscricaoId: string; 
+      pago: boolean;
+      valor?: number;
+      cerimoniaId?: string;
+      userId?: string;
+      formaPagamento?: string | null;
+    }) => {
       setUpdatingPaymentId(inscricaoId);
-      const { error } = await supabase
+      
+      // 1. Atualizar status da inscrição
+      const { error: errorInscricao } = await supabase
         .from('inscricoes')
         .update({ pago })
         .eq('id', inscricaoId);
-      if (error) throw error;
+      
+      if (errorInscricao) throw errorInscricao;
+
+      // 2. Se for marcado como pago e tiver valor, criar entrada no financeiro
+      if (pago && valor && valor > 0) {
+        // Buscar categoria 'Cerimônias'
+        const categoriaCerimonias = categoriasFinanceiras?.find(c => c.nome === 'Cerimônias' && c.tipo === 'entrada');
+        
+        const { error: errorFinanceiro } = await supabase
+          .from('transacoes_financeiras')
+          .insert({
+            tipo: 'entrada',
+            descricao: `Pagamento Inscrição - ${inscricaoId}`,
+            valor: valor, // valor já vem em centavos
+            data: new Date().toISOString().split('T')[0],
+            categoria_id: categoriaCerimonias?.id || null,
+            forma_pagamento: formaPagamento || 'Outros',
+            referencia_tipo: 'inscricao',
+            referencia_id: inscricaoId,
+            created_by: userId || null,
+          });
+        
+        if (errorFinanceiro) {
+          console.error('Erro ao criar registro financeiro:', errorFinanceiro);
+          // Não lançamos erro aqui para não travar a atualização da inscrição, 
+          // mas notificamos o log
+        }
+      }
+
       return pago;
     },
     onSuccess: (pago) => {
       const msg = pago ? TOAST_MESSAGES.pagamento.confirmado : TOAST_MESSAGES.pagamento.pendente;
       toast.success(msg.title, {
-        description: msg.description,
+        description: pago 
+          ? 'Pagamento confirmado e entrada registrada no caixa.' 
+          : 'Status de pagamento alterado para pendente.',
       });
       queryClient.invalidateQueries({ queryKey: ['admin-inscricoes'] });
+      queryClient.invalidateQueries({ queryKey: ['transacoes-financeiras'] });
+      queryClient.invalidateQueries({ queryKey: ['resumo-financeiro'] });
       setUpdatingPaymentId(null);
+      setPaymentConfirmDialog(prev => ({ ...prev, open: false }));
     },
     onError: () => {
       toast.error(TOAST_MESSAGES.pagamento.erro.title, {
@@ -284,6 +351,29 @@ const Admin: React.FC = () => {
         inscricaoId: cancelInscricaoDialog.inscricaoId,
         motivo: motivoCancelamento,
       });
+    }
+  };
+
+  const handleTogglePayment = (inscricao: any, checked: boolean) => {
+    if (checked) {
+      // Se estiver marcando como pago, abrir diálogo de confirmação de valor
+      const valorSugerido = inscricao.cerimonias?.valor 
+        ? (inscricao.cerimonias.valor / 100).toString() 
+        : '';
+        
+      setPaymentConfirmDialog({
+        open: true,
+        inscricaoId: inscricao.id,
+        valor: valorSugerido,
+        nomeParticipante: inscricao.profiles?.full_name || 'Participante',
+        nomeCerimonia: inscricao.cerimonias?.nome || inscricao.cerimonias?.medicina_principal || 'Cerimônia',
+        cerimoniaId: inscricao.cerimonia_id,
+        userId: inscricao.user_id,
+        formaPagamento: inscricao.forma_pagamento,
+      });
+    } else {
+      // Se estiver desmarcando, apenas atualizar status
+      togglePaymentMutation.mutate({ inscricaoId: inscricao.id, pago: false });
     }
   };
 
@@ -1538,7 +1628,7 @@ const Admin: React.FC = () => {
                               ) : (
                                 <Switch
                                   checked={inscricao.pago || false}
-                                  onCheckedChange={(checked) => togglePaymentMutation.mutate({ inscricaoId: inscricao.id, pago: checked })}
+                                  onCheckedChange={(checked) => handleTogglePayment(inscricao, checked)}
                                   disabled={togglePaymentMutation.isPending}
                                 />
                               )}
@@ -1607,7 +1697,7 @@ const Admin: React.FC = () => {
                             ) : (
                               <Switch
                                 checked={inscricao.pago || false}
-                                onCheckedChange={(checked) => togglePaymentMutation.mutate({ inscricaoId: inscricao.id, pago: checked })}
+                                onCheckedChange={(checked) => handleTogglePayment(inscricao, checked)}
                                 disabled={togglePaymentMutation.isPending}
                               />
                             )}
@@ -1943,6 +2033,81 @@ const Admin: React.FC = () => {
               Confirmar Cancelamento
             </LoadingButton>
           </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Dialog de Confirmação de Pagamento e Valor */}
+      <Dialog 
+        open={paymentConfirmDialog.open} 
+        onOpenChange={(open) => !open && setPaymentConfirmDialog(prev => ({ ...prev, open: false }))}
+      >
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <DollarSign className="w-5 h-5 text-primary" />
+              Confirmar Pagamento
+            </DialogTitle>
+            <DialogDescription>
+              Confirme o valor pago por <strong>{paymentConfirmDialog.nomeParticipante}</strong> para a cerimônia <strong>{paymentConfirmDialog.nomeCerimonia}</strong>.
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="valor_pago">Valor Recebido (R$)</Label>
+              <div className="relative">
+                <span className="absolute left-3 top-2.5 text-muted-foreground text-sm font-medium">R$</span>
+                <Input
+                  id="valor_pago"
+                  type="number"
+                  step="0.01"
+                  placeholder="0,00"
+                  className="pl-9"
+                  value={paymentConfirmDialog.valor}
+                  onChange={(e) => setPaymentConfirmDialog(prev => ({ ...prev, valor: e.target.value }))}
+                />
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Este valor será registrado automaticamente como uma entrada no Fluxo de Caixa.
+              </p>
+            </div>
+          </div>
+
+          <DialogFooter className="gap-2 sm:gap-0">
+            <Button
+              variant="outline"
+              onClick={() => setPaymentConfirmDialog(prev => ({ ...prev, open: false }))}
+            >
+              Cancelar
+            </Button>
+            <Button
+              onClick={() => {
+                const valorFloat = parseFloat(paymentConfirmDialog.valor.replace(',', '.'));
+                if (isNaN(valorFloat) || valorFloat <= 0) {
+                  toast.error('Informe um valor válido');
+                  return;
+                }
+                
+                togglePaymentMutation.mutate({
+                  inscricaoId: paymentConfirmDialog.inscricaoId!,
+                  pago: true,
+                  valor: Math.round(valorFloat * 100),
+                  cerimoniaId: paymentConfirmDialog.cerimoniaId!,
+                  userId: paymentConfirmDialog.userId!,
+                  formaPagamento: paymentConfirmDialog.formaPagamento,
+                });
+              }}
+              disabled={togglePaymentMutation.isPending}
+              className="gap-2"
+            >
+              {togglePaymentMutation.isPending ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                <Check className="w-4 h-4" />
+              )}
+              Confirmar e Registrar
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>
