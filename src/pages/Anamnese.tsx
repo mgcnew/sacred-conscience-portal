@@ -119,6 +119,7 @@ const Anamnese: React.FC = () => {
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
   const [updatedAt, setUpdatedAt] = useState<string | null>(null);
   const [showContraindicacaoModal, setShowContraindicacaoModal] = useState(false);
+  const [isIncomplete, setIsIncomplete] = useState(false);
 
   const [formData, setFormData] = useState<AnamneseFormData>({
     nome_completo: '',
@@ -242,6 +243,11 @@ const Anamnese: React.FC = () => {
         };
         setFormData(mapped);
         setExistingAnamnese(mapped);
+        
+        // Verificar se faltam novos campos obrigatórios
+        const incomplete = !mapped.documento_valor || !mapped.assinatura;
+        setIsIncomplete(incomplete);
+        
         setViewMode('view'); // Mostrar modo visualização quando já existe ficha
         // Clear any draft since we have real data
         try {
@@ -659,6 +665,33 @@ const Anamnese: React.FC = () => {
               Preenchida
             </Badge>
           </div>
+
+          {/* Alerta de Ficha Incompleta */}
+          {isIncomplete && (
+            <div className="mb-6 p-4 rounded-xl bg-destructive/10 border border-destructive/30 animate-pulse-slow">
+              <div className="flex items-start gap-3">
+                <AlertTriangle className="w-6 h-6 text-destructive flex-shrink-0 mt-0.5" />
+                <div className="space-y-1">
+                  <h3 className="font-semibold text-destructive">
+                    Atualização Necessária
+                  </h3>
+                  <p className="text-sm text-destructive/80 leading-relaxed">
+                    Sua ficha está desatualizada. Por segurança, adicionamos os campos de 
+                    <strong> Documento (RG/CPF)</strong> e <strong>Assinatura Digital</strong>. 
+                    Por favor, atualize sua ficha agora.
+                  </p>
+                  <Button 
+                    variant="destructive" 
+                    size="sm" 
+                    className="mt-2"
+                    onClick={() => setViewMode('edit')}
+                  >
+                    Atualizar Agora
+                  </Button>
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Info de última atualização */}
           {updatedAt && (

@@ -38,6 +38,7 @@ const Index: React.FC = () => {
   const navigate = useNavigate();
   const { theme } = useTheme();
   const [hasAnamnese, setHasAnamnese] = useState<boolean | null>(null);
+  const [isAnamneseComplete, setIsAnamneseComplete] = useState<boolean>(true);
 
   // Determinar se está no modo escuro (verificando a classe no HTML)
   const [isDark, setIsDark] = useState(false);
@@ -68,19 +69,24 @@ const Index: React.FC = () => {
     error: inscriptionsError,
   } = useMyInscriptions(user?.id, 3);
 
-  // Check if user has anamnese
+  // Check if user has anamnese and if it's complete
   useEffect(() => {
     const checkAnamnese = async () => {
       if (!user) return;
 
       const { data, error } = await supabase
         .from('anamneses')
-        .select('id')
+        .select('id, documento_valor, assinatura')
         .eq('user_id', user.id)
         .maybeSingle();
 
       if (!error) {
         setHasAnamnese(!!data);
+        if (data) {
+          // Verificar se os novos campos obrigatórios estão preenchidos
+          const complete = !!(data.documento_valor && data.assinatura);
+          setIsAnamneseComplete(complete);
+        }
       }
     };
 
@@ -111,7 +117,7 @@ const Index: React.FC = () => {
         <CeremonyReminder />
 
         {/* Anamnese Alert */}
-        {hasAnamnese === false && (
+        {(hasAnamnese === false || isAnamneseComplete === false) && (
           <Card className="mb-6 border-primary/30 bg-primary/5">
             <CardContent className="flex flex-col sm:flex-row items-start sm:items-center gap-4 p-4">
               <div className="flex items-center gap-3 w-full sm:w-auto">
@@ -119,17 +125,23 @@ const Index: React.FC = () => {
                   <AlertCircle className="w-5 h-5 text-primary" />
                 </div>
                 <div className="flex-1 sm:hidden">
-                  <h3 className="font-medium text-foreground">Complete sua Ficha</h3>
+                  <h3 className="font-medium text-foreground">
+                    {hasAnamnese === false ? 'Complete sua Ficha' : 'Atualize sua Ficha'}
+                  </h3>
                   <p className="text-xs text-muted-foreground">
-                    Necessário para participar das cerimônias
+                    {hasAnamnese === false ? 'Necessário para participar' : 'Novos campos obrigatórios'}
                   </p>
                 </div>
               </div>
 
               <div className="hidden sm:block flex-1">
-                <h3 className="font-medium text-foreground">Complete sua Ficha de Anamnese</h3>
+                <h3 className="font-medium text-foreground">
+                  {hasAnamnese === false ? 'Complete sua Ficha de Anamnese' : 'Atualização de Cadastro Obrigatória'}
+                </h3>
                 <p className="text-sm text-muted-foreground">
-                  Para participar das cerimônias, você precisa preencher sua ficha de saúde.
+                  {hasAnamnese === false 
+                    ? 'Para participar das cerimônias, você precisa preencher sua ficha de saúde.'
+                    : 'Adicionamos novos campos de segurança (Documento e Assinatura). Por favor, atualize sua ficha.'}
                 </p>
               </div>
 
@@ -138,7 +150,7 @@ const Index: React.FC = () => {
                 size="sm"
                 className="w-full sm:w-auto"
               >
-                Preencher
+                {hasAnamnese === false ? 'Preencher' : 'Atualizar'}
                 <ChevronRight className="w-4 h-4 ml-1" />
               </Button>
             </CardContent>
@@ -155,7 +167,7 @@ const Index: React.FC = () => {
               ceremonies={ceremonies}
               isLoading={ceremoniesLoading}
               error={ceremoniesError}
-              hasAnamnese={hasAnamnese ?? true}
+              hasAnamnese={(hasAnamnese ?? true) && isAnamneseComplete}
             />
           </SectionErrorBoundary>
 
