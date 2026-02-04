@@ -650,6 +650,52 @@ const Admin: React.FC = () => {
     return substancias;
   };
 
+  // Filtrar inscrições baseado na cerimônia selecionada
+  const [selectedCerimoniaId, setSelectedCerimoniaId] = useState<string>('todas');
+
+  const inscricoesFiltradas = useMemo(() => {
+    if (!inscricoes) return [];
+    
+    // Filtro por cerimônia
+    if (selectedCerimoniaId !== 'todas') {
+      return inscricoes.filter(i => i.cerimonia_id === selectedCerimoniaId);
+    }
+    
+    // Se "todas", ordenar por data da cerimônia (mais próxima primeiro)
+    return [...inscricoes].sort((a, b) => {
+      const dataA = new Date(a.cerimonias?.data || 0).getTime();
+      const dataB = new Date(b.cerimonias?.data || 0).getTime();
+      return dataB - dataA; // Decrescente (mais recente primeiro)
+    });
+  }, [inscricoes, selectedCerimoniaId]);
+
+  // Encontrar a próxima cerimônia ativa para selecionar por padrão
+  React.useEffect(() => {
+    if (cerimonias && cerimonias.length > 0 && selectedCerimoniaId === 'todas') {
+      const hoje = new Date();
+      hoje.setHours(0, 0, 0, 0);
+      
+      // Encontrar a próxima cerimônia (data >= hoje)
+      const proximaCerimonia = cerimonias
+        .filter(c => new Date(c.data) >= hoje)
+        .sort((a, b) => new Date(a.data).getTime() - new Date(b.data).getTime())[0];
+        
+      if (proximaCerimonia) {
+        setSelectedCerimoniaId(proximaCerimonia.id);
+      }
+    }
+  }, [cerimonias]); // Executar apenas quando as cerimônias forem carregadas
+
+  // Paginação de inscrições
+  const [inscricoesPage, setInscricoesPage] = useState(1);
+  const inscricoesPerPage = 10;
+  const totalInscricoesPages = Math.ceil((inscricoesFiltradas?.length || 0) / inscricoesPerPage);
+  
+  const paginatedInscricoes = useMemo(() => {
+    const startIndex = (inscricoesPage - 1) * inscricoesPerPage;
+    return inscricoesFiltradas?.slice(startIndex, startIndex + inscricoesPerPage);
+  }, [inscricoesFiltradas, inscricoesPage]);
+
   const [activeTab, setActiveTab] = useState('dashboard');
 
   // Define available tabs based on permissions
@@ -1577,7 +1623,27 @@ const Admin: React.FC = () => {
 
           {/* INSCRICOES TAB */}
           <TabsContent value="inscricoes" className="space-y-6 ">
-            <div className="flex justify-end">
+            <div className="flex flex-col md:flex-row justify-between gap-4">
+              {/* Filtro de Cerimônia */}
+              <div className="w-full md:w-[300px]">
+                <Select value={selectedCerimoniaId} onValueChange={(value) => {
+                  setSelectedCerimoniaId(value);
+                  setInscricoesPage(1);
+                }}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione uma cerimônia" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="todas">Todas as Cerimônias</SelectItem>
+                    {cerimonias?.map((cerimonia) => (
+                      <SelectItem key={cerimonia.id} value={cerimonia.id}>
+                        {cerimonia.nome || cerimonia.medicina_principal} - {formatDateBR(cerimonia.data)}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
               <Button
                 variant="outline"
                 size="sm"
@@ -1595,7 +1661,9 @@ const Admin: React.FC = () => {
                   Gestão de Pagamentos
                 </CardTitle>
                 <CardDescription>
-                  Controle os pagamentos das inscrições nas cerimônias.
+                  {selectedCerimoniaId === 'todas' 
+                    ? 'Visualizando todas as inscrições.' 
+                    : `Inscrições para ${cerimonias?.find(c => c.id === selectedCerimoniaId)?.nome || 'cerimônia selecionada'}.`}
                 </CardDescription>
               </CardHeader>
               <CardContent>
