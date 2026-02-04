@@ -46,8 +46,21 @@ const Cerimonias: React.FC = () => {
     }
   }, [tabFromUrl, searchParams, setSearchParams]);
 
-  // Tratar retorno do Mercado Pago
+  // Tratar retorno do Mercado Pago e Hash da URL
   useEffect(() => {
+    // Verificar hash para abrir modal de pagamento automaticamente
+    const hash = window.location.hash;
+    if (hash && hash.startsWith('#pagar-') && cerimonias) {
+      const idToPay = hash.replace('#pagar-', '');
+      const ceremonyToPay = cerimonias.find(c => c.id === idToPay);
+      
+      if (ceremonyToPay) {
+        // Limpar hash para não reabrir ao atualizar
+        window.history.replaceState(null, '', window.location.pathname + window.location.search);
+        handleOpenPayment(ceremonyToPay);
+      }
+    }
+
     const paymentStatus = searchParams.get('payment');
     if (paymentStatus) {
       searchParams.delete('payment');
@@ -386,7 +399,7 @@ const Cerimonias: React.FC = () => {
         </TabsContent>
 
         <TabsContent value="historico">
-          <CerimoniasHistorico userId={user?.id} />
+          <CerimoniasHistorico userId={user?.id} onOpenPayment={handleOpenPayment} />
         </TabsContent>
 
         {podeVerListaPresentes && (

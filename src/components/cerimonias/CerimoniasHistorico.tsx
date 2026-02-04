@@ -9,12 +9,14 @@ import { Link } from 'react-router-dom';
 import { useHistoricoInscricoes, useMeusDepoimentosAprovados } from '@/hooks/queries';
 import { ROUTES } from '@/constants';
 import { formatDateBR, formatDateExtensoBR, parseDateString } from '@/lib/date-utils';
+import type { Cerimonia } from '@/types';
 
 interface CerimoniasHistoricoProps {
   userId?: string;
+  onOpenPayment?: (cerimonia: Cerimonia) => void;
 }
 
-const CerimoniasHistorico: React.FC<CerimoniasHistoricoProps> = ({ userId }) => {
+const CerimoniasHistorico: React.FC<CerimoniasHistoricoProps> = ({ userId, onOpenPayment }) => {
   const { data: inscricoes, isLoading } = useHistoricoInscricoes(userId);
   const { data: depoimentosAprovados } = useMeusDepoimentosAprovados(userId);
 
@@ -90,9 +92,22 @@ const CerimoniasHistorico: React.FC<CerimoniasHistoricoProps> = ({ userId }) => 
                     <span className="text-xs text-muted-foreground">
                       {inscricao.forma_pagamento || 'Pagamento não especificado'}
                     </span>
-                    <Badge variant={inscricao.pago ? 'default' : 'outline'} className="text-xs">
-                      {inscricao.pago ? '✓ Pago' : 'Pendente'}
-                    </Badge>
+                    <div className="flex items-center gap-2">
+                      {!inscricao.pago && onOpenPayment ? (
+                        <Button 
+                          variant="destructive" 
+                          size="sm" 
+                          className="h-7 text-xs px-2"
+                          onClick={() => onOpenPayment(inscricao.cerimonias as unknown as Cerimonia)}
+                        >
+                          Pagar Agora
+                        </Button>
+                      ) : (
+                        <Badge variant={inscricao.pago ? 'default' : 'outline'} className="text-xs">
+                          {inscricao.pago ? '✓ Pago' : 'Pendente'}
+                        </Badge>
+                      )}
+                    </div>
                   </div>
                 </CardContent>
               </Card>

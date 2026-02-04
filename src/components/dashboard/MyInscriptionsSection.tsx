@@ -123,7 +123,13 @@ export function MyInscriptionsSection({
                 className={`overflow-hidden cursor-pointer transition-colors hover:bg-accent/50 ${
                   isUpcoming ? "border-amber-500/50 bg-amber-500/5" : ""
                 }`}
-                onClick={() => navigate(`${ROUTES.CERIMONIAS}#${inscription.cerimonia.id}`)}
+                onClick={() => {
+                  if (!inscription.pago && inscription.status !== 'cancelada') {
+                    navigate(`${ROUTES.CERIMONIAS}#pagar-${inscription.cerimonia.id}`);
+                  } else {
+                    navigate(`${ROUTES.CERIMONIAS}#${inscription.cerimonia.id}`);
+                  }
+                }}
               >
                 <CardContent className="p-4">
                   <div className="flex flex-col gap-3">
@@ -173,7 +179,22 @@ export function MyInscriptionsSection({
 
                     {/* Action buttons */}
                     <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
-                      {/* Botão de confirmar presença - só aparece para cerimônias futuras */}
+                      {/* Botão de Pagar - Prioridade se não pago */}
+                      {!inscription.pago && inscription.status !== 'cancelada' && (
+                        <Button
+                          size="sm"
+                          variant="destructive"
+                          className="w-full sm:w-auto h-8 text-xs font-bold"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            navigate(`${ROUTES.CERIMONIAS}#pagar-${inscription.cerimonia.id}`);
+                          }}
+                        >
+                          Pagar Agora
+                        </Button>
+                      )}
+
+                      {/* Botão de confirmar presença - só aparece para cerimônias futuras e pagas */}
                       {daysUntil >= 0 && daysUntil <= 7 && inscription.pago && (
                         inscription.presenca_confirmada ? (
                           <div className="flex items-center gap-1 text-sm text-green-600 dark:text-green-400">
