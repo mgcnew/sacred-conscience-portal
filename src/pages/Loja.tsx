@@ -14,8 +14,9 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { PageHeader, PageContainer } from '@/components/shared';
-import { ShoppingBag, Plus, Search, Package, Pencil, Trash2, Star, Info } from 'lucide-react';
+import { ShoppingBag, Plus, Search, Package, Pencil, Trash2, Star, Info, Filter, ArrowRight, ShoppingCart } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
+import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import {
   AlertDialog,
@@ -198,99 +199,140 @@ const Loja: React.FC = () => {
         />
       )}
 
-      {/* Filtros */}
-      <div className="flex flex-col sm:flex-row gap-4 mb-8">
-        <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-          <Input
-            placeholder="Buscar produtos..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-10"
-          />
+      {/* Filtros e Categorias */}
+      <div className="space-y-6 mb-10">
+        <div className="flex flex-col md:flex-row gap-4">
+          <div className="relative flex-1 group">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
+            <Input
+              placeholder="O que você está procurando?"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-10 h-12 rounded-2xl border-muted bg-card/50 focus-visible:ring-primary/20"
+            />
+          </div>
+          <div className="hidden md:block">
+            <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+              <SelectTrigger className="w-[200px] h-12 rounded-2xl border-muted bg-card/50">
+                <Filter className="w-4 h-4 mr-2 text-muted-foreground" />
+                <SelectValue placeholder="Categoria" />
+              </SelectTrigger>
+              <SelectContent className="rounded-2xl">
+                <SelectItem value="todas">Todas as categorias</SelectItem>
+                {categorias?.map((cat) => (
+                  <SelectItem key={cat.id} value={cat.nome}>
+                    {cat.nome}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
         </div>
-        <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-          <SelectTrigger className="w-full sm:w-[200px]">
-            <SelectValue placeholder="Categoria" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="todas">Todas as categorias</SelectItem>
-            {categorias?.map((cat) => (
-              <SelectItem key={cat.id} value={cat.nome}>
-                {cat.nome}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+
+        {/* Chips de Categoria (Mobile & Quick Access) */}
+        <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none">
+          <Button
+            variant={selectedCategory === 'todas' ? 'default' : 'outline'}
+            size="sm"
+            onClick={() => setSelectedCategory('todas')}
+            className="rounded-full h-8 px-4 text-[11px] uppercase tracking-wider font-bold"
+          >
+            Todas
+          </Button>
+          {categorias?.map((cat) => (
+            <Button
+              key={cat.id}
+              variant={selectedCategory === cat.nome ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => setSelectedCategory(cat.nome)}
+              className="rounded-full h-8 px-4 text-[11px] uppercase tracking-wider font-bold whitespace-nowrap"
+            >
+              {cat.nome}
+            </Button>
+          ))}
+        </div>
       </div>
 
       {/* Grid de produtos */}
       {!filteredProducts || filteredProducts.length === 0 ? (
-        <Card className="border-dashed border-2 bg-card/50">
+        <div className="py-20 text-center bg-card/30 rounded-[2rem] border-2 border-dashed">
           {searchTerm || selectedCategory !== 'todas' ? (
             <NoResultsState query={searchTerm} />
           ) : (
             <EmptyState
               icon={Package}
-              title="Nenhum produto disponível"
-              description="Em breve teremos novidades na loja!"
+              title="A loja está descansando..."
+              description="Em breve teremos novos itens sagrados disponíveis para você."
             />
           )}
-        </Card>
+        </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
           {filteredProducts.map((produto) => (
-            <Card
+            <div
               key={produto.id}
-              className={`overflow-hidden flex flex-col h-full ${
-                !produto.ativo ? 'opacity-60' : ''
-              }`}
+              className={cn(
+                "group relative flex flex-col h-full bg-card rounded-[1.5rem] border border-border/40 overflow-hidden transition-all duration-300 hover:shadow-2xl hover:shadow-primary/5 hover:-translate-y-1",
+                !produto.ativo && "opacity-60"
+              )}
             >
-              {/* Imagem */}
-              <div className="relative h-44 bg-muted overflow-hidden">
+              {/* Container da Imagem */}
+              <div className="relative aspect-square overflow-hidden bg-muted">
                 {produto.imagem_url ? (
                   <img
                     src={produto.imagem_url}
                     alt={produto.nome}
-                    className="w-full h-full object-cover"
+                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                     loading="lazy"
                   />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center">
-                    <Package className="w-16 h-16 text-muted-foreground/30" />
+                    <Package className="w-12 h-12 text-muted-foreground/20" />
                   </div>
                 )}
                 
-                {/* Badges */}
-                <div className="absolute top-2 left-2 flex flex-col gap-1">
+                {/* Overlay de Ações Rápidas (Desktop) */}
+                <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 hidden md:flex items-center justify-center gap-2">
+                  <Button 
+                    size="icon" 
+                    variant="secondary" 
+                    className="rounded-full w-10 h-10 shadow-lg translate-y-4 group-hover:translate-y-0 transition-transform duration-300"
+                    onClick={() => handleViewInfo(produto)}
+                  >
+                    <Info className="w-5 h-5" />
+                  </Button>
+                </div>
+
+                {/* Badges Flutuantes */}
+                <div className="absolute top-2 left-2 flex flex-col gap-1.5 z-10">
                   {produto.destaque && (
-                    <Badge className="bg-amber-500 text-white border-none">
-                      <Star className="w-3 h-3 mr-1" /> Destaque
+                    <Badge className="bg-amber-500 hover:bg-amber-500 text-[9px] uppercase font-black tracking-tighter border-none px-2 h-5">
+                      <Star className="w-2.5 h-2.5 mr-1 fill-white" /> Destaque
                     </Badge>
                   )}
                   {produto.preco_promocional && (
-                    <Badge className="bg-red-500 text-white border-none">
+                    <Badge className="bg-red-500 hover:bg-red-500 text-[9px] uppercase font-black tracking-tighter border-none px-2 h-5">
                       Promoção
                     </Badge>
                   )}
                   {!produto.ativo && isAdmin && (
-                    <Badge variant="secondary">Inativo</Badge>
+                    <Badge variant="secondary" className="text-[9px] uppercase font-black tracking-tighter h-5">Inativo</Badge>
                   )}
                 </div>
 
+                {/* Categoria Badge */}
                 {produto.categoria && (
-                  <Badge
-                    variant="outline"
-                    className="absolute top-2 right-10 bg-background/80"
-                  >
-                    {produto.categoria}
-                  </Badge>
+                  <div className="absolute bottom-2 right-2">
+                    <span className="text-[9px] font-black uppercase tracking-widest bg-background/80 backdrop-blur-sm text-foreground px-2 py-1 rounded-lg border shadow-sm">
+                      {produto.categoria}
+                    </span>
+                  </div>
                 )}
 
-                {/* Botão de informação */}
+                {/* Info Button (Mobile Only) */}
                 <button
                   type="button"
-                  className="absolute top-2 right-2 h-7 w-7 rounded-full bg-background/80 flex items-center justify-center shadow-md active:scale-95"
+                  className="md:hidden absolute top-2 right-2 h-8 w-8 rounded-full bg-background/90 flex items-center justify-center shadow-lg active:scale-90 transition-transform"
                   onClick={(e) => {
                     e.stopPropagation();
                     handleViewInfo(produto);
@@ -300,96 +342,111 @@ const Loja: React.FC = () => {
                 </button>
               </div>
 
-              <CardContent className="flex-grow p-4">
-                <h3 className="font-display text-lg font-semibold text-foreground mb-2 line-clamp-2">
-                  {produto.nome}
-                </h3>
-                
-                {produto.descricao && (
-                  <p className="text-sm text-muted-foreground line-clamp-2 mb-3">
-                    {produto.descricao}
-                  </p>
-                )}
-
-                <div className="flex items-baseline gap-2">
-                  {produto.preco_promocional ? (
-                    <>
-                      <span className="text-xl font-bold text-primary">
-                        {formatPrice(produto.preco_promocional)}
-                      </span>
-                      <span className="text-sm text-muted-foreground line-through">
-                        {formatPrice(produto.preco)}
-                      </span>
-                    </>
-                  ) : (
-                    <span className="text-xl font-bold text-primary">
-                      {formatPrice(produto.preco)}
-                    </span>
+              {/* Conteúdo do Produto */}
+              <div className="flex flex-col flex-grow p-3 md:p-5">
+                <div className="flex-grow">
+                  <h3 className="font-display text-sm md:text-base font-bold text-foreground leading-tight mb-1 group-hover:text-primary transition-colors line-clamp-2">
+                    {produto.nome}
+                  </h3>
+                  
+                  {produto.descricao && (
+                    <p className="text-[11px] md:text-xs text-muted-foreground line-clamp-1 mb-3">
+                      {produto.descricao}
+                    </p>
                   )}
                 </div>
 
-                {produto.estoque <= 5 && produto.estoque > 0 && (
-                  <p className="text-xs text-amber-600 mt-2">
-                    Apenas {produto.estoque} em estoque!
-                  </p>
-                )}
-                {produto.estoque === 0 && (
-                  <p className="text-xs text-destructive mt-2">Esgotado</p>
-                )}
-              </CardContent>
-
-              <CardFooter className="p-4 pt-0 flex flex-col gap-2">
-                <Button
-                  className="w-full"
-                  disabled={produto.estoque === 0}
-                  onClick={() => handleComprar(produto)}
-                >
-                  {produto.estoque === 0 ? 'Esgotado' : 'Comprar'}
-                </Button>
-
-                {/* Admin actions */}
-                {isAdmin && (
-                  <div className="w-full flex gap-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="flex-1"
-                      onClick={() => handleEdit(produto)}
-                    >
-                      <Pencil className="w-3.5 h-3.5 mr-1" /> Editar
-                    </Button>
-                    <AlertDialog>
-                      <AlertDialogTrigger asChild>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="flex-1 text-destructive border-destructive/30 hover:bg-destructive/10"
-                        >
-                          <Trash2 className="w-3.5 h-3.5 mr-1" /> Excluir
-                        </Button>
-                      </AlertDialogTrigger>
-                      <AlertDialogContent>
-                        <AlertDialogHeader>
-                          <AlertDialogTitle>Excluir Produto?</AlertDialogTitle>
-                          <AlertDialogDescription>
-                            Esta ação não pode ser desfeita. O produto será removido permanentemente.
-                          </AlertDialogDescription>
-                        </AlertDialogHeader>
-                        <AlertDialogFooter>
-                          <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                          <AlertDialogAction
-                            onClick={() => deleteMutation.mutate(produto.id)}
-                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                          >
-                            Sim, Excluir
-                          </AlertDialogAction>
-                        </AlertDialogFooter>
-                      </AlertDialogContent>
-                    </AlertDialog>
+                <div className="mt-auto space-y-3">
+                  <div className="flex flex-col">
+                    {produto.preco_promocional ? (
+                      <div className="flex flex-col -space-y-1">
+                        <span className="text-[10px] text-muted-foreground line-through opacity-60">
+                          {formatPrice(produto.preco)}
+                        </span>
+                        <span className="text-lg md:text-xl font-black text-primary">
+                          {formatPrice(produto.preco_promocional)}
+                        </span>
+                      </div>
+                    ) : (
+                      <span className="text-lg md:text-xl font-black text-foreground">
+                        {formatPrice(produto.preco)}
+                      </span>
+                    )}
                   </div>
-                )}
-              </CardFooter>
-            </Card>
+
+                  {produto.estoque <= 5 && produto.estoque > 0 && (
+                    <div className="flex items-center gap-1.5 px-2 py-1 bg-amber-500/10 rounded-lg w-fit">
+                      <div className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
+                      <p className="text-[9px] md:text-[10px] font-bold text-amber-600 uppercase">
+                        Resta {produto.estoque} unidade{produto.estoque > 1 ? 's' : ''}
+                      </p>
+                    </div>
+                  )}
+
+                  <div className="flex flex-col gap-2">
+                    <Button
+                      className={cn(
+                        "w-full rounded-xl h-10 md:h-11 font-bold transition-all group/btn",
+                        produto.estoque === 0 ? "bg-muted text-muted-foreground" : "bg-primary hover:bg-primary/90 shadow-lg shadow-primary/10"
+                      )}
+                      disabled={produto.estoque === 0}
+                      onClick={() => handleComprar(produto)}
+                    >
+                      {produto.estoque === 0 ? (
+                        'Esgotado'
+                      ) : (
+                        <>
+                          <ShoppingCart className="w-4 h-4 mr-2 group-hover/btn:translate-x-1 transition-transform" />
+                          Comprar
+                        </>
+                      )}
+                    </Button>
+
+                    {/* Admin Actions */}
+                    {isAdmin && (
+                      <div className="flex gap-1.5">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="flex-1 h-8 rounded-lg text-[10px] font-bold uppercase tracking-wider hover:bg-primary/10 hover:text-primary"
+                          onClick={() => handleEdit(produto)}
+                        >
+                          <Pencil className="w-3 h-3 mr-1" /> Editar
+                        </Button>
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="flex-1 h-8 rounded-lg text-[10px] font-bold uppercase tracking-wider text-destructive hover:bg-destructive/10"
+                            >
+                              <Trash2 className="w-3 h-3 mr-1" /> Excluir
+                            </Button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent className="rounded-[2rem] border-none">
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>Excluir {produto.nome}?</AlertDialogTitle>
+                              <AlertDialogDescription>
+                                Esta ação removerá o produto permanentemente da loja.
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel className="rounded-xl">Voltar</AlertDialogCancel>
+                              <AlertDialogAction
+                                onClick={() => deleteMutation.mutate(produto.id)}
+                                className="bg-destructive text-white rounded-xl"
+                              >
+                                Confirmar Exclusão
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
           ))}
         </div>
       )}
