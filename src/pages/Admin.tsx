@@ -692,42 +692,42 @@ const Admin: React.FC = () => {
 
   return (
     <div className="min-h-screen py-4 md:py-6 bg-background/50 pb-20">
-      <div className="container max-w-7xl mx-auto">
+      <div className="container max-w-7xl mx-auto px-4 md:px-6">
         <div className="flex flex-row items-center justify-between gap-4 mb-6 md:mb-8">
-          <div className="flex items-center gap-3 md:gap-4">
+          <div className="flex items-center gap-3 md:gap-4 overflow-hidden">
             <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
               <Shield className="w-5 h-5 md:w-6 md:h-6 text-primary" />
             </div>
-            <div>
-              <h1 className="font-display text-xl md:text-3xl font-medium text-foreground">
-                Painel Administrativo
+            <div className="min-w-0">
+              <h1 className="font-display text-lg md:text-3xl font-medium text-foreground truncate">
+                Painel Admin
               </h1>
               <p className="text-sm md:text-base text-muted-foreground font-body hidden md:block">
-                Gestão de consagradores, cerimônias e inscrições.
+                Gestão do portal.
               </p>
             </div>
           </div>
 
           {/* Minimalist Tab Selector Dropdown */}
-          <div className="flex items-center gap-2">
+          <div className="flex items-center shrink-0">
             <Select value={activeTab} onValueChange={setActiveTab}>
-              <SelectTrigger className="w-[140px] md:w-[200px] h-10 rounded-xl border-muted bg-card shadow-sm hover:border-primary/50 transition-colors">
+              <SelectTrigger className="w-[130px] md:w-[200px] h-10 rounded-xl border-muted bg-card shadow-sm hover:border-primary/50 transition-all">
                 <div className="flex items-center gap-2 overflow-hidden">
-                  <Filter className="w-4 h-4 text-muted-foreground shrink-0" />
-                  <SelectValue placeholder="Selecione o Menu" />
+                  <Filter className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
+                  <SelectValue placeholder="Menu" />
                 </div>
               </SelectTrigger>
-              <SelectContent className="rounded-xl border-muted shadow-xl">
+              <SelectContent align="end" className="rounded-xl border-muted shadow-2xl min-w-[180px] md:min-w-[220px]">
                 {availableTabs.map((tab) => (
                   <SelectItem 
                     key={tab.value} 
                     value={tab.value}
-                    className="rounded-lg focus:bg-primary/10 focus:text-primary transition-colors py-2.5"
+                    className="rounded-lg focus:bg-primary/10 focus:text-primary transition-colors py-2.5 px-3 cursor-pointer"
                   >
-                    <div className="flex items-center justify-between w-full gap-4">
-                      <span>{tab.label}</span>
+                    <div className="flex items-center justify-between w-full gap-3">
+                      <span className="text-sm font-medium">{tab.label}</span>
                       {tab.badge > 0 && (
-                        <span className="px-1.5 py-0.5 rounded-full bg-amber-500 text-white text-[10px] font-bold">
+                        <span className="px-1.5 py-0.5 rounded-full bg-amber-500 text-white text-[10px] font-black shrink-0">
                           {tab.badge}
                         </span>
                       )}
