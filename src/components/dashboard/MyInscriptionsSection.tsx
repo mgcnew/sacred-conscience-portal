@@ -116,6 +116,7 @@ export function MyInscriptionsSection({
             
             const daysUntil = differenceInDays(ceremonyDate, today);
             const isUpcoming = daysUntil >= 0 && daysUntil <= 7;
+            const isPast = daysUntil < 0;
 
             return (
               <Card
@@ -124,10 +125,11 @@ export function MyInscriptionsSection({
                   isUpcoming ? "border-amber-500/50 bg-amber-500/5" : ""
                 }`}
                 onClick={() => {
+                  const targetTab = isPast ? '?tab=historico' : '';
                   if (!inscription.pago && inscription.status !== 'cancelada') {
-                    navigate(`${ROUTES.CERIMONIAS}#pagar-${inscription.cerimonia.id}`);
+                    navigate(`${ROUTES.CERIMONIAS}${targetTab}#pagar-${inscription.cerimonia.id}`);
                   } else {
-                    navigate(`${ROUTES.CERIMONIAS}#${inscription.cerimonia.id}`);
+                    navigate(`${ROUTES.CERIMONIAS}${targetTab}#${inscription.cerimonia.id}`);
                   }
                 }}
               >
@@ -187,7 +189,8 @@ export function MyInscriptionsSection({
                           className="w-full sm:w-auto h-8 text-xs font-bold"
                           onClick={(e) => {
                             e.stopPropagation();
-                            navigate(`${ROUTES.CERIMONIAS}#pagar-${inscription.cerimonia.id}`);
+                            const targetTab = isPast ? '?tab=historico' : '';
+                            navigate(`${ROUTES.CERIMONIAS}${targetTab}#pagar-${inscription.cerimonia.id}`);
                           }}
                         >
                           Pagar Agora
@@ -223,7 +226,8 @@ export function MyInscriptionsSection({
                         className="sm:ml-auto w-full sm:w-auto"
                         onClick={(e) => {
                           e.stopPropagation();
-                          navigate(`${ROUTES.CERIMONIAS}#${inscription.cerimonia.id}`);
+                          const targetTab = isPast ? '?tab=historico' : '';
+                          navigate(`${ROUTES.CERIMONIAS}${targetTab}#${inscription.cerimonia.id}`);
                         }}
                       >
                         Ver detalhes

@@ -50,14 +50,40 @@ const Cerimonias: React.FC = () => {
   useEffect(() => {
     // Verificar hash para abrir modal de pagamento automaticamente
     const hash = window.location.hash;
-    if (hash && hash.startsWith('#pagar-') && cerimonias) {
+    
+    // Função para buscar cerimônia pelo ID se não estiver na lista de futuras
+    const fetchCeremonyById = async (id: string) => {
+      try {
+        const { data, error } = await supabase
+          .from('cerimonias')
+          .select('*')
+          .eq('id', id)
+          .single();
+          
+        if (data && !error) {
+          handleOpenPayment(data);
+        }
+      } catch (err) {
+        console.error('Erro ao buscar cerimônia:', err);
+      }
+    };
+
+    if (hash && hash.startsWith('#pagar-')) {
       const idToPay = hash.replace('#pagar-', '');
-      const ceremonyToPay = cerimonias.find(c => c.id === idToPay);
+      
+      // Tentar encontrar nas cerimônias futuras primeiro (mais rápido pois já está carregado)
+      const ceremonyToPay = cerimonias?.find(c => c.id === idToPay);
       
       if (ceremonyToPay) {
         // Limpar hash para não reabrir ao atualizar
         window.history.replaceState(null, '', window.location.pathname + window.location.search);
         handleOpenPayment(ceremonyToPay);
+      } else {
+        // Se não achou (pode ser passada/histórico), busca no banco
+        fetchCeremonyById(idToPay).then(() => {
+          // Limpar hash após buscar e abrir
+          window.history.replaceState(null, '', window.location.pathname + window.location.search);
+        });
       }
     }
 
