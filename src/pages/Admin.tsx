@@ -74,6 +74,8 @@ import {
   Percent,
   RotateCcw,
   Save,
+  Check,
+  Loader2,
 } from 'lucide-react';
 import { useCategoriasFinanceiras, useCreateTransacao } from '@/hooks/queries/useFluxoCaixa';
 import { format } from 'date-fns';
