@@ -489,166 +489,208 @@ export const FluxoCaixaTab: React.FC = () => {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 pb-24 md:pb-0">
+      {/* Resumo Fixo Mobile (Sticky Bottom) */}
+      <div className="fixed bottom-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-sm border-t p-3 md:hidden flex items-center justify-between shadow-[0_-4px_12px_rgba(0,0,0,0.1)]">
+        <div className="flex flex-col">
+          <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-bold">Saldo Atual</span>
+          <span className={`text-lg font-bold ${(resumo?.saldo || 0) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+            {formatarValor(resumo?.saldo || 0)}
+          </span>
+        </div>
+        <div className="flex gap-2">
+          <Button 
+            size="sm" 
+            className="bg-green-600 hover:bg-green-700 h-11 w-11 p-0 rounded-full shadow-lg shadow-green-500/20 flex items-center justify-center"
+            onClick={() => handleOpenForm('entrada')}
+          >
+            <ArrowUpCircle className="w-6 h-6 text-white" />
+          </Button>
+          <Button 
+            size="sm" 
+            variant="destructive" 
+            className="h-11 w-11 p-0 rounded-full shadow-lg shadow-red-500/20 flex items-center justify-center"
+            onClick={() => handleOpenForm('saida')}
+          >
+            <ArrowDownCircle className="w-6 h-6 text-white" />
+          </Button>
+        </div>
+      </div>
+
       {/* Alerta de Saldo Baixo */}
       {mostrarAlertaSaldo && (
-        <div className="p-4 rounded-lg bg-red-100 dark:bg-red-900/30 border border-red-300 flex items-center gap-3">
+        <div className="p-4 rounded-xl bg-red-100 dark:bg-red-900/30 border border-red-300 flex items-center gap-3 animate-in fade-in slide-in-from-top-2 duration-300">
           <AlertTriangle className="w-6 h-6 text-red-600 shrink-0" />
           <div>
-            <p className="font-medium text-red-800 dark:text-red-200">⚠️ Alerta: Saldo Baixo!</p>
+            <p className="font-bold text-red-800 dark:text-red-200">Atenção: Saldo Baixo!</p>
             <p className="text-sm text-red-700 dark:text-red-300">
-              O saldo atual ({formatarValor(saldoAtual)}) está abaixo do limite configurado ({formatarValor(alertaSaldoBaixo?.valor_limite || 0)}).
+              Limite: {formatarValor(alertaSaldoBaixo?.valor_limite || 0)}
             </p>
           </div>
         </div>
       )}
 
       {/* Cards de Resumo */}
-      <div className="grid gap-4 md:grid-cols-3">
-        <Card className="border-green-200 bg-green-50 dark:bg-green-900/20">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-green-700 dark:text-green-300 flex items-center gap-2">
-              <ArrowUpCircle className="w-4 h-4" />
+      <div className="grid gap-3 grid-cols-2 md:grid-cols-3">
+        <Card className="border-green-200 bg-green-50/50 dark:bg-green-900/10">
+          <CardHeader className="pb-1 pt-4 px-4">
+            <CardTitle className="text-[10px] md:text-sm font-bold uppercase tracking-wider text-green-700 dark:text-green-300 flex items-center gap-1.5">
+              <ArrowUpCircle className="w-3.5 h-3.5" />
               Entradas
             </CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-green-700 dark:text-green-300">
+          <CardContent className="px-4 pb-4">
+            <div className="text-xl md:text-2xl font-black text-green-700 dark:text-green-300">
               {formatarValor(resumo?.entradas || 0)}
             </div>
             {resumo?.entradasMP ? (
-              <p className="text-xs text-green-600 mt-1">
+              <p className="text-[10px] text-green-600/80 mt-1 hidden md:block">
                 💳 MP: {formatarValor(resumo.entradasMP)} | ✍️ Manual: {formatarValor(resumo.entradasManuais || 0)}
               </p>
             ) : null}
           </CardContent>
         </Card>
 
-        <Card className="border-red-200 bg-red-50 dark:bg-red-900/20">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-red-700 dark:text-red-300 flex items-center gap-2">
-              <ArrowDownCircle className="w-4 h-4" />
+        <Card className="border-red-200 bg-red-50/50 dark:bg-red-900/10">
+          <CardHeader className="pb-1 pt-4 px-4">
+            <CardTitle className="text-[10px] md:text-sm font-bold uppercase tracking-wider text-red-700 dark:text-red-300 flex items-center gap-1.5">
+              <ArrowDownCircle className="w-3.5 h-3.5" />
               Saídas
             </CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-red-700 dark:text-red-300">
+          <CardContent className="px-4 pb-4">
+            <div className="text-xl md:text-2xl font-black text-red-700 dark:text-red-300">
               {formatarValor(resumo?.saidas || 0)}
             </div>
           </CardContent>
         </Card>
 
-        <Card className={`border-2 ${(resumo?.saldo || 0) >= 0 ? 'border-green-500 bg-green-100 dark:bg-green-900/30' : 'border-red-500 bg-red-100 dark:bg-red-900/30'}`}>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium flex items-center gap-2">
-              <Wallet className="w-4 h-4" />
-              Saldo
+        <Card className={`col-span-2 md:col-span-1 border-2 ${(resumo?.saldo || 0) >= 0 ? 'border-green-500/20 bg-green-50 dark:bg-green-900/20' : 'border-red-500/20 bg-red-50 dark:bg-red-900/20'}`}>
+          <CardHeader className="pb-1 pt-4 px-4">
+            <CardTitle className="text-[10px] md:text-sm font-bold uppercase tracking-wider flex items-center gap-1.5">
+              <Wallet className="w-3.5 h-3.5" />
+              Saldo Líquido
             </CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className={`text-2xl font-bold ${(resumo?.saldo || 0) >= 0 ? 'text-green-700 dark:text-green-300' : 'text-red-700 dark:text-red-300'}`}>
+          <CardContent className="px-4 pb-4 flex items-center justify-between md:block">
+            <div className={`text-2xl font-black ${(resumo?.saldo || 0) >= 0 ? 'text-green-700 dark:text-green-300' : 'text-red-700 dark:text-red-300'}`}>
               {formatarValor(resumo?.saldo || 0)}
             </div>
-            <p className="text-xs text-muted-foreground mt-1">
-              {(resumo?.saldo || 0) >= 0 ? '✅ Saúde financeira OK' : '⚠️ Atenção: saldo negativo'}
-            </p>
+            <Badge variant="outline" className={`md:mt-1 text-[10px] border-none p-0 ${(resumo?.saldo || 0) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+              {(resumo?.saldo || 0) >= 0 ? '✅ Saudável' : '⚠️ Atenção'}
+            </Badge>
           </CardContent>
         </Card>
       </div>
 
-      {/* Ações Rápidas */}
-      <div className="flex flex-col md:flex-row gap-2">
+      {/* Ações Rápidas - Desktop Only (Mobile uses FAB/Sticky) */}
+      <div className="hidden md:flex flex-col md:flex-row gap-2">
         <div className="flex gap-2">
           <Button onClick={() => handleOpenForm('entrada')} className="bg-green-600 hover:bg-green-700 flex-1 md:flex-none" size="sm">
             <Plus className="w-4 h-4 mr-1" />
-            <span className="hidden sm:inline">Nova </span>Entrada
+            Nova Entrada
           </Button>
           <Button onClick={() => handleOpenForm('saida')} variant="destructive" className="flex-1 md:flex-none" size="sm">
             <Plus className="w-4 h-4 mr-1" />
-            <span className="hidden sm:inline">Nova </span>Saída
+            Nova Saída
           </Button>
         </div>
-        <div className="hidden md:block flex-1" />
-        <div className="flex gap-2 justify-between md:justify-end">
-          <Button variant="outline" size="sm" onClick={exportarRelatorio} className="flex-1 md:flex-none">
+        <div className="flex-1" />
+        <div className="flex gap-2 justify-end">
+          <Button variant="outline" size="sm" onClick={exportarRelatorio}>
             <Download className="w-4 h-4 mr-1" />
-            <span className="hidden sm:inline">Exportar </span>CSV
+            Exportar CSV
           </Button>
-          <div className="flex gap-1">
-            <Button variant="outline" size="sm" onClick={() => aplicarFiltroRapido('mes')}>Mês</Button>
-            <Button variant="outline" size="sm" onClick={() => aplicarFiltroRapido('trimestre')}>Tri</Button>
-            <Button variant="outline" size="sm" onClick={() => aplicarFiltroRapido('ano')}>Ano</Button>
+          <div className="flex gap-1 bg-muted p-0.5 rounded-lg">
+            <Button variant="ghost" size="sm" className="h-7 text-xs" onClick={() => aplicarFiltroRapido('mes')}>Mês</Button>
+            <Button variant="ghost" size="sm" className="h-7 text-xs" onClick={() => aplicarFiltroRapido('trimestre')}>Tri</Button>
+            <Button variant="ghost" size="sm" className="h-7 text-xs" onClick={() => aplicarFiltroRapido('ano')}>Ano</Button>
           </div>
         </div>
       </div>
 
       {/* Tabs */}
-      <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as any)}>
-        <TabsList className="w-full flex-wrap h-auto gap-1 p-1">
-          <TabsTrigger value="resumo" className="flex-1 md:flex-none text-xs md:text-sm px-2 md:px-3">
-            <BarChart3 className="w-4 h-4 md:mr-2" />
-            <span className="hidden md:inline">Gráficos</span>
-          </TabsTrigger>
-          <TabsTrigger value="transacoes" className="flex-1 md:flex-none text-xs md:text-sm px-2 md:px-3">
-            <DollarSign className="w-4 h-4 md:mr-2" />
-            <span className="hidden md:inline">Transações</span>
-          </TabsTrigger>
-          <TabsTrigger value="recorrentes" className="flex-1 md:flex-none text-xs md:text-sm px-2 md:px-3">
-            <RefreshCw className="w-4 h-4 md:mr-2" />
-            <span className="hidden md:inline">Recorrentes</span>
-          </TabsTrigger>
-          <TabsTrigger value="categorias" className="flex-1 md:flex-none text-xs md:text-sm px-2 md:px-3">
-            <Tag className="w-4 h-4 md:mr-2" />
-            <span className="hidden md:inline">Categorias</span>
-          </TabsTrigger>
-          <TabsTrigger value="metas" className="flex-1 md:flex-none text-xs md:text-sm px-2 md:px-3">
-            <Target className="w-4 h-4 md:mr-2" />
-            <span className="hidden md:inline">Metas</span>
-          </TabsTrigger>
-        </TabsList>
+      <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as any)} className="w-full">
+        <div className="relative">
+          <TabsList className="w-full flex md:inline-flex h-auto p-1 bg-muted/50 overflow-x-auto scrollbar-none justify-start md:justify-center">
+            <TabsTrigger value="resumo" className="flex-shrink-0 min-w-[100px] md:min-w-0 md:flex-1 text-xs md:text-sm py-2">
+              <BarChart3 className="w-4 h-4 md:mr-2" />
+              <span>Painel</span>
+            </TabsTrigger>
+            <TabsTrigger value="transacoes" className="flex-shrink-0 min-w-[100px] md:min-w-0 md:flex-1 text-xs md:text-sm py-2">
+              <DollarSign className="w-4 h-4 md:mr-2" />
+              <span>Extrato</span>
+            </TabsTrigger>
+            <TabsTrigger value="recorrentes" className="flex-shrink-0 min-w-[100px] md:min-w-0 md:flex-1 text-xs md:text-sm py-2">
+              <RefreshCw className="w-4 h-4 md:mr-2" />
+              <span>Fixos</span>
+            </TabsTrigger>
+            <TabsTrigger value="categorias" className="flex-shrink-0 min-w-[100px] md:min-w-0 md:flex-1 text-xs md:text-sm py-2">
+              <Tag className="w-4 h-4 md:mr-2" />
+              <span>Tags</span>
+            </TabsTrigger>
+            <TabsTrigger value="metas" className="flex-shrink-0 min-w-[100px] md:min-w-0 md:flex-1 text-xs md:text-sm py-2">
+              <Target className="w-4 h-4 md:mr-2" />
+              <span>Metas</span>
+            </TabsTrigger>
+          </TabsList>
+        </div>
 
         {/* Tab Gráficos */}
-        <TabsContent value="resumo" className="space-y-6">
+        <TabsContent value="resumo" className="space-y-6 animate-in fade-in duration-500">
           {/* Comparativo Mês Atual vs Anterior */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <TrendingUp className="w-5 h-5" />
-                Comparativo Mensal
+          <Card className="overflow-hidden border-none shadow-md bg-gradient-to-br from-card to-muted/30">
+            <CardHeader className="pb-4">
+              <CardTitle className="flex items-center gap-2 text-lg">
+                <TrendingUp className="w-5 h-5 text-primary" />
+                Desempenho Mensal
               </CardTitle>
               <CardDescription>
-                {MESES[hoje.getMonth()]} vs {MESES[hoje.getMonth() === 0 ? 11 : hoje.getMonth() - 1]}
+                Comparativo com o mês anterior
               </CardDescription>
             </CardHeader>
-            <CardContent>
+            <CardContent className="px-3 md:px-6">
               {dadosMensais && (
-                <div className="grid grid-cols-2 gap-6">
-                  <div className="text-center p-4 rounded-lg bg-muted/50">
-                    <p className="text-sm text-muted-foreground mb-1">Mês Atual</p>
-                    <p className="text-2xl font-bold text-green-600">
-                      {formatarValor(dadosMensais[hoje.getMonth()]?.entradas || 0)}
-                    </p>
-                    <p className="text-sm text-red-600">
-                      -{formatarValor(dadosMensais[hoje.getMonth()]?.saidas || 0)}
-                    </p>
-                    <p className="text-lg font-semibold mt-2">
-                      = {formatarValor((dadosMensais[hoje.getMonth()]?.entradas || 0) - (dadosMensais[hoje.getMonth()]?.saidas || 0))}
-                    </p>
+                <div className="flex flex-col sm:grid sm:grid-cols-2 gap-3">
+                  <div className="text-center p-4 rounded-2xl bg-background border shadow-sm relative overflow-hidden group">
+                    <div className="absolute top-0 right-0 p-2 opacity-5 group-hover:opacity-10 transition-opacity">
+                      <CalendarIcon className="w-12 h-12" />
+                    </div>
+                    <p className="text-[10px] uppercase tracking-tighter text-muted-foreground mb-1 font-bold">Mês Atual ({MESES[hoje.getMonth()]})</p>
+                    <div className="space-y-1">
+                      <p className="text-2xl font-black text-green-600">
+                        {formatarValor(dadosMensais[hoje.getMonth()]?.entradas || 0)}
+                      </p>
+                      <p className="text-xs font-medium text-red-500 flex items-center justify-center gap-1">
+                        <ArrowDownCircle className="w-3 h-3" />
+                        {formatarValor(dadosMensais[hoje.getMonth()]?.saidas || 0)}
+                      </p>
+                    </div>
+                    <div className="mt-3 pt-3 border-t">
+                      <p className="text-sm font-bold">
+                        Saldo: {formatarValor((dadosMensais[hoje.getMonth()]?.entradas || 0) - (dadosMensais[hoje.getMonth()]?.saidas || 0))}
+                      </p>
+                    </div>
                   </div>
-                  <div className="text-center p-4 rounded-lg bg-muted/50">
-                    <p className="text-sm text-muted-foreground mb-1">Mês Anterior</p>
-                    <p className="text-2xl font-bold text-green-600">
-                      {formatarValor(dadosMensais[hoje.getMonth() === 0 ? 11 : hoje.getMonth() - 1]?.entradas || 0)}
-                    </p>
-                    <p className="text-sm text-red-600">
-                      -{formatarValor(dadosMensais[hoje.getMonth() === 0 ? 11 : hoje.getMonth() - 1]?.saidas || 0)}
-                    </p>
-                    <p className="text-lg font-semibold mt-2">
-                      = {formatarValor(
-                        (dadosMensais[hoje.getMonth() === 0 ? 11 : hoje.getMonth() - 1]?.entradas || 0) - 
-                        (dadosMensais[hoje.getMonth() === 0 ? 11 : hoje.getMonth() - 1]?.saidas || 0)
-                      )}
-                    </p>
+
+                  <div className="text-center p-4 rounded-2xl bg-muted/30 border border-dashed relative overflow-hidden">
+                    <p className="text-[10px] uppercase tracking-tighter text-muted-foreground mb-1 font-bold">Mês Anterior ({MESES[hoje.getMonth() === 0 ? 11 : hoje.getMonth() - 1]})</p>
+                    <div className="space-y-1 opacity-70">
+                      <p className="text-xl font-bold text-green-600/80">
+                        {formatarValor(dadosMensais[hoje.getMonth() === 0 ? 11 : hoje.getMonth() - 1]?.entradas || 0)}
+                      </p>
+                      <p className="text-xs font-medium text-red-500/80">
+                        -{formatarValor(dadosMensais[hoje.getMonth() === 0 ? 11 : hoje.getMonth() - 1]?.saidas || 0)}
+                      </p>
+                    </div>
+                    <div className="mt-3 pt-3 border-t border-muted">
+                      <p className="text-sm font-semibold text-muted-foreground">
+                        Saldo: {formatarValor(
+                          (dadosMensais[hoje.getMonth() === 0 ? 11 : hoje.getMonth() - 1]?.entradas || 0) - 
+                          (dadosMensais[hoje.getMonth() === 0 ? 11 : hoje.getMonth() - 1]?.saidas || 0)
+                        )}
+                      </p>
+                    </div>
                   </div>
                 </div>
               )}
@@ -1034,20 +1076,20 @@ export const FluxoCaixaTab: React.FC = () => {
                     </Table>
                   </div>
 
-                  {/* Versão Mobile - Cards */}
-                  <div className="md:hidden space-y-3">
+                  {/* Versão Mobile - Cards Modernos */}
+                  <div className="md:hidden space-y-4">
                     {/* Botão selecionar todas no mobile */}
-                    <div className="flex items-center justify-between pb-2 border-b">
+                    <div className="flex items-center justify-between px-1">
                       <Button
                         variant="ghost"
                         size="sm"
                         onClick={handleSelecionarTodas}
-                        className="text-xs"
+                        className="text-[10px] uppercase font-bold tracking-widest text-muted-foreground"
                       >
                         {transacoesSelecionadas.size > 0 ? (
-                          <CheckCircle className="w-4 h-4 mr-1 text-primary" />
+                          <CheckCircle className="w-3 h-3 mr-1.5 text-primary" />
                         ) : (
-                          <Circle className="w-4 h-4 mr-1" />
+                          <Circle className="w-3 h-3 mr-1.5" />
                         )}
                         {transacoesSelecionadas.size > 0 ? `${transacoesSelecionadas.size} selecionadas` : 'Selecionar todas'}
                       </Button>
@@ -1056,111 +1098,122 @@ export const FluxoCaixaTab: React.FC = () => {
                     {transacoesFiltradas.map((t) => (
                       <div
                         key={t.id}
-                        className={`p-3 rounded-lg border ${t.reconciliada ? 'bg-green-50/50 dark:bg-green-900/10 border-green-200' : 'bg-card'}`}
+                        className={`relative overflow-hidden rounded-2xl border shadow-sm transition-all active:scale-[0.98] ${
+                          t.reconciliada 
+                            ? 'bg-green-50/30 dark:bg-green-900/5 border-green-200/50' 
+                            : 'bg-card border-border/50'
+                        }`}
                       >
-                        {/* Header do card - Data e Valor */}
-                        <div className="flex items-center justify-between mb-2">
-                          <div className="flex items-center gap-2">
-                            {t.tipo === 'entrada' ? (
-                              <TrendingUp className="w-4 h-4 text-green-600" />
-                            ) : (
-                              <TrendingDown className="w-4 h-4 text-red-600" />
-                            )}
-                            <span className="text-xs text-muted-foreground">
-                              {format(new Date(t.data), 'dd/MM/yy', { locale: ptBR })}
-                            </span>
-                            {t.reconciliada && (
-                              <CheckCircle className="w-3 h-3 text-green-600" />
-                            )}
-                          </div>
-                          <span className={`font-bold ${t.tipo === 'entrada' ? 'text-green-600' : 'text-red-600'}`}>
-                            {t.tipo === 'entrada' ? '+' : '-'} {formatarValor(t.valor)}
-                          </span>
-                        </div>
-
-                        {/* Descrição */}
-                        <p className="text-sm font-medium mb-2">{t.descricao}</p>
-
-                        {/* Categoria e Pagamento */}
-                        <div className="flex flex-wrap items-center gap-2 mb-3">
-                          {t.categoria && (
-                            <Badge variant="outline" className="text-xs" style={{ borderColor: t.categoria.cor || undefined }}>
-                              {t.categoria.nome}
-                            </Badge>
-                          )}
-                          {t.forma_pagamento && (
-                            <span className="text-xs text-muted-foreground">
-                              {t.forma_pagamento}
-                            </span>
-                          )}
-                        </div>
-
-                        {/* Ações */}
-                        <div className="flex items-center justify-between pt-2 border-t">
-                          {t.referencia_tipo === 'manual' && !t.id.startsWith('mp-') ? (
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => handleToggleSelecao(t.id)}
-                              className="text-xs"
-                            >
-                              {transacoesSelecionadas.has(t.id) ? (
-                                <CheckCircle className="w-4 h-4 mr-1 text-primary" />
-                              ) : (
-                                <Circle className="w-4 h-4 mr-1" />
+                        {/* Indicador Lateral de Tipo */}
+                        <div className={`absolute top-0 left-0 bottom-0 w-1.5 ${t.tipo === 'entrada' ? 'bg-green-500' : 'bg-red-500'}`} />
+                        
+                        <div className="p-4 pl-5">
+                          {/* Header: Data e Reconciliação */}
+                          <div className="flex items-center justify-between mb-3">
+                            <div className="flex items-center gap-2">
+                              <span className="text-[10px] font-black text-muted-foreground uppercase tracking-tighter">
+                                {format(new Date(t.data), 'dd MMM yyyy', { locale: ptBR })}
+                              </span>
+                              {t.reconciliada && (
+                                <Badge variant="secondary" className="h-4 text-[8px] bg-green-100 text-green-700 hover:bg-green-100 border-none px-1">
+                                  CONFERIDO
+                                </Badge>
                               )}
-                              Selecionar
-                            </Button>
-                          ) : (
-                            <span />
-                          )}
-                          
-                          <div className="flex items-center gap-1">
-                            {t.referencia_tipo === 'manual' && !t.id.startsWith('mp-') && (
-                              <>
-                                <Button
-                                  variant="ghost"
-                                  size="icon"
-                                  className={`h-8 w-8 ${t.reconciliada ? 'text-green-600' : 'text-muted-foreground'}`}
-                                  onClick={() => handleToggleReconciliacao(t.id, !!t.reconciliada)}
-                                >
-                                  {t.reconciliada ? (
-                                    <CheckCircle className="w-4 h-4" />
-                                  ) : (
-                                    <Circle className="w-4 h-4" />
-                                  )}
-                                </Button>
-                                <Button
-                                  variant="ghost"
-                                  size="icon"
-                                  className="h-8 w-8"
-                                  onClick={() => handleOpenAnexos(t.id)}
-                                >
-                                  <Paperclip className="w-4 h-4" />
-                                </Button>
-                              </>
-                            )}
-                            {t.referencia_tipo === 'manual' || t.referencia_tipo === 'inscricao' ? (
-                              <AlertDialog>
-                                <AlertDialogTrigger asChild>
-                                  <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive">
-                                    <Trash2 className="w-4 h-4" />
+                            </div>
+                            <span className={`text-base font-black ${t.tipo === 'entrada' ? 'text-green-600' : 'text-red-600'}`}>
+                              {t.tipo === 'entrada' ? '+' : '-'} {formatarValor(t.valor)}
+                            </span>
+                          </div>
+
+                          {/* Conteúdo: Descrição e Detalhes */}
+                          <div className="space-y-3">
+                            <div>
+                              <p className="text-sm font-bold leading-tight line-clamp-2">{t.descricao}</p>
+                              <div className="flex items-center gap-2 mt-2">
+                                {t.categoria && (
+                                  <span 
+                                    className="text-[10px] px-2 py-0.5 rounded-full border font-medium" 
+                                    style={{ 
+                                      borderColor: t.categoria.cor || 'currentColor',
+                                      color: t.categoria.cor || 'inherit',
+                                      backgroundColor: `${t.categoria.cor}10`
+                                    }}
+                                  >
+                                    {t.categoria.nome}
+                                  </span>
+                                )}
+                                {t.forma_pagamento && (
+                                  <span className="text-[10px] text-muted-foreground bg-muted px-2 py-0.5 rounded-full">
+                                    {t.forma_pagamento.toLowerCase()}
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+
+                            {/* Ações Rápidas Mobile */}
+                            <div className="flex items-center justify-between pt-3 border-t border-dashed">
+                              <div className="flex gap-1">
+                                {t.referencia_tipo === 'manual' && !t.id.startsWith('mp-') && (
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => handleToggleSelecao(t.id)}
+                                    className={`h-8 px-2 text-[10px] font-bold ${transacoesSelecionadas.has(t.id) ? 'text-primary' : 'text-muted-foreground'}`}
+                                  >
+                                    {transacoesSelecionadas.has(t.id) ? (
+                                      <CheckCircle className="w-3.5 h-3.5 mr-1" />
+                                    ) : (
+                                      <Circle className="w-3.5 h-3.5 mr-1" />
+                                    )}
+                                    FOCO
                                   </Button>
-                                </AlertDialogTrigger>
-                                <AlertDialogContent>
-                                  <AlertDialogHeader>
-                                    <AlertDialogTitle>Excluir transação?</AlertDialogTitle>
-                                    <AlertDialogDescription>Esta ação não pode ser desfeita e o valor será removido do saldo total.</AlertDialogDescription>
-                                  </AlertDialogHeader>
-                                  <AlertDialogFooter>
-                                    <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                                    <AlertDialogAction onClick={() => handleDelete(t.id)} className="bg-destructive">
-                                      Excluir
-                                    </AlertDialogAction>
-                                  </AlertDialogFooter>
-                                </AlertDialogContent>
-                              </AlertDialog>
-                            ) : null}
+                                )}
+                              </div>
+                              
+                              <div className="flex items-center gap-1">
+                                {t.referencia_tipo === 'manual' && !t.id.startsWith('mp-') && (
+                                  <>
+                                    <Button
+                                      variant="outline"
+                                      size="icon"
+                                      className={`h-8 w-8 rounded-full border-none shadow-none ${t.reconciliada ? 'text-green-600 bg-green-50' : 'text-muted-foreground bg-muted/50'}`}
+                                      onClick={() => handleToggleReconciliacao(t.id, !!t.reconciliada)}
+                                    >
+                                      <CheckCircle2 className="w-4 h-4" />
+                                    </Button>
+                                    <Button
+                                      variant="outline"
+                                      size="icon"
+                                      className="h-8 w-8 rounded-full border-none shadow-none bg-muted/50"
+                                      onClick={() => handleOpenAnexos(t.id)}
+                                    >
+                                      <Paperclip className="w-4 h-4" />
+                                    </Button>
+                                  </>
+                                )}
+                                {t.referencia_tipo === 'manual' || t.referencia_tipo === 'inscricao' ? (
+                                  <AlertDialog>
+                                    <AlertDialogTrigger asChild>
+                                      <Button variant="outline" size="icon" className="h-8 w-8 rounded-full border-none shadow-none bg-red-50 text-red-500">
+                                        <Trash2 className="w-4 h-4" />
+                                      </Button>
+                                    </AlertDialogTrigger>
+                                    <AlertDialogContent className="w-[90%] rounded-2xl">
+                                      <AlertDialogHeader>
+                                        <AlertDialogTitle>Excluir?</AlertDialogTitle>
+                                        <AlertDialogDescription className="text-xs">
+                                          Esta ação removerá o valor do saldo permanentemente.
+                                        </AlertDialogDescription>
+                                      </AlertDialogHeader>
+                                      <AlertDialogFooter className="flex-row gap-2">
+                                        <AlertDialogCancel className="flex-1 rounded-xl">Não</AlertDialogCancel>
+                                        <AlertDialogAction onClick={() => handleDelete(t.id)} className="flex-1 bg-destructive rounded-xl">Sim</AlertDialogAction>
+                                      </AlertDialogFooter>
+                                    </AlertDialogContent>
+                                  </AlertDialog>
+                                ) : null}
+                              </div>
+                            </div>
                           </div>
                         </div>
                       </div>
