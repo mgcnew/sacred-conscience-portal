@@ -211,45 +211,20 @@ const Loja: React.FC = () => {
               className="pl-10 h-12 rounded-2xl border-muted bg-card/50 focus-visible:ring-primary/20"
             />
           </div>
-          <div className="hidden md:block">
-            <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-              <SelectTrigger className="w-[200px] h-12 rounded-2xl border-muted bg-card/50">
-                <Filter className="w-4 h-4 mr-2 text-muted-foreground" />
-                <SelectValue placeholder="Categoria" />
-              </SelectTrigger>
-              <SelectContent className="rounded-2xl">
-                <SelectItem value="todas">Todas as categorias</SelectItem>
-                {categorias?.map((cat) => (
-                  <SelectItem key={cat.id} value={cat.nome}>
-                    {cat.nome}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-        </div>
-
-        {/* Chips de Categoria (Mobile & Quick Access) */}
-        <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none">
-          <Button
-            variant={selectedCategory === 'todas' ? 'default' : 'outline'}
-            size="sm"
-            onClick={() => setSelectedCategory('todas')}
-            className="rounded-full h-8 px-4 text-[11px] uppercase tracking-wider font-bold"
-          >
-            Todas
-          </Button>
-          {categorias?.map((cat) => (
-            <Button
-              key={cat.id}
-              variant={selectedCategory === cat.nome ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => setSelectedCategory(cat.nome)}
-              className="rounded-full h-8 px-4 text-[11px] uppercase tracking-wider font-bold whitespace-nowrap"
-            >
-              {cat.nome}
-            </Button>
-          ))}
+          <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+            <SelectTrigger className="w-full md:w-[240px] h-12 rounded-2xl border-muted bg-card/50">
+              <Filter className="w-4 h-4 mr-2 text-muted-foreground" />
+              <SelectValue placeholder="Filtrar por Categoria" />
+            </SelectTrigger>
+            <SelectContent className="rounded-2xl">
+              <SelectItem value="todas">Todas as categorias</SelectItem>
+              {categorias?.map((cat) => (
+                <SelectItem key={cat.id} value={cat.nome}>
+                  {cat.nome}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
       </div>
 
