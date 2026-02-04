@@ -102,6 +102,7 @@ const anamneseSchema = z.object({
 
 type AnamneseFormData = z.infer<typeof anamneseSchema>;
 
+// Ficha de Anamnese com Assinatura Digital
 const Anamnese: React.FC = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
