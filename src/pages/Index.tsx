@@ -99,53 +99,53 @@ const Index: React.FC = () => {
 
   // Mobile Story-like Quick Actions
   const QuickActions = () => (
-    <div className="flex gap-4 overflow-x-auto pb-4 -mx-4 px-4 scrollbar-none md:hidden">
+    <div className="flex gap-2 overflow-x-auto pb-4 -mx-4 px-4 scrollbar-none md:hidden">
       <button 
         onClick={() => navigate(ROUTES.CERIMONIAS)}
-        className="flex flex-col items-center gap-2 min-w-[72px] group"
+        className="flex flex-col items-center gap-1.5 min-w-[72px] group relative"
       >
-        <div className="w-[68px] h-[68px] rounded-full p-[2px] bg-gradient-to-tr from-primary via-purple-500 to-amber-500 group-active:scale-95 transition-transform">
-          <div className="w-full h-full rounded-full border-2 border-background bg-card flex items-center justify-center overflow-hidden relative">
-            <CalendarDays className="w-7 h-7 text-primary" />
+        <div className="w-[60px] h-[60px] rounded-2xl p-[2px] bg-primary/20 group-active:scale-95 transition-transform">
+          <div className="w-full h-full rounded-[14px] bg-card flex items-center justify-center overflow-hidden relative border border-border/50 shadow-sm">
+            <CalendarDays className="w-6 h-6 text-primary/80" />
           </div>
         </div>
-        <span className="text-[11px] font-medium text-center truncate w-full">Eventos</span>
+        <span className="text-[10px] font-medium text-muted-foreground text-center truncate w-full">Eventos</span>
       </button>
 
       <button 
         onClick={() => navigate(ROUTES.GALERIA)}
-        className="flex flex-col items-center gap-2 min-w-[72px] group"
+        className="flex flex-col items-center gap-1.5 min-w-[72px] group relative"
       >
-        <div className="w-[68px] h-[68px] rounded-full p-[2px] bg-gradient-to-tr from-gray-300 via-gray-400 to-gray-300 group-active:scale-95 transition-transform">
-          <div className="w-full h-full rounded-full border-2 border-background bg-card flex items-center justify-center overflow-hidden relative">
-            <Image className="w-7 h-7 text-muted-foreground" />
+        <div className="w-[60px] h-[60px] rounded-2xl p-[2px] bg-primary/20 group-active:scale-95 transition-transform">
+          <div className="w-full h-full rounded-[14px] bg-card flex items-center justify-center overflow-hidden relative border border-border/50 shadow-sm">
+            <Image className="w-6 h-6 text-primary/80" />
           </div>
         </div>
-        <span className="text-[11px] font-medium text-center truncate w-full">Galeria</span>
+        <span className="text-[10px] font-medium text-muted-foreground text-center truncate w-full">Galeria</span>
       </button>
 
       <button 
         onClick={() => navigate(ROUTES.PARTILHAS)}
-        className="flex flex-col items-center gap-2 min-w-[72px] group"
+        className="flex flex-col items-center gap-1.5 min-w-[72px] group relative"
       >
-        <div className="w-[68px] h-[68px] rounded-full p-[2px] bg-gradient-to-tr from-gray-300 via-gray-400 to-gray-300 group-active:scale-95 transition-transform">
-          <div className="w-full h-full rounded-full border-2 border-background bg-card flex items-center justify-center overflow-hidden relative">
-            <Users className="w-7 h-7 text-muted-foreground" />
+        <div className="w-[60px] h-[60px] rounded-2xl p-[2px] bg-primary/20 group-active:scale-95 transition-transform">
+          <div className="w-full h-full rounded-[14px] bg-card flex items-center justify-center overflow-hidden relative border border-border/50 shadow-sm">
+            <Users className="w-6 h-6 text-primary/80" />
           </div>
         </div>
-        <span className="text-[11px] font-medium text-center truncate w-full">Partilhas</span>
+        <span className="text-[10px] font-medium text-muted-foreground text-center truncate w-full">Partilhas</span>
       </button>
 
       <button 
         onClick={() => navigate(ROUTES.LOJA)}
-        className="flex flex-col items-center gap-2 min-w-[72px] group"
+        className="flex flex-col items-center gap-1.5 min-w-[72px] group relative"
       >
-        <div className="w-[68px] h-[68px] rounded-full p-[2px] bg-gradient-to-tr from-amber-300 via-amber-500 to-amber-300 group-active:scale-95 transition-transform">
-          <div className="w-full h-full rounded-full border-2 border-background bg-card flex items-center justify-center overflow-hidden relative">
-            <ShoppingBag className="w-7 h-7 text-amber-600" />
+        <div className="w-[60px] h-[60px] rounded-2xl p-[2px] bg-primary/20 group-active:scale-95 transition-transform">
+          <div className="w-full h-full rounded-[14px] bg-card flex items-center justify-center overflow-hidden relative border border-border/50 shadow-sm">
+            <ShoppingBag className="w-6 h-6 text-primary/80" />
           </div>
         </div>
-        <span className="text-[11px] font-medium text-center truncate w-full">Loja</span>
+        <span className="text-[10px] font-medium text-muted-foreground text-center truncate w-full">Loja</span>
       </button>
     </div>
   );
