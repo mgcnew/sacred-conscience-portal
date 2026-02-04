@@ -10,6 +10,9 @@ import { useHistoricoInscricoes, useMeusDepoimentosAprovados } from '@/hooks/que
 import { ROUTES } from '@/constants';
 import { formatDateBR, formatDateExtensoBR, parseDateString } from '@/lib/date-utils';
 import type { Cerimonia } from '@/types';
+import { useConfirmarPresenca } from '@/hooks/queries/useConfirmacaoPresenca';
+import { toast } from 'sonner';
+import { useNavigate } from 'react-router-dom';
 
 interface CerimoniasHistoricoProps {
   userId?: string;
@@ -17,8 +20,25 @@ interface CerimoniasHistoricoProps {
 }
 
 const CerimoniasHistorico: React.FC<CerimoniasHistoricoProps> = ({ userId, onOpenPayment }) => {
+  const navigate = useNavigate();
   const { data: inscricoes, isLoading } = useHistoricoInscricoes(userId);
   const { data: depoimentosAprovados } = useMeusDepoimentosAprovados(userId);
+  const confirmarPresenca = useConfirmarPresenca();
+
+  const handleConfirmarPresenca = (inscricaoId: string, cerimoniaId: string) => {
+    confirmarPresenca.mutate(inscricaoId, {
+      onSuccess: () => {
+        toast.success('Presença confirmada com sucesso!', {
+          description: 'Gostaria de compartilhar como foi sua experiência?',
+          action: {
+            label: 'Partilhar',
+            onClick: () => navigate(`${ROUTES.PARTILHAS}?cerimonia=${cerimoniaId}`)
+          },
+          duration: 8000,
+        });
+      }
+    });
+  };
 
   const { passadas, futuras } = useMemo(() => {
     if (!inscricoes) return { passadas: [], futuras: [] };
@@ -103,9 +123,22 @@ const CerimoniasHistorico: React.FC<CerimoniasHistoricoProps> = ({ userId, onOpe
                           Pagar Agora
                         </Button>
                       ) : (
-                        <Badge variant={inscricao.pago ? 'default' : 'outline'} className="text-xs">
-                          {inscricao.pago ? '✓ Pago' : 'Pendente'}
-                        </Badge>
+                        <div className="flex items-center gap-2">
+                          {!inscricao.presenca_confirmada && (
+                            <Button 
+                              variant="outline" 
+                              size="sm" 
+                              className="h-7 text-xs px-2 border-primary/50 text-primary hover:bg-primary/10"
+                              onClick={() => handleConfirmarPresenca(inscricao.id, inscricao.cerimonia_id)}
+                              disabled={confirmarPresenca.isPending}
+                            >
+                              Confirmar Presença
+                            </Button>
+                          )}
+                          <Badge variant={inscricao.pago ? 'default' : 'outline'} className="text-xs">
+                            {inscricao.pago ? '✓ Pago' : 'Pendente'}
+                          </Badge>
+                        </div>
                       )}
                     </div>
                   </div>
