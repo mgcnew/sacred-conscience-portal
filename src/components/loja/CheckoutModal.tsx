@@ -184,6 +184,11 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({
   const [selectedMPMethod, setSelectedMPMethod] = useState('');
   const [valorComTaxa, setValorComTaxa] = useState(0);
 
+  const handleCopyPixKey = useCallback(() => {
+    navigator.clipboard.writeText(PIX_KEY);
+    toast.success('Chave Pix copiada!');
+  }, []);
+
   if (!produto) return null;
 
   const precoEmCentavos = produto.preco_promocional || produto.preco;
@@ -196,11 +201,6 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({
     const novaQuantidade = quantidade + delta;
     if (novaQuantidade >= 1 && novaQuantidade <= maxQuantidade) setQuantidade(novaQuantidade);
   };
-
-  const handleCopyPixKey = useCallback(() => {
-    navigator.clipboard.writeText(PIX_KEY);
-    toast.success('Chave Pix copiada!');
-  }, []);
 
   const handleMPMethodSelect = (forma: string, valorFinal: number) => {
     setSelectedMPMethod(forma);
