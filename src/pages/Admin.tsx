@@ -650,10 +650,50 @@ const Admin: React.FC = () => {
     return substancias;
   };
 
+  const [activeTab, setActiveTab] = useState('dashboard');
+
+  // Define available tabs based on permissions
+  const availableTabs = useMemo(() => {
+    const tabs = [
+      { value: 'dashboard', label: isMobile ? 'Home' : 'Dashboard' },
+    ];
+
+    if (temPermissao('ver_consagradores')) {
+      tabs.push({ value: 'consagradores', label: isMobile ? 'Usuários' : 'Consagradores' });
+    }
+    if (temPermissao('gerenciar_pagamentos')) {
+      tabs.push({ value: 'inscricoes', label: 'Inscrições' });
+    }
+    if (temPermissao('aprovar_depoimentos')) {
+      tabs.push({ 
+        value: 'depoimentos', 
+        label: isMobile ? 'Partilhas' : 'Partilhas',
+        badge: depoimentosPendentes?.length || 0
+      });
+    }
+    if (temPermissao('ver_cerimonias')) {
+      tabs.push({ value: 'cerimonias', label: isMobile ? 'Eventos' : 'Cerimônias' });
+    }
+    if (isSuperAdmin()) {
+      tabs.push({ value: 'cursos', label: isMobile ? 'Cursos' : 'Cursos/Eventos' });
+      tabs.push({ value: 'financeiro', label: isMobile ? 'Caixa' : 'Financeiro' });
+      tabs.push({ value: 'vendas', label: isMobile ? 'Loja' : 'Vendas Loja' });
+      tabs.push({ value: 'permissoes', label: isMobile ? 'Perms' : 'Permissões' });
+    }
+    if (temPermissaoExplicita('ver_logs')) {
+      tabs.push({ value: 'logs', label: 'Logs' });
+    }
+    if (isSuperAdmin()) {
+      tabs.push({ value: 'taxas', label: 'Taxas' });
+    }
+
+    return tabs;
+  }, [isMobile, temPermissao, temPermissaoExplicita, isSuperAdmin, depoimentosPendentes]);
+
   return (
     <div className="min-h-screen py-4 md:py-6 bg-background/50 pb-20">
       <div className="container max-w-7xl mx-auto">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6 md:mb-8">
+        <div className="flex flex-row items-center justify-between gap-4 mb-6 md:mb-8">
           <div className="flex items-center gap-3 md:gap-4">
             <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
               <Shield className="w-5 h-5 md:w-6 md:h-6 text-primary" />
@@ -667,107 +707,42 @@ const Admin: React.FC = () => {
               </p>
             </div>
           </div>
+
+          {/* Minimalist Tab Selector Dropdown */}
+          <div className="flex items-center gap-2">
+            <Select value={activeTab} onValueChange={setActiveTab}>
+              <SelectTrigger className="w-[140px] md:w-[200px] h-10 rounded-xl border-muted bg-card shadow-sm hover:border-primary/50 transition-colors">
+                <div className="flex items-center gap-2 overflow-hidden">
+                  <Filter className="w-4 h-4 text-muted-foreground shrink-0" />
+                  <SelectValue placeholder="Selecione o Menu" />
+                </div>
+              </SelectTrigger>
+              <SelectContent className="rounded-xl border-muted shadow-xl">
+                {availableTabs.map((tab) => (
+                  <SelectItem 
+                    key={tab.value} 
+                    value={tab.value}
+                    className="rounded-lg focus:bg-primary/10 focus:text-primary transition-colors py-2.5"
+                  >
+                    <div className="flex items-center justify-between w-full gap-4">
+                      <span>{tab.label}</span>
+                      {tab.badge > 0 && (
+                        <span className="px-1.5 py-0.5 rounded-full bg-amber-500 text-white text-[10px] font-bold">
+                          {tab.badge}
+                        </span>
+                      )}
+                    </div>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
         </div>
 
-        <Tabs defaultValue="dashboard" className="space-y-6">
-          <div className="relative mb-6">
-            <TabsList className={cn(
-              "w-full h-auto p-0 bg-transparent border-b rounded-none justify-start overflow-x-auto scrollbar-none flex-nowrap",
-              isMobile ? "flex" : "inline-flex"
-            )}>
-              <TabsTrigger 
-                value="dashboard" 
-                className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary data-[state=active]:bg-transparent py-3 text-xs md:text-sm font-bold uppercase tracking-wider transition-all px-4"
-              >
-                {isMobile ? 'Home' : 'Dashboard'}
-              </TabsTrigger>
-              {temPermissao('ver_consagradores') && (
-                <TabsTrigger 
-                  value="consagradores" 
-                  className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary data-[state=active]:bg-transparent py-3 text-xs md:text-sm font-bold uppercase tracking-wider transition-all px-4"
-                >
-                  {isMobile ? 'Usuários' : 'Consagradores'}
-                </TabsTrigger>
-              )}
-              {temPermissao('gerenciar_pagamentos') && (
-                <TabsTrigger 
-                  value="inscricoes" 
-                  className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary data-[state=active]:bg-transparent py-3 text-xs md:text-sm font-bold uppercase tracking-wider transition-all px-4"
-                >
-                  Inscrições
-                </TabsTrigger>
-              )}
-              {temPermissao('aprovar_depoimentos') && (
-                <TabsTrigger 
-                  value="depoimentos" 
-                  className="relative rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary data-[state=active]:bg-transparent py-3 text-xs md:text-sm font-bold uppercase tracking-wider transition-all px-4"
-                >
-                  {isMobile ? 'Partilhas' : 'Partilhas'}
-                  {depoimentosPendentes && depoimentosPendentes.length > 0 && (
-                    <span className="ml-1 px-1.5 py-0.5 rounded-full bg-amber-500 text-white text-[10px] font-bold">
-                      {depoimentosPendentes.length}
-                    </span>
-                  )}
-                </TabsTrigger>
-              )}
-              {temPermissao('ver_cerimonias') && (
-                <TabsTrigger 
-                  value="cerimonias" 
-                  className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary data-[state=active]:bg-transparent py-3 text-xs md:text-sm font-bold uppercase tracking-wider transition-all px-4"
-                >
-                  {isMobile ? 'Eventos' : 'Cerimônias'}
-                </TabsTrigger>
-              )}
-              {isSuperAdmin() && (
-                <TabsTrigger 
-                  value="cursos" 
-                  className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary data-[state=active]:bg-transparent py-3 text-xs md:text-sm font-bold uppercase tracking-wider transition-all px-4"
-                >
-                  {isMobile ? 'Cursos' : 'Cursos/Eventos'}
-                </TabsTrigger>
-              )}
-              {isSuperAdmin() && (
-                <TabsTrigger 
-                  value="financeiro" 
-                  className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary data-[state=active]:bg-transparent py-3 text-xs md:text-sm font-bold uppercase tracking-wider transition-all px-4"
-                >
-                  {isMobile ? 'Caixa' : 'Financeiro'}
-                </TabsTrigger>
-              )}
-              {isSuperAdmin() && (
-                <TabsTrigger 
-                  value="vendas" 
-                  className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary data-[state=active]:bg-transparent py-3 text-xs md:text-sm font-bold uppercase tracking-wider transition-all px-4"
-                >
-                  {isMobile ? 'Loja' : 'Vendas Loja'}
-                </TabsTrigger>
-              )}
-              {isSuperAdmin() && (
-                <TabsTrigger 
-                  value="permissoes" 
-                  className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary data-[state=active]:bg-transparent py-3 text-xs md:text-sm font-bold uppercase tracking-wider transition-all px-4"
-                >
-                  {isMobile ? 'Perms' : 'Permissões'}
-                </TabsTrigger>
-              )}
-              {temPermissaoExplicita('ver_logs') && (
-                <TabsTrigger 
-                  value="logs" 
-                  className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary data-[state=active]:bg-transparent py-3 text-xs md:text-sm font-bold uppercase tracking-wider transition-all px-4"
-                >
-                  Logs
-                </TabsTrigger>
-              )}
-              {isSuperAdmin() && (
-                <TabsTrigger 
-                  value="taxas" 
-                  className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary data-[state=active]:bg-transparent py-3 text-xs md:text-sm font-bold uppercase tracking-wider transition-all px-4"
-                >
-                  Taxas
-                </TabsTrigger>
-              )}
-            </TabsList>
-          </div>
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+          {/* Hidden TabsList to keep Radix functionality but using custom dropdown above */}
+          <TabsList className="hidden" />
+
 
           {/* DASHBOARD TAB */}
           <TabsContent value="dashboard" className="space-y-6">
