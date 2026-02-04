@@ -717,23 +717,30 @@ const Admin: React.FC = () => {
                   <SelectValue placeholder="Menu" />
                 </div>
               </SelectTrigger>
-              <SelectContent align="end" className="rounded-xl border-muted shadow-2xl min-w-[180px] md:min-w-[220px]">
-                {availableTabs.map((tab) => (
-                  <SelectItem 
-                    key={tab.value} 
-                    value={tab.value}
-                    className="rounded-lg focus:bg-primary/10 focus:text-primary transition-colors py-2.5 px-3 cursor-pointer"
-                  >
-                    <div className="flex items-center justify-between w-full gap-3">
-                      <span className="text-sm font-medium">{tab.label}</span>
-                      {tab.badge > 0 && (
-                        <span className="px-1.5 py-0.5 rounded-full bg-amber-500 text-white text-[10px] font-black shrink-0">
-                          {tab.badge}
-                        </span>
-                      )}
-                    </div>
-                  </SelectItem>
-                ))}
+              <SelectContent 
+                align="end" 
+                position="popper" 
+                sideOffset={8}
+                className="rounded-xl border-muted shadow-2xl w-[200px] md:w-[240px] max-h-[80vh] overflow-y-auto scrollbar-none"
+              >
+                <div className="p-1 space-y-1">
+                  {availableTabs.map((tab) => (
+                    <SelectItem 
+                      key={tab.value} 
+                      value={tab.value}
+                      className="rounded-lg focus:bg-primary/10 focus:text-primary transition-colors py-2.5 px-3 cursor-pointer"
+                    >
+                      <div className="flex items-center justify-between w-full gap-3">
+                        <span className="text-sm font-medium">{tab.label}</span>
+                        {tab.badge > 0 && (
+                          <span className="px-1.5 py-0.5 rounded-full bg-amber-500 text-white text-[10px] font-black shrink-0">
+                            {tab.badge}
+                          </span>
+                        )}
+                      </div>
+                    </SelectItem>
+                  ))}
+                </div>
               </SelectContent>
             </Select>
           </div>
