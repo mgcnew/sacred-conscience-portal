@@ -80,12 +80,17 @@ export const PaymentMethodSelector: React.FC<PaymentMethodSelectorProps> = ({
   }
 
   return (
-    <div className="space-y-2">
-      <p className="text-sm text-muted-foreground mb-3">
-        Valor base: <span className="font-semibold text-foreground">{formatCurrency(valorBase)}</span>
-      </p>
+    <div className="space-y-4">
+      <div className="flex items-center justify-between px-2">
+        <p className="text-[10px] uppercase tracking-widest text-muted-foreground font-bold">
+          Valor Base
+        </p>
+        <span className="text-sm font-bold text-foreground bg-background px-2 py-0.5 rounded-full border">
+          {formatCurrency(valorBase)}
+        </span>
+      </div>
       
-      <RadioGroup value={selectedMethod} onValueChange={handleSelect} className="space-y-2">
+      <RadioGroup value={selectedMethod} onValueChange={handleSelect} className="space-y-1.5">
         {taxas.map((taxa) => {
           const valorFinal = calcularValorFinal(taxa);
           const taxaValor = valorFinal - valorBase;
@@ -100,25 +105,29 @@ export const PaymentMethodSelector: React.FC<PaymentMethodSelectorProps> = ({
               />
               <Label
                 htmlFor={taxa.forma_pagamento}
-                className="flex items-center justify-between p-4 rounded-lg border-2 cursor-pointer transition-all
-                  peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-primary/5
-                  hover:border-primary/50 hover:bg-muted/50"
+                className="flex items-center justify-between p-3 rounded-xl border cursor-pointer transition-all duration-200
+                  peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-primary/5 peer-data-[state=checked]:shadow-sm
+                  hover:border-primary/40 hover:bg-muted/50 active:scale-[0.99]"
               >
                 <div className="flex items-center gap-3">
-                  {getIcon(taxa.forma_pagamento)}
-                  <div>
-                    <p className="font-medium">{taxa.nome_exibicao}</p>
-                    {taxa.parcelas > 1 && (
-                      <p className="text-xs text-muted-foreground">
+                  <div className="p-1.5 rounded-lg bg-background border shadow-sm">
+                    {getIcon(taxa.forma_pagamento)}
+                  </div>
+                  <div className="space-y-0.5">
+                    <p className="text-sm font-bold leading-none">{taxa.nome_exibicao}</p>
+                    {taxa.parcelas > 1 ? (
+                      <p className="text-[10px] text-primary font-medium">
                         {taxa.parcelas}x de {formatCurrency(valorParcela!)}
                       </p>
+                    ) : (
+                      <p className="text-[10px] text-muted-foreground">À vista no Pix/Débito</p>
                     )}
                   </div>
                 </div>
-                <div className="text-right">
-                  <p className="font-bold text-primary">{formatCurrency(valorFinal)}</p>
+                <div className="text-right space-y-0.5">
+                  <p className="text-sm font-black text-primary leading-none">{formatCurrency(valorFinal)}</p>
                   {taxaValor > 0 && (
-                    <p className="text-xs text-muted-foreground">
+                    <p className="text-[9px] text-muted-foreground font-medium">
                       +{formatCurrency(taxaValor)} taxa
                     </p>
                   )}
@@ -131,5 +140,6 @@ export const PaymentMethodSelector: React.FC<PaymentMethodSelectorProps> = ({
     </div>
   );
 };
+
 
 export default PaymentMethodSelector;
