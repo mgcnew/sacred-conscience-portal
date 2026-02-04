@@ -7,6 +7,7 @@ interface SectionErrorBoundaryProps {
   sectionTitle?: string;
   sectionIcon?: ReactNode;
   fallback?: ReactNode;
+  hideHeader?: boolean;
 }
 
 interface SectionErrorBoundaryState {
@@ -47,7 +48,7 @@ export class SectionErrorBoundary extends Component<
 
       return (
         <Card className="w-full">
-          {this.props.sectionTitle && (
+          {this.props.sectionTitle && !this.props.hideHeader && (
             <CardHeader className="pb-2">
               <CardTitle className="flex items-center gap-2 text-lg">
                 {this.props.sectionIcon}
