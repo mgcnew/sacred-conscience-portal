@@ -1,5 +1,5 @@
 -- Migration: Create storage bucket for anamnese document photos
--- Date: 2026-03-03
+-- Date: 2026-03-03 (v2 trigger)
 -- Purpose: Allow users to upload photos of their identification documents in the anamnesis form
 
 -- Step 1: Create bucket (not public - sensitive documents)
