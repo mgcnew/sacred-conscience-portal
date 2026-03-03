@@ -35,6 +35,8 @@ import {
   Shield,
   MessageCircle,
   RotateCcw,
+  Upload,
+  IdCard,
 } from 'lucide-react';
 import {
   Dialog,
@@ -123,6 +125,14 @@ const Anamnese: React.FC = () => {
   const [showContraindicacaoModal, setShowContraindicacaoModal] = useState(false);
   const [isIncomplete, setIsIncomplete] = useState(false);
   const [isFullScreenSignature, setIsFullScreenSignature] = useState(false);
+
+  // Estados para upload de documentos
+  const [documentoFrenteUrl, setDocumentoFrenteUrl] = useState<string | null>(null);
+  const [documentoVersoUrl, setDocumentoVersoUrl] = useState<string | null>(null);
+  const [isUploadingDocFrente, setIsUploadingDocFrente] = useState(false);
+  const [isUploadingDocVerso, setIsUploadingDocVerso] = useState(false);
+  const docFrenteInputRef = useRef<HTMLInputElement>(null);
+  const docVersoInputRef = useRef<HTMLInputElement>(null);
 
   const [formData, setFormData] = useState<AnamneseFormData>({
     nome_completo: '',
@@ -362,7 +372,6 @@ const Anamnese: React.FC = () => {
     const file = e.target.files?.[0];
     if (!file || !user) return;
 
-    // Validar tipo e tamanho
     if (!file.type.startsWith('image/')) {
       toast.error('Arquivo inválido', { description: 'Selecione uma imagem.' });
       return;
@@ -376,23 +385,19 @@ const Anamnese: React.FC = () => {
     try {
       const fileExt = file.name.split('.').pop();
       const fileName = `${user.id}.${fileExt}`;
-      const filePath = `${fileName}`;
 
-      // Upload para o storage
       const { error: uploadError } = await supabase.storage
         .from('avatars')
-        .upload(filePath, file, { upsert: true });
+        .upload(fileName, file, { upsert: true });
 
       if (uploadError) throw uploadError;
 
-      // Obter URL pública
       const { data: urlData } = supabase.storage
         .from('avatars')
-        .getPublicUrl(filePath);
+        .getPublicUrl(fileName);
 
       const newAvatarUrl = `${urlData.publicUrl}?t=${Date.now()}`;
 
-      // Atualizar profile
       const { error: updateError } = await supabase
         .from('profiles')
         .update({ avatar_url: newAvatarUrl })
@@ -407,6 +412,75 @@ const Anamnese: React.FC = () => {
       toast.error('Erro ao enviar foto');
     } finally {
       setIsUploadingAvatar(false);
+    }
+  };
+
+  const handleDocumentUpload = async (
+    e: React.ChangeEvent<HTMLInputElement>,
+    side: 'frente' | 'verso'
+  ) => {
+    const file = e.target.files?.[0];
+    if (!file || !user) return;
+
+    if (!file.type.startsWith('image/')) {
+      toast.error('Arquivo inválido', { description: 'Selecione uma imagem.' });
+      return;
+    }
+    if (file.size > 10 * 1024 * 1024) {
+      toast.error('Arquivo muito grande', { description: 'Máximo 10MB.' });
+      return;
+    }
+
+    const setUploading = side === 'frente' ? setIsUploadingDocFrente : setIsUploadingDocVerso;
+    setUploading(true);
+
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${user.id}/doc_${side}_${Date.now()}.${fileExt}`;
+
+      console.log('Supabase Upload iniciando bucket: anamnese-files, file:', fileName);
+
+      const { error: uploadError } = await supabase.storage
+        .from('anamnese-files')
+        .upload(fileName, file, { upsert: true });
+
+      if (uploadError) {
+        console.error('Supabase Upload Error:', uploadError);
+        throw new Error(uploadError.message);
+      }
+
+      const { data: urlData } = supabase.storage
+        .from('anamnese-files')
+        .getPublicUrl(fileName);
+
+      const publicUrl = `${urlData.publicUrl}?t=${Date.now()}`;
+
+      // Salvar URL na tabela anamneses
+      const column = side === 'frente' ? 'documento_frente_url' : 'documento_verso_url';
+      const { error: dbError } = await supabase
+        .from('anamneses')
+        .upsert(
+          { user_id: user.id, [column]: publicUrl },
+          { onConflict: 'user_id' }
+        );
+
+      if (dbError) {
+        console.error('Erro ao salvar URL no banco:', dbError);
+        toast.error('Upload feito, mas não foi possível salvar no banco: ' + dbError.message);
+      } else {
+        if (side === 'frente') setDocumentoFrenteUrl(publicUrl);
+        else setDocumentoVersoUrl(publicUrl);
+        toast.success(`Documento (${side}) enviado com sucesso!`);
+      }
+    } catch (error: unknown) {
+      const msg = error instanceof Error ? error.message : 'Erro desconhecido';
+      console.error('Erro no upload:', error);
+      toast.error('Erro ao enviar documento', { description: msg });
+    } finally {
+      setUploading(false);
+      // Limpar input para permitir re-upload do mesmo arquivo
+      if (side === 'frente' && docFrenteInputRef.current) docFrenteInputRef.current.value = '';
+      if (side === 'verso' && docVersoInputRef.current) docVersoInputRef.current.value = '';
     }
   };
 
@@ -1280,6 +1354,107 @@ const Anamnese: React.FC = () => {
                     {errors.documento_valor && <p className="text-xs font-medium text-destructive animate-fade-in">{errors.documento_valor}</p>}
                   </div>
                 </div>
+
+                {/* Upload de fotos do documento */}
+                <div className="pt-4 border-t border-border">
+                  <h4 className="font-medium mb-3 flex items-center gap-2 text-sm">
+                    <IdCard className="w-4 h-4 text-primary" />
+                    Foto do Documento (opcional)
+                  </h4>
+                  <p className="text-xs text-muted-foreground mb-4">
+                    Envie uma foto da frente (e verso, se RG) do seu documento para facilitar a verificação.
+                  </p>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {/* Frente */}
+                    <div className="space-y-2">
+                      <Label className="text-xs font-medium">Frente do Documento</Label>
+                      <div
+                        className="relative border-2 border-dashed border-border rounded-lg p-4 flex flex-col items-center justify-center gap-2 cursor-pointer hover:border-primary/50 hover:bg-primary/5 transition-colors min-h-[140px]"
+                        onClick={() => !isUploadingDocFrente && docFrenteInputRef.current?.click()}
+                      >
+                        {documentoFrenteUrl ? (
+                          <>
+                            <img
+                              src={documentoFrenteUrl}
+                              alt="Frente do documento"
+                              className="max-h-[120px] rounded object-contain"
+                            />
+                            <button
+                              type="button"
+                              className="absolute top-1 right-1 bg-background border border-border rounded-full p-0.5 hover:bg-destructive hover:text-white transition-colors"
+                              onClick={(e) => { e.stopPropagation(); setDocumentoFrenteUrl(null); }}
+                            >
+                              <X className="w-3 h-3" />
+                            </button>
+                          </>
+                        ) : isUploadingDocFrente ? (
+                          <>
+                            <Loader2 className="w-6 h-6 animate-spin text-primary" />
+                            <span className="text-xs text-muted-foreground">Enviando...</span>
+                          </>
+                        ) : (
+                          <>
+                            <Upload className="w-6 h-6 text-muted-foreground" />
+                            <span className="text-xs text-muted-foreground text-center">Clique para enviar</span>
+                          </>
+                        )}
+                      </div>
+                      <input
+                        ref={docFrenteInputRef}
+                        type="file"
+                        accept="image/*"
+                        capture="environment"
+                        className="hidden"
+                        onChange={(e) => handleDocumentUpload(e, 'frente')}
+                      />
+                    </div>
+
+                    {/* Verso */}
+                    <div className="space-y-2">
+                      <Label className="text-xs font-medium">Verso do Documento {formData.documento_tipo === 'rg' ? '' : '(se RG)'}</Label>
+                      <div
+                        className="relative border-2 border-dashed border-border rounded-lg p-4 flex flex-col items-center justify-center gap-2 cursor-pointer hover:border-primary/50 hover:bg-primary/5 transition-colors min-h-[140px]"
+                        onClick={() => !isUploadingDocVerso && docVersoInputRef.current?.click()}
+                      >
+                        {documentoVersoUrl ? (
+                          <>
+                            <img
+                              src={documentoVersoUrl}
+                              alt="Verso do documento"
+                              className="max-h-[120px] rounded object-contain"
+                            />
+                            <button
+                              type="button"
+                              className="absolute top-1 right-1 bg-background border border-border rounded-full p-0.5 hover:bg-destructive hover:text-white transition-colors"
+                              onClick={(e) => { e.stopPropagation(); setDocumentoVersoUrl(null); }}
+                            >
+                              <X className="w-3 h-3" />
+                            </button>
+                          </>
+                        ) : isUploadingDocVerso ? (
+                          <>
+                            <Loader2 className="w-6 h-6 animate-spin text-primary" />
+                            <span className="text-xs text-muted-foreground">Enviando...</span>
+                          </>
+                        ) : (
+                          <>
+                            <Upload className="w-6 h-6 text-muted-foreground" />
+                            <span className="text-xs text-muted-foreground text-center">Clique para enviar</span>
+                          </>
+                        )}
+                      </div>
+                      <input
+                        ref={docVersoInputRef}
+                        type="file"
+                        accept="image/*"
+                        capture="environment"
+                        className="hidden"
+                        onChange={(e) => handleDocumentUpload(e, 'verso')}
+                      />
+                    </div>
+                  </div>
+                </div>
+
                 <div className="space-y-2">
                   <Label htmlFor="telefone" className={errors.telefone ? "text-destructive" : ""}>Telefone *</Label>
                   <Input
