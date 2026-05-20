@@ -156,6 +156,7 @@ const Admin: React.FC = () => {
   const [dateFrom, setDateFrom] = useState<string>('');
   const [dateTo, setDateTo] = useState<string>('');
   const [anamneseFilter, setAnamneseFilter] = useState<AnamneseFilterType>('todos');
+  const [roleFilter, setRoleFilter] = useState<'todos' | 'membro' | 'guardiao' | 'admin'>('todos');
   const [expandedCerimonias, setExpandedCerimonias] = useState<Set<string>>(new Set());
   const [selectedCerimoniaId, setSelectedCerimoniaId] = useState<string>('todas');
   
@@ -476,10 +477,18 @@ const Admin: React.FC = () => {
         if (anamneseFilter === 'com_ficha' && !hasAnamnese) return false;
         if (anamneseFilter === 'sem_ficha' && hasAnamnese) return false;
       }
-      
+
+      // Role filter
+      if (roleFilter !== 'todos') {
+        const profileRole = getUserRole(profile.id);
+        if (roleFilter === 'membro' && profileRole !== 'consagrador') return false;
+        if (roleFilter === 'guardiao' && profileRole !== 'guardiao') return false;
+        if (roleFilter === 'admin' && profileRole !== 'admin') return false;
+      }
+
       return true;
     });
-  }, [profiles, searchTerm, dateFilter, dateFrom, dateTo, anamneseFilter, anamneses]);
+  }, [profiles, searchTerm, dateFilter, dateFrom, dateTo, anamneseFilter, roleFilter, anamneses, userRoles, roles]);
 
   // Helper to toggle ceremony expansion
   const toggleCerimonia = (cerimoniaId: string) => {
@@ -506,11 +515,12 @@ const Admin: React.FC = () => {
     setDateFrom('');
     setDateTo('');
     setAnamneseFilter('todos');
+    setRoleFilter('todos');
     setConsagradoresPage(1);
   };
 
   // Check if any filter is active
-  const hasActiveFilters = searchTerm || dateFilter !== 'todos' || anamneseFilter !== 'todos';
+  const hasActiveFilters = searchTerm || dateFilter !== 'todos' || anamneseFilter !== 'todos' || roleFilter !== 'todos';
 
   // Paginated Profiles (memoized)
   const { totalConsagradoresPages, paginatedConsagradores } = useMemo(() => ({
@@ -580,7 +590,7 @@ const Admin: React.FC = () => {
   // Helper to export consagradores to CSV
   const handleExportConsagradores = () => {
     if (!filteredProfiles || filteredProfiles.length === 0) {
-      toast.error('Nenhum consagrador para exportar');
+      toast.error('Nenhum membro para exportar');
       return;
     }
 
@@ -629,7 +639,7 @@ const Admin: React.FC = () => {
     switch (role) {
       case 'admin': return 'Administrador';
       case 'guardiao': return 'Guardião';
-      default: return 'Consagrador';
+      default: return 'Membro'; // consagrador ou null → Membro
     }
   };
 
@@ -694,7 +704,7 @@ const Admin: React.FC = () => {
     ];
 
     if (temPermissao('ver_consagradores')) {
-      tabs.push({ value: 'consagradores', label: isMobile ? 'Usuários' : 'Consagradores' });
+      tabs.push({ value: 'consagradores', label: 'Membros' });
     }
     if (temPermissao('gerenciar_pagamentos')) {
       tabs.push({ value: 'inscricoes', label: 'Inscrições' });
@@ -800,6 +810,36 @@ const Admin: React.FC = () => {
 
           {/* CONSAGRADORES TAB */}
           <TabsContent value="consagradores" className="space-y-6 ">
+            {/* Metrics */}
+            {(() => {
+              const total = profiles?.length || 0;
+              const comFicha = anamneses?.length || 0;
+              const semFicha = total - comFicha;
+              const bloqueados = profiles?.filter(p => p.bloqueado).length || 0;
+              return (
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                  {[
+                    { label: 'Total de Membros', value: total, icon: Users, color: 'text-primary', bg: 'bg-primary/10' },
+                    { label: 'Com Ficha', value: comFicha, icon: CheckCircle2, color: 'text-green-600', bg: 'bg-green-50 dark:bg-green-950/30' },
+                    { label: 'Sem Ficha', value: semFicha, icon: FileText, color: 'text-amber-600', bg: 'bg-amber-50 dark:bg-amber-950/30' },
+                    { label: 'Bloqueados', value: bloqueados, icon: XCircle, color: 'text-destructive', bg: 'bg-destructive/10' },
+                  ].map(({ label, value, icon: Icon, color, bg }) => (
+                    <Card key={label} className="border-border/50">
+                      <CardContent className="p-4 flex items-center gap-3">
+                        <div className={cn('w-10 h-10 rounded-full flex items-center justify-center shrink-0', bg)}>
+                          <Icon className={cn('w-5 h-5', color)} />
+                        </div>
+                        <div className="min-w-0">
+                          <p className="text-2xl font-bold">{value}</p>
+                          <p className="text-xs text-muted-foreground truncate">{label}</p>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              );
+            })()}
+
             {/* Search and Filters Card */}
             <Card className="border-primary/10">
               <CardContent className="p-4 space-y-4">
@@ -808,7 +848,7 @@ const Admin: React.FC = () => {
                   <div className="relative w-full md:max-w-md">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
                     <Input
-                      placeholder="Buscar consagrador por nome..."
+                      placeholder="Buscar membro por nome..."
                       className="pl-10 h-11"
                       value={searchTerm}
                       onChange={(e) => {
@@ -883,20 +923,39 @@ const Admin: React.FC = () => {
                   )}
 
                   {/* Anamnese Filter */}
-                  <Select 
-                    value={anamneseFilter} 
+                  <Select
+                    value={anamneseFilter}
                     onValueChange={(value: AnamneseFilterType) => {
                       setAnamneseFilter(value);
                       setConsagradoresPage(1);
                     }}
                   >
                     <SelectTrigger className="w-full md:w-[160px] h-9">
-                      <SelectValue placeholder="Status anamnese" />
+                      <SelectValue placeholder="Status ficha" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="todos">Todos</SelectItem>
+                      <SelectItem value="todos">Qualquer ficha</SelectItem>
                       <SelectItem value="com_ficha">Com ficha</SelectItem>
                       <SelectItem value="sem_ficha">Sem ficha</SelectItem>
+                    </SelectContent>
+                  </Select>
+
+                  {/* Role Filter */}
+                  <Select
+                    value={roleFilter}
+                    onValueChange={(value: 'todos' | 'membro' | 'guardiao' | 'admin') => {
+                      setRoleFilter(value);
+                      setConsagradoresPage(1);
+                    }}
+                  >
+                    <SelectTrigger className="w-full md:w-[150px] h-9">
+                      <SelectValue placeholder="Papel" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="todos">Qualquer papel</SelectItem>
+                      <SelectItem value="membro">Membro</SelectItem>
+                      <SelectItem value="guardiao">Guardião</SelectItem>
+                      <SelectItem value="admin">Administrador</SelectItem>
                     </SelectContent>
                   </Select>
 
@@ -918,7 +977,7 @@ const Admin: React.FC = () => {
               {/* Results count */}
               {hasActiveFilters && (
                 <p className="text-sm text-muted-foreground mt-2">
-                  {filteredProfiles?.length || 0} consagrador(es) encontrado(s)
+                  {filteredProfiles?.length || 0} membro(s) encontrado(s)
                 </p>
               )}
               </CardContent>
@@ -981,19 +1040,29 @@ const Admin: React.FC = () => {
                                   <span className="text-xs text-muted-foreground">Atualizando...</span>
                                 </div>
                               ) : (
-                                <select
-                                  value={currentRole}
-                                  onChange={(e) => {
-                                    const newValue = e.target.value === 'consagrador' ? null : e.target.value;
-                                    changeRoleMutation.mutate({ userId: profile.id, newRole: newValue });
-                                  }}
-                                  disabled={changeRoleMutation.isPending}
-                                  className={`px-2 py-1 rounded-md text-xs font-medium border cursor-pointer ${getRoleBadgeClass(currentRole)} disabled:opacity-50 disabled:cursor-not-allowed`}
-                                >
-                                  <option value="consagrador">Consagrador</option>
-                                  <option value="guardiao">Guardião</option>
-                                  <option value="admin">Administrador</option>
-                                </select>
+                                <Popover>
+                                  <PopoverTrigger asChild>
+                                    <button className={cn('px-2.5 py-1 rounded-full text-xs font-medium border cursor-pointer transition-opacity hover:opacity-80', getRoleBadgeClass(currentRole))}>
+                                      {getRoleLabel(currentRole)}
+                                    </button>
+                                  </PopoverTrigger>
+                                  <PopoverContent className="w-44 p-1" align="start">
+                                    {(['consagrador', 'guardiao', 'admin'] as const).map((r) => (
+                                      <button
+                                        key={r}
+                                        onClick={() => changeRoleMutation.mutate({ userId: profile.id, newRole: r === 'consagrador' ? null : r })}
+                                        disabled={changeRoleMutation.isPending || currentRole === r}
+                                        className={cn(
+                                          'w-full flex items-center gap-2 px-3 py-2 rounded-md text-sm transition-colors',
+                                          currentRole === r ? 'bg-muted font-medium' : 'hover:bg-muted/60'
+                                        )}
+                                      >
+                                        {currentRole === r && <Check className="w-3 h-3 shrink-0" />}
+                                        <span className={currentRole === r ? '' : 'ml-5'}>{getRoleLabel(r)}</span>
+                                      </button>
+                                    ))}
+                                  </PopoverContent>
+                                </Popover>
                               )}
                             </TableCell>
                             <TableCell>
@@ -1032,7 +1101,7 @@ const Admin: React.FC = () => {
                                   </DialogTrigger>
                               <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
                                 <DialogHeader>
-                                  <DialogTitle>Detalhes do Consagrador</DialogTitle>
+                                  <DialogTitle>Detalhes do Membro</DialogTitle>
                                   <DialogDescription>Informações completas e ficha de saúde.</DialogDescription>
                                 </DialogHeader>
 
@@ -1365,19 +1434,29 @@ const Admin: React.FC = () => {
                                 <span className="text-xs">...</span>
                               </div>
                             ) : (
-                              <select
-                                value={currentRole}
-                                onChange={(e) => {
-                                  const newValue = e.target.value === 'consagrador' ? null : e.target.value;
-                                  changeRoleMutation.mutate({ userId: profile.id, newRole: newValue });
-                                }}
-                                disabled={changeRoleMutation.isPending}
-                                className={`px-2 py-1 rounded-md text-xs font-medium border cursor-pointer ${getRoleBadgeClass(currentRole)} disabled:opacity-50`}
-                              >
-                                <option value="consagrador">Consagrador</option>
-                                <option value="guardiao">Guardião</option>
-                                <option value="admin">Admin</option>
-                              </select>
+                              <Popover>
+                                <PopoverTrigger asChild>
+                                  <button className={cn('px-2.5 py-1 rounded-full text-xs font-medium border cursor-pointer hover:opacity-80', getRoleBadgeClass(currentRole))}>
+                                    {getRoleLabel(currentRole)}
+                                  </button>
+                                </PopoverTrigger>
+                                <PopoverContent className="w-44 p-1" align="start">
+                                  {(['consagrador', 'guardiao', 'admin'] as const).map((r) => (
+                                    <button
+                                      key={r}
+                                      onClick={() => changeRoleMutation.mutate({ userId: profile.id, newRole: r === 'consagrador' ? null : r })}
+                                      disabled={changeRoleMutation.isPending || currentRole === r}
+                                      className={cn(
+                                        'w-full flex items-center gap-2 px-3 py-2 rounded-md text-sm transition-colors',
+                                        currentRole === r ? 'bg-muted font-medium' : 'hover:bg-muted/60'
+                                      )}
+                                    >
+                                      {currentRole === r && <Check className="w-3 h-3 shrink-0" />}
+                                      <span className={currentRole === r ? '' : 'ml-5'}>{getRoleLabel(r)}</span>
+                                    </button>
+                                  ))}
+                                </PopoverContent>
+                              </Popover>
                             )}
                           </MobileCardRow>
                           <MobileCardRow label="Ficha">
@@ -1422,7 +1501,7 @@ const Admin: React.FC = () => {
                 <Drawer open={detalhesDrawerOpen} onOpenChange={setDetalhesDrawerOpen}>
                   <DrawerContent className="h-[85vh] max-h-[85vh]">
                     <DrawerHeader className="pb-2 shrink-0">
-                      <DrawerTitle>Detalhes do Consagrador</DrawerTitle>
+                      <DrawerTitle>Detalhes do Membro</DrawerTitle>
                       <DrawerDescription>Informações completas e ficha de saúde.</DrawerDescription>
                     </DrawerHeader>
                     <div className="px-4 pb-6 overflow-y-auto flex-1">
@@ -1662,7 +1741,7 @@ const Admin: React.FC = () => {
                   <Table>
                     <TableHeader>
                       <TableRow>
-                        <TableHead>Consagrador</TableHead>
+                        <TableHead>Membro</TableHead>
                         <TableHead>Cerimônia</TableHead>
                         <TableHead>Data Inscrição</TableHead>
                         <TableHead>Forma Pagamento</TableHead>
