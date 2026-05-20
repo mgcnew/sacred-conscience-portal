@@ -133,6 +133,8 @@ const Anamnese: React.FC = () => {
   const [isUploadingDocVerso, setIsUploadingDocVerso] = useState(false);
   const docFrenteInputRef = useRef<HTMLInputElement>(null);
   const docVersoInputRef = useRef<HTMLInputElement>(null);
+  const docFrenteCameraRef = useRef<HTMLInputElement>(null);
+  const docVersoCameraRef = useRef<HTMLInputElement>(null);
 
   const [formData, setFormData] = useState<AnamneseFormData>({
     nome_completo: '',
@@ -651,94 +653,110 @@ const Anamnese: React.FC = () => {
   const renderFullScreenSignature = () => {
     if (!isFullScreenSignature) return null;
 
+    const handleOpen = () => {
+      try {
+        screen.orientation?.lock?.('landscape').catch(() => {});
+      } catch {}
+    };
+
+    const handleClose = () => {
+      try {
+        screen.orientation?.unlock?.();
+      } catch {}
+      setIsFullScreenSignature(false);
+    };
+
+    const handleSave = () => {
+      if (sigPad.current && !sigPad.current.isEmpty()) {
+        updateField('assinatura', sigPad.current.toDataURL());
+        try { screen.orientation?.unlock?.(); } catch {}
+        setIsFullScreenSignature(false);
+        toast.success('Assinatura salva!', { description: 'Sua assinatura foi capturada com sucesso.' });
+      } else {
+        toast.error('Assinatura vazia', { description: 'Por favor, faça sua assinatura antes de salvar.' });
+      }
+    };
+
     return (
-      <div className="fixed inset-0 z-[100] bg-background flex flex-col items-center justify-center animate-in fade-in duration-300 overflow-hidden">
-        {/* Container que rotaciona no mobile */}
-        <div className="w-full h-full flex flex-col p-4 md:p-10 gap-4 max-w-5xl">
-          <div className="flex justify-between items-center px-2">
+      <div
+        className="fixed inset-0 z-[100] bg-background flex flex-col animate-in fade-in duration-300 overflow-hidden"
+        ref={(el) => { if (el) handleOpen(); }}
+      >
+        <div className="w-full h-full flex flex-col p-3 md:p-8 gap-3 max-w-5xl mx-auto">
+          {/* Header */}
+          <div className="flex justify-between items-center">
             <div className="flex flex-col">
-              <h3 className="font-display text-xl font-semibold flex items-center gap-2">
+              <h3 className="font-display text-lg font-semibold flex items-center gap-2">
                 <Shield className="w-5 h-5 text-primary" />
                 Assinatura Digital
               </h3>
-              <p className="text-xs text-muted-foreground hidden md:block">
-                Assine no campo abaixo de forma clara.
+              <p className="text-xs text-muted-foreground">
+                Assine no campo abaixo com o dedo ou caneta.
               </p>
             </div>
-            <Button 
-              variant="ghost" 
-              size="icon" 
-              onClick={() => setIsFullScreenSignature(false)}
-              className="rounded-full hover:bg-destructive/10 hover:text-destructive transition-colors"
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={handleClose}
+              className="rounded-full hover:bg-destructive/10 hover:text-destructive"
             >
               <X className="w-6 h-6" />
             </Button>
           </div>
 
-          <div className="flex-1 bg-white rounded-3xl border-4 border-muted shadow-2xl overflow-hidden relative group cursor-crosshair">
-            {/* Background informativo */}
+          {/* Canvas */}
+          <div className="flex-1 bg-white rounded-2xl border-4 border-muted shadow-2xl overflow-hidden relative cursor-crosshair">
+            {/* Watermark */}
             <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-[0.03] select-none">
               <FileText className="w-64 h-64 -rotate-12" />
             </div>
-            
-            <SignatureCanvas 
-              ref={sigPad}
-              penColor='black'
-              canvasProps={{
-                className: 'signature-canvas w-full h-full'
-              }}
-            />
 
-            {/* Guia visual para mobile portrait */}
-            <div className="absolute inset-0 flex md:hidden items-center justify-center pointer-events-none">
-              <div className="flex flex-col items-center gap-2 opacity-20 portrait:rotate-90">
-                <RotateCcw className="w-8 h-8 animate-pulse" />
-                <span className="text-sm font-medium uppercase tracking-tighter">Vire o celular para assinar melhor</span>
-              </div>
+            {/* Linha guia */}
+            <div className="absolute bottom-[30%] left-[5%] right-[5%] pointer-events-none">
+              <div className="border-b-2 border-dashed border-slate-300" />
+              <p className="text-[10px] text-slate-300 mt-1 select-none">Assine acima desta linha</p>
             </div>
+
+            <SignatureCanvas
+              ref={sigPad}
+              penColor="black"
+              minWidth={1.5}
+              maxWidth={3}
+              canvasProps={{ className: 'signature-canvas w-full h-full' }}
+            />
           </div>
 
-          <div className="flex flex-col md:flex-row justify-between items-center gap-4 px-2">
-            <div className="flex items-center gap-2 order-2 md:order-1">
-              <Button 
-                variant="outline" 
-                size="sm"
-                onClick={() => sigPad.current?.clear()}
-                className="gap-2 border-primary/20 hover:bg-primary/5"
-              >
-                <RotateCcw className="w-4 h-4" />
-                Limpar
-              </Button>
-            </div>
-            
-            <div className="flex items-center gap-3 w-full md:w-auto order-1 md:order-2">
-              <Button 
-                variant="ghost" 
-                className="flex-1 md:flex-none"
-                onClick={() => setIsFullScreenSignature(false)}
-              >
-                Cancelar
-              </Button>
-              <Button 
-                onClick={() => {
-                  if (sigPad.current && !sigPad.current.isEmpty()) {
-                    updateField('assinatura', sigPad.current.toDataURL());
-                    setIsFullScreenSignature(false);
-                    toast.success('Assinatura salva!', {
-                      description: 'Sua assinatura foi capturada com sucesso.'
-                    });
-                  } else {
-                    toast.error('Assinatura vazia', {
-                      description: 'Por favor, faça sua assinatura antes de salvar.'
-                    });
-                  }
-                }}
-                className="flex-1 md:flex-none gap-2 px-10 bg-primary hover:bg-primary/90 shadow-lg shadow-primary/20"
-              >
-                Salvar Assinatura
-                <Check className="w-4 h-4" />
-              </Button>
-            </div>
+          {/* Dica mobile portrait */}
+          <div className="flex md:hidden items-center justify-center gap-2 text-xs text-muted-foreground portrait:flex landscape:hidden">
+            <RotateCcw className="w-3 h-3 animate-pulse" />
+            <span>Vire o celular na horizontal para mais espaço</span>
+          </div>
+
+          {/* Ações */}
+          <div className="flex items-center gap-3">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => sigPad.current?.clear()}
+              className="gap-2 shrink-0"
+            >
+              <RotateCcw className="w-4 h-4" />
+              Limpar
+            </Button>
+            <Button
+              variant="ghost"
+              className="flex-1"
+              onClick={handleClose}
+            >
+              Cancelar
+            </Button>
+            <Button
+              onClick={handleSave}
+              className="flex-1 gap-2 bg-primary hover:bg-primary/90 shadow-lg shadow-primary/20"
+            >
+              <Check className="w-4 h-4" />
+              Salvar
+            </Button>
           </div>
         </div>
       </div>
@@ -1368,10 +1386,7 @@ const Anamnese: React.FC = () => {
                     {/* Frente */}
                     <div className="space-y-2">
                       <Label className="text-xs font-medium">Frente do Documento</Label>
-                      <div
-                        className="relative border-2 border-dashed border-border rounded-lg p-4 flex flex-col items-center justify-center gap-2 cursor-pointer hover:border-primary/50 hover:bg-primary/5 transition-colors min-h-[140px]"
-                        onClick={() => !isUploadingDocFrente && docFrenteInputRef.current?.click()}
-                      >
+                      <div className="relative border-2 border-dashed border-border rounded-lg p-4 flex flex-col items-center justify-center gap-3 min-h-[140px]">
                         {documentoFrenteUrl ? (
                           <>
                             <img
@@ -1381,10 +1396,17 @@ const Anamnese: React.FC = () => {
                             />
                             <button
                               type="button"
-                              className="absolute top-1 right-1 bg-background border border-border rounded-full p-0.5 hover:bg-destructive hover:text-white transition-colors"
-                              onClick={(e) => { e.stopPropagation(); setDocumentoFrenteUrl(null); }}
+                              className="absolute top-1 right-1 bg-background border border-border rounded-full p-1 hover:bg-destructive hover:text-white transition-colors"
+                              onClick={() => setDocumentoFrenteUrl(null)}
                             >
                               <X className="w-3 h-3" />
+                            </button>
+                            <button
+                              type="button"
+                              className="text-xs text-primary underline"
+                              onClick={() => docFrenteInputRef.current?.click()}
+                            >
+                              Trocar imagem
                             </button>
                           </>
                         ) : isUploadingDocFrente ? (
@@ -1394,16 +1416,41 @@ const Anamnese: React.FC = () => {
                           </>
                         ) : (
                           <>
-                            <Upload className="w-6 h-6 text-muted-foreground" />
-                            <span className="text-xs text-muted-foreground text-center">Clique para enviar</span>
+                            <Upload className="w-5 h-5 text-muted-foreground" />
+                            <span className="text-xs text-muted-foreground text-center">Escolha como enviar:</span>
+                            <div className="flex gap-2 w-full">
+                              <button
+                                type="button"
+                                className="flex-1 flex flex-col items-center gap-1 py-2 px-3 rounded-lg border border-border bg-muted/40 hover:bg-primary/10 hover:border-primary/40 transition-colors text-xs font-medium"
+                                onClick={() => docFrenteCameraRef.current?.click()}
+                              >
+                                <Camera className="w-4 h-4" />
+                                Câmera
+                              </button>
+                              <button
+                                type="button"
+                                className="flex-1 flex flex-col items-center gap-1 py-2 px-3 rounded-lg border border-border bg-muted/40 hover:bg-primary/10 hover:border-primary/40 transition-colors text-xs font-medium"
+                                onClick={() => docFrenteInputRef.current?.click()}
+                              >
+                                <Upload className="w-4 h-4" />
+                                Galeria
+                              </button>
+                            </div>
                           </>
                         )}
                       </div>
                       <input
-                        ref={docFrenteInputRef}
+                        ref={docFrenteCameraRef}
                         type="file"
                         accept="image/*"
                         capture="environment"
+                        className="hidden"
+                        onChange={(e) => handleDocumentUpload(e, 'frente')}
+                      />
+                      <input
+                        ref={docFrenteInputRef}
+                        type="file"
+                        accept="image/*"
                         className="hidden"
                         onChange={(e) => handleDocumentUpload(e, 'frente')}
                       />
@@ -1412,10 +1459,7 @@ const Anamnese: React.FC = () => {
                     {/* Verso */}
                     <div className="space-y-2">
                       <Label className="text-xs font-medium">Verso do Documento {formData.documento_tipo === 'rg' ? '' : '(se RG)'}</Label>
-                      <div
-                        className="relative border-2 border-dashed border-border rounded-lg p-4 flex flex-col items-center justify-center gap-2 cursor-pointer hover:border-primary/50 hover:bg-primary/5 transition-colors min-h-[140px]"
-                        onClick={() => !isUploadingDocVerso && docVersoInputRef.current?.click()}
-                      >
+                      <div className="relative border-2 border-dashed border-border rounded-lg p-4 flex flex-col items-center justify-center gap-3 min-h-[140px]">
                         {documentoVersoUrl ? (
                           <>
                             <img
@@ -1425,10 +1469,17 @@ const Anamnese: React.FC = () => {
                             />
                             <button
                               type="button"
-                              className="absolute top-1 right-1 bg-background border border-border rounded-full p-0.5 hover:bg-destructive hover:text-white transition-colors"
-                              onClick={(e) => { e.stopPropagation(); setDocumentoVersoUrl(null); }}
+                              className="absolute top-1 right-1 bg-background border border-border rounded-full p-1 hover:bg-destructive hover:text-white transition-colors"
+                              onClick={() => setDocumentoVersoUrl(null)}
                             >
                               <X className="w-3 h-3" />
+                            </button>
+                            <button
+                              type="button"
+                              className="text-xs text-primary underline"
+                              onClick={() => docVersoInputRef.current?.click()}
+                            >
+                              Trocar imagem
                             </button>
                           </>
                         ) : isUploadingDocVerso ? (
@@ -1438,16 +1489,41 @@ const Anamnese: React.FC = () => {
                           </>
                         ) : (
                           <>
-                            <Upload className="w-6 h-6 text-muted-foreground" />
-                            <span className="text-xs text-muted-foreground text-center">Clique para enviar</span>
+                            <Upload className="w-5 h-5 text-muted-foreground" />
+                            <span className="text-xs text-muted-foreground text-center">Escolha como enviar:</span>
+                            <div className="flex gap-2 w-full">
+                              <button
+                                type="button"
+                                className="flex-1 flex flex-col items-center gap-1 py-2 px-3 rounded-lg border border-border bg-muted/40 hover:bg-primary/10 hover:border-primary/40 transition-colors text-xs font-medium"
+                                onClick={() => docVersoCameraRef.current?.click()}
+                              >
+                                <Camera className="w-4 h-4" />
+                                Câmera
+                              </button>
+                              <button
+                                type="button"
+                                className="flex-1 flex flex-col items-center gap-1 py-2 px-3 rounded-lg border border-border bg-muted/40 hover:bg-primary/10 hover:border-primary/40 transition-colors text-xs font-medium"
+                                onClick={() => docVersoInputRef.current?.click()}
+                              >
+                                <Upload className="w-4 h-4" />
+                                Galeria
+                              </button>
+                            </div>
                           </>
                         )}
                       </div>
                       <input
-                        ref={docVersoInputRef}
+                        ref={docVersoCameraRef}
                         type="file"
                         accept="image/*"
                         capture="environment"
+                        className="hidden"
+                        onChange={(e) => handleDocumentUpload(e, 'verso')}
+                      />
+                      <input
+                        ref={docVersoInputRef}
+                        type="file"
+                        accept="image/*"
                         className="hidden"
                         onChange={(e) => handleDocumentUpload(e, 'verso')}
                       />
@@ -2078,11 +2154,11 @@ const Anamnese: React.FC = () => {
                       <span className="text-xs text-muted-foreground">(A tela mudará para horizontal para facilitar)</span>
                     </Button>
                   ) : (
-                    <div className="relative group">
+                    <div className="relative">
                       <div className="bg-white rounded-xl border-2 border-primary/20 p-4 flex flex-col items-center shadow-inner overflow-hidden">
-                        <img 
-                          src={formData.assinatura} 
-                          alt="Sua assinatura" 
+                        <img
+                          src={formData.assinatura}
+                          alt="Sua assinatura"
                           className="max-h-32 object-contain"
                         />
                         <div className="mt-2 w-full border-t border-slate-100 pt-2 text-center">
@@ -2091,24 +2167,26 @@ const Anamnese: React.FC = () => {
                           </p>
                         </div>
                       </div>
-                      <Button 
-                        size="icon" 
-                        variant="destructive" 
-                        className="absolute -top-2 -right-2 w-8 h-8 rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition-opacity"
-                        onClick={() => updateField('assinatura', '')}
-                      >
-                        <X className="w-4 h-4" />
-                      </Button>
-                      <p className="text-center mt-2">
-                        <Button 
-                          variant="link" 
-                          size="sm" 
-                          className="text-xs"
+                      <div className="flex gap-2 mt-2 justify-center">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="text-xs gap-1"
                           onClick={() => setIsFullScreenSignature(true)}
                         >
-                          Refazer assinatura
+                          <RotateCcw className="w-3 h-3" />
+                          Refazer
                         </Button>
-                      </p>
+                        <Button
+                          size="sm"
+                          variant="destructive"
+                          className="text-xs gap-1"
+                          onClick={() => updateField('assinatura', '')}
+                        >
+                          <X className="w-3 h-3" />
+                          Remover
+                        </Button>
+                      </div>
                     </div>
                   )}
                 </div>
