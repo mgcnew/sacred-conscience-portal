@@ -4,7 +4,6 @@ import {
   Calendar,
   Leaf,
   Settings,
-  Heart,
   Shield,
   MessageSquareQuote,
   Image,
@@ -55,10 +54,8 @@ export const communityNavItems: NavItem[] = [
   { icon: ShoppingBag, label: 'Loja', path: ROUTES.LOJA },
 ];
 
-// ℹ️ Informações & Suporte
-export const supportNavItems: NavItem[] = [
-  { icon: Heart, label: 'Emergência', path: ROUTES.EMERGENCIA, highlight: true },
-];
+// ℹ️ Suporte (sem itens visíveis — Emergência foi movida para o topbar)
+export const supportNavItems: NavItem[] = [];
 
 // ⚙️ Sistema
 export const settingsNavItem: NavItem = {
@@ -92,7 +89,6 @@ export const getNavGroups = (isAdmin: boolean): NavGroup[] => {
     { label: 'Principal', items: essentialNavItems },
     { label: 'Conteúdo', items: contentNavItems },
     { label: 'Comunidade', items: communityNavItems },
-    { label: 'Suporte', items: supportNavItems },
     { label: 'Sistema', items: [settingsNavItem, ...(isAdmin ? [adminNavItem] : [])] },
   ];
   return groups;

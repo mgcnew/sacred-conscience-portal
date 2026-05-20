@@ -4,7 +4,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { LogOut, User, Loader2 } from 'lucide-react';
+import { LogOut, User, Loader2, Heart } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { ModeToggle } from '@/components/mode-toggle';
 import { ROUTES } from '@/constants';
@@ -205,6 +205,15 @@ const MainLayout: React.FC = () => {
             </div>
 
             <div className="flex items-center gap-2">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => navigate(ROUTES.EMERGENCIA)}
+                className="relative w-10 h-10 text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30"
+                aria-label="Emergência"
+              >
+                <Heart className="w-5 h-5 fill-current" />
+              </Button>
               <NotificationBell />
               <ModeToggle />
               <Button
