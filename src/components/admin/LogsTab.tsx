@@ -435,14 +435,23 @@ export const LogsTab: React.FC = () => {
 
         {/* Filters */}
         <div className="flex flex-col sm:flex-row gap-2">
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+          <div className="relative flex-1 min-w-0">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
             <Input
               placeholder="Buscar na página atual..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-9"
+              className="pl-9 h-12 md:h-10 text-base md:text-sm pr-8"
             />
+            {searchTerm && (
+              <button
+                onClick={() => setSearchTerm('')}
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                aria-label="Limpar busca"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            )}
           </div>
 
           <Select value={actionFilter} onValueChange={(v) => { setActionFilter(v); resetPage(); }}>
@@ -450,7 +459,7 @@ export const LogsTab: React.FC = () => {
               <Filter className="w-4 h-4 mr-2 shrink-0" />
               <SelectValue placeholder="Ação" />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent position="popper" className="max-h-72">
               <SelectItem value="all">Todas as ações</SelectItem>
               {ACTION_GROUPS.map(group => (
                 <SelectGroup key={group.label}>
@@ -467,7 +476,7 @@ export const LogsTab: React.FC = () => {
             <SelectTrigger className="w-full sm:w-[160px]">
               <SelectValue placeholder="Entidade" />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent position="popper" className="max-h-72">
               <SelectItem value="all">Todas</SelectItem>
               <SelectItem value="inscricoes">Inscrições</SelectItem>
               <SelectItem value="cerimonias">Cerimônias</SelectItem>
