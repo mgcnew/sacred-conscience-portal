@@ -121,7 +121,7 @@ const Auth: React.FC = () => {
           <div className="relative inline-block">
             <div className="absolute inset-0 rounded-full bg-primary/20 blur-2xl scale-110" />
             <div className="relative w-28 h-28 mx-auto">
-              <img src="/logo-full.png" alt="Consciência Divinal" className="w-full h-full object-contain drop-shadow-lg" />
+              <img src="/logo-conciencia.png" alt="Consciência Divinal" className="w-full h-full object-contain drop-shadow-lg" />
             </div>
           </div>
           <div className="pt-1">
