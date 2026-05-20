@@ -15,7 +15,6 @@ import {
   Users,
   Image,
   Leaf,
-  Bell,
 } from 'lucide-react';
 import { ROUTES } from '@/constants';
 import { APP_CONFIG } from '@/config/app';
@@ -172,7 +171,7 @@ const Index: React.FC = () => {
             <span className="font-display text-sm font-bold text-primary whitespace-nowrap">Consciência Divinal</span>
           </div>
 
-          {/* Right: Alert + Bell */}
+          {/* Right: Alert */}
           <div className="flex items-center gap-1 shrink-0">
             {anamnesePending && (
               <button
@@ -183,15 +182,6 @@ const Index: React.FC = () => {
                 <span className="text-xs font-bold">!</span>
               </button>
             )}
-            <Button
-              size="icon"
-              variant="ghost"
-              className="rounded-full relative"
-              onClick={() => navigate(ROUTES.CONFIGURACOES)}
-            >
-              <Bell className="w-5 h-5" />
-              <span className="absolute top-2 right-2 w-1.5 h-1.5 bg-red-500 rounded-full border border-background" />
-            </Button>
           </div>
         </div>
       </header>
