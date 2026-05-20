@@ -280,12 +280,6 @@
   box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.08), 0 4px 6px -4px rgb(0 0 0 / 0.05);
 }
 
-/* Disable Radix animations but keep positioning */
-[data-radix-select-content],
-[data-radix-select-viewport] {
-  animation: none !important;
-  transition: none !important;
-}
 
 /* Table headers */
 :root th {
@@ -589,16 +583,10 @@
   h3 { font-size: 1.125rem; }
 }
 
-/* Transições mais rápidas no mobile */
+/* Transições mais rápidas no mobile — apenas para elementos de layout, nunca para componentes Radix */
 @media (max-width: 1023px) {
-  * {
-    transition-duration: 150ms !important;
-  }
-  
-  /* Exceção para animações intencionais */
-  [class*="duration-300"],
-  [class*="duration-500"] {
-    transition-duration: 200ms !important;
+  button, a, .card, header, nav, footer, main, aside {
+    transition-duration: 150ms;
   }
 }
 
