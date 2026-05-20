@@ -9,7 +9,6 @@ import { cn } from '@/lib/utils';
 import { ModeToggle } from '@/components/mode-toggle';
 import { ROUTES } from '@/constants';
 import NotificationBell from '@/components/layout/NotificationBell';
-import ChatBell from '@/components/layout/ChatBell';
 import Sidebar from '@/components/layout/Sidebar';
 import { WelcomeModal, InstallPWAPrompt, OnboardingTutorial } from '@/components/shared';
 import { ScrollToTop } from '@/components/ui/scroll-to-top';
@@ -206,7 +205,6 @@ const MainLayout: React.FC = () => {
             </div>
 
             <div className="flex items-center gap-2">
-              <ChatBell />
               <NotificationBell />
               <ModeToggle />
               <Button
