@@ -3,7 +3,7 @@ import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import {
   Image, Upload, X, Loader2, Calendar, Trash2, Edit2, Check, Play,
-  ChevronLeft, ChevronRight, Tag,
+  ChevronLeft, ChevronRight, Tag, Minimize2,
 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -28,6 +28,7 @@ import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
+import { Switch } from '@/components/ui/switch';
 import { PageHeader, PageContainer } from '@/components/shared';
 import { useAuth } from '@/contexts/AuthContext';
 import { useCerimoniasSelect } from '@/hooks/queries';
@@ -37,6 +38,63 @@ import {
 import { formatDateBR } from '@/lib/date-utils';
 import { cn } from '@/lib/utils';
 import type { GaleriaItemComCerimonia } from '@/types';
+
+
+// ── Utilitário de compressão ─────────────────────────────────────────────────
+
+type QualidadeCompressao = 'alta' | 'media' | 'baixa';
+
+const QUALITY_MAP: Record<QualidadeCompressao, number> = { alta: 0.85, media: 0.7, baixa: 0.5 };
+const MAX_WIDTH_MAP: Record<QualidadeCompressao, number> = { alta: 2560, media: 1920, baixa: 1280 };
+
+async function compressImage(file: File, qualidade: QualidadeCompressao): Promise<File> {
+  const maxWidth = MAX_WIDTH_MAP[qualidade];
+  const quality = QUALITY_MAP[qualidade];
+
+  return new Promise((resolve, reject) => {
+    const img = new window.Image();
+    const objectUrl = URL.createObjectURL(file);
+
+    img.onload = () => {
+      URL.revokeObjectURL(objectUrl);
+
+      let { width, height } = img;
+      if (width > maxWidth) {
+        height = Math.round((height * maxWidth) / width);
+        width = maxWidth;
+      }
+
+      const canvas = document.createElement('canvas');
+      canvas.width = width;
+      canvas.height = height;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) { reject(new Error('Canvas indisponível')); return; }
+
+      ctx.drawImage(img, 0, 0, width, height);
+      canvas.toBlob(
+        (blob) => {
+          if (!blob) { reject(new Error('Falha na compressão')); return; }
+          // Só usa versão comprimida se for menor que o original
+          const compressed = new File([blob], file.name.replace(/\.[^.]+$/, '.jpg'), {
+            type: 'image/jpeg',
+            lastModified: Date.now(),
+          });
+          resolve(compressed.size < file.size ? compressed : file);
+        },
+        'image/jpeg',
+        quality,
+      );
+    };
+
+    img.onerror = () => { URL.revokeObjectURL(objectUrl); reject(new Error('Falha ao carregar imagem')); };
+    img.src = objectUrl;
+  });
+}
+
+const formatBytes = (bytes: number) => {
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(0)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+};
 
 
 // ── Upload Dialog ────────────────────────────────────────────────────────────
@@ -50,9 +108,14 @@ function UploadDialog({ isOpen, onClose }: { isOpen: boolean; onClose: () => voi
   const [descricao, setDescricao] = useState('');
   const [cerimoniaId, setCerimoniaId] = useState<string>('');
   const [uploadProgress, setUploadProgress] = useState(0);
+  const [comprimir, setComprimir] = useState(true);
+  const [qualidade, setQualidade] = useState<QualidadeCompressao>('media');
+  const [savedBytes, setSavedBytes] = useState(0);
 
   const { data: cerimonias } = useCerimoniasSelect();
   const uploadMutation = useUploadGaleria();
+
+  const temImagens = files.some(f => f.type.startsWith('image/'));
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selected = Array.from(e.target.files || []);
@@ -74,10 +137,21 @@ function UploadDialog({ isOpen, onClose }: { isOpen: boolean; onClose: () => voi
     if (files.length === 0) { toast.error('Selecione pelo menos um arquivo'); return; }
 
     let success = 0;
+    let totalOriginal = 0;
+    let totalFinal = 0;
+
     for (let i = 0; i < files.length; i++) {
       try {
+        let fileToUpload = files[i];
+        totalOriginal += files[i].size;
+
+        if (comprimir && files[i].type.startsWith('image/')) {
+          fileToUpload = await compressImage(files[i], qualidade);
+        }
+        totalFinal += fileToUpload.size;
+
         await uploadMutation.mutateAsync({
-          file: files[i],
+          file: fileToUpload,
           cerimoniaId: cerimoniaId && cerimoniaId !== 'nenhuma' ? cerimoniaId : null,
           titulo: files.length === 1 ? (titulo || undefined) : undefined,
           descricao: files.length === 1 ? (descricao || undefined) : undefined,
@@ -90,7 +164,13 @@ function UploadDialog({ isOpen, onClose }: { isOpen: boolean; onClose: () => voi
     }
 
     if (success > 0) {
-      toast.success(success === 1 ? 'Mídia enviada!' : `${success} mídias enviadas!`);
+      const saved = totalOriginal - totalFinal;
+      const msg = success === 1 ? 'Mídia enviada!' : `${success} mídias enviadas!`;
+      const description = comprimir && saved > 1024
+        ? `${formatBytes(saved)} economizados com compressão`
+        : undefined;
+      toast.success(msg, { description });
+      setSavedBytes(saved);
       handleClose();
     }
   };
@@ -103,6 +183,7 @@ function UploadDialog({ isOpen, onClose }: { isOpen: boolean; onClose: () => voi
     setDescricao('');
     setCerimoniaId('');
     setUploadProgress(0);
+    setSavedBytes(0);
     onClose();
   };
 
@@ -167,6 +248,41 @@ function UploadDialog({ isOpen, onClose }: { isOpen: boolean; onClose: () => voi
           </div>
         )}
       </div>
+
+      {/* Compressão — só para imagens */}
+      {temImagens && (
+        <div className="rounded-lg border bg-muted/30 p-3 space-y-2.5">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Minimize2 className="w-4 h-4 text-primary" />
+              <Label className="cursor-pointer text-sm">Comprimir imagens</Label>
+            </div>
+            <Switch checked={comprimir} onCheckedChange={setComprimir} />
+          </div>
+
+          {comprimir && (
+            <div className="flex items-center gap-2">
+              <Label className="text-xs text-muted-foreground shrink-0">Qualidade</Label>
+              <Select value={qualidade} onValueChange={(v: QualidadeCompressao) => setQualidade(v)}>
+                <SelectTrigger className="h-7 text-xs flex-1">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="alta">Alta — menor redução (~85%)</SelectItem>
+                  <SelectItem value="media">Média — recomendado (~70%)</SelectItem>
+                  <SelectItem value="baixa">Baixa — maior redução (~50%)</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          )}
+
+          <p className="text-[11px] text-muted-foreground">
+            {comprimir
+              ? 'Imagens serão redimensionadas e otimizadas antes do envio.'
+              : 'Imagens serão enviadas no tamanho original.'}
+          </p>
+        </div>
+      )}
 
       {/* Cerimônia */}
       <div className="space-y-2">
