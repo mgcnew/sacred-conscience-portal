@@ -2,7 +2,7 @@ import { useState, useMemo, useEffect, useCallback } from 'react';
 import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Calendar, Plus, Users } from 'lucide-react';
+import { Calendar, Plus, Users, History, ClipboardCheck } from 'lucide-react';
 import { PageHeader, PageContainer } from '@/components/shared';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { cn } from '@/lib/utils';
@@ -15,7 +15,6 @@ import SuccessModal from '@/components/cerimonias/SuccessModal';
 import CeremonyFormDialog from '@/components/cerimonias/CeremonyFormDialog';
 import CerimoniasLista from '@/components/cerimonias/CerimoniasLista';
 import CerimoniasHistorico from '@/components/cerimonias/CerimoniasHistorico';
-import CerimoniasFilters from '@/components/cerimonias/CerimoniasFilters';
 import CerimoniaSkeleton from '@/components/cerimonias/CerimoniaSkeleton';
 import CerimoniaInfoModal from '@/components/cerimonias/CerimoniaInfoModal';
 import ListaPresentes from '@/components/cerimonias/ListaPresentes';
@@ -326,7 +325,6 @@ const Cerimonias: React.FC = () => {
     if (!info || info.total_vagas === null) return null;
     return info.vagas_disponiveis;
   };
-  const isUserInscrito = (cerimoniaId: string) => minhasInscricoes?.includes(cerimoniaId);
 
   if (isLoading) {
     return (
@@ -366,46 +364,104 @@ const Cerimonias: React.FC = () => {
       )}
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <div className="relative mb-6">
-          <TabsList className={cn(
-            "w-full h-auto p-0 bg-transparent border-b rounded-none justify-start overflow-x-auto scrollbar-none",
-            podeVerListaPresentes ? "grid grid-cols-3 md:inline-flex" : "grid grid-cols-2 md:inline-flex"
-          )}>
-            <TabsTrigger 
-              value="proximas" 
-              className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary data-[state=active]:bg-transparent py-3 text-xs sm:text-sm font-bold uppercase tracking-wider transition-all"
+        {/* Pill-style tab bar */}
+        <div className="mb-6">
+          <TabsList className="inline-flex gap-1 bg-muted/70 p-1 rounded-full h-auto">
+            {/* Tab 1: Agenda / Próximas */}
+            <TabsTrigger
+              value="proximas"
+              className={cn(
+                "rounded-full px-3 sm:px-4 py-1.5 text-xs sm:text-sm font-semibold transition-all gap-1.5",
+                "data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm",
+                "data-[state=inactive]:text-muted-foreground data-[state=inactive]:hover:text-foreground"
+              )}
             >
-              <Calendar className="w-4 h-4 mr-2 hidden sm:inline" />
-              Próximas
+              <Calendar className="w-3.5 h-3.5" />
+              <span>{podeVerListaPresentes ? 'Agenda' : 'Próximas'}</span>
+              {cerimonias && cerimonias.length > 0 && (
+                <span className={cn(
+                  "ml-0.5 rounded-full px-1.5 py-0.5 text-[10px] font-bold leading-none",
+                  "data-[state=active]:bg-primary/15 data-[state=active]:text-primary",
+                  activeTab === 'proximas'
+                    ? "bg-primary/15 text-primary"
+                    : "bg-muted-foreground/15 text-muted-foreground"
+                )}>
+                  {cerimonias.length}
+                </span>
+              )}
             </TabsTrigger>
-            <TabsTrigger 
-              value="historico" 
-              className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary data-[state=active]:bg-transparent py-3 text-xs sm:text-sm font-bold uppercase tracking-wider transition-all"
+
+            {/* Tab 2: Histórico */}
+            <TabsTrigger
+              value="historico"
+              className={cn(
+                "rounded-full px-3 sm:px-4 py-1.5 text-xs sm:text-sm font-semibold transition-all gap-1.5",
+                "data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm",
+                "data-[state=inactive]:text-muted-foreground data-[state=inactive]:hover:text-foreground"
+              )}
             >
-              Histórico
+              <History className="w-3.5 h-3.5" />
+              <span>{podeVerListaPresentes ? 'Histórico Geral' : 'Meu Histórico'}</span>
             </TabsTrigger>
+
+            {/* Tab 3: Check-in (admin/guardião only) */}
             {podeVerListaPresentes && (
-              <TabsTrigger 
-                value="presentes" 
-                className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary data-[state=active]:bg-transparent py-3 text-xs sm:text-sm font-bold uppercase tracking-wider transition-all"
+              <TabsTrigger
+                value="presentes"
+                className={cn(
+                  "rounded-full px-3 sm:px-4 py-1.5 text-xs sm:text-sm font-semibold transition-all gap-1.5",
+                  "data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm",
+                  "data-[state=inactive]:text-muted-foreground data-[state=inactive]:hover:text-foreground"
+                )}
               >
-                <Users className="w-4 h-4 mr-2 hidden sm:inline" />
-                Presentes
+                <ClipboardCheck className="w-3.5 h-3.5" />
+                <span>Check-in</span>
               </TabsTrigger>
             )}
           </TabsList>
         </div>
 
         <TabsContent value="proximas">
-          <CerimoniasFilters
-            consagracoes={consagracoesUnicas}
-            selectedConsagracao={selectedConsagracao}
-            selectedMes={selectedMes}
-            totalResults={cerimoniasFiltradas.length}
-            onConsagracaoChange={setSelectedConsagracao}
-            onMesChange={setSelectedMes}
-            onClearFilters={handleClearFilters}
-          />
+          {/* Compact inline filters */}
+          <div className="flex flex-wrap items-center gap-2 mb-5">
+            {consagracoesUnicas.length > 0 && (
+              <select
+                value={selectedConsagracao}
+                onChange={e => setSelectedConsagracao(e.target.value)}
+                className="h-8 rounded-full border border-border bg-background px-3 text-xs font-medium text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 cursor-pointer"
+              >
+                <option value="todas">Todas as medicinas</option>
+                {consagracoesUnicas.map(c => (
+                  <option key={c} value={c}>{c}</option>
+                ))}
+              </select>
+            )}
+            <select
+              value={selectedMes}
+              onChange={e => setSelectedMes(e.target.value)}
+              className="h-8 rounded-full border border-border bg-background px-3 text-xs font-medium text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 cursor-pointer"
+            >
+              <option value="todos">Todos os meses</option>
+              {['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'].map((m, i) => (
+                <option key={i+1} value={String(i+1)}>{m}</option>
+              ))}
+            </select>
+            {(selectedConsagracao !== 'todas' || selectedMes !== 'todos') && (
+              <button
+                onClick={handleClearFilters}
+                className="h-8 rounded-full border border-border bg-background px-3 text-xs font-medium text-muted-foreground hover:text-foreground transition-colors"
+              >
+                ✕ Limpar
+              </button>
+            )}
+            <span className="ml-auto text-xs text-muted-foreground">
+              {cerimoniasFiltradas.length === 0
+                ? 'Nenhuma cerimônia'
+                : cerimoniasFiltradas.length === 1
+                  ? '1 cerimônia'
+                  : `${cerimoniasFiltradas.length} cerimônias`}
+            </span>
+          </div>
           <CerimoniasLista
             cerimonias={cerimoniasFiltradas}
             minhasInscricoes={minhasInscricoes}
