@@ -167,15 +167,16 @@ export const PermissoesTab: React.FC = () => {
         </CardHeader>
         <CardContent className="space-y-4">
           {/* Busca com autosugestão */}
-          <SearchInput
-            placeholder="Buscar usuário por nome ou email..."
-            value={searchTerm}
-            onChange={(v) => {
-              setSearchTerm(v);
-              if (selectedUserId && v === '') setSelectedUserId(null);
-            }}
-          />
-            
+          <div className="relative">
+            <SearchInput
+              placeholder="Buscar usuário por nome ou email..."
+              value={searchTerm}
+              onChange={(v) => {
+                setSearchTerm(v);
+                if (selectedUserId && v === '') setSelectedUserId(null);
+              }}
+            />
+
             {/* Dropdown de sugestões */}
             {searchTerm && searchTerm.length >= 1 && !selectedUserId && filteredProfiles.length > 0 && (
               <div className="absolute top-full left-0 right-0 mt-1 bg-popover border rounded-lg shadow-lg z-50 max-h-[250px] overflow-y-auto">
