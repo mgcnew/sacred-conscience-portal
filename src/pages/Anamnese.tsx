@@ -259,7 +259,11 @@ const Anamnese: React.FC = () => {
         };
         setFormData(mapped);
         setExistingAnamnese(mapped);
-        
+
+        // Carregar URLs das fotos do documento nos estados locais
+        if (data.documento_frente_url) setDocumentoFrenteUrl(data.documento_frente_url);
+        if (data.documento_verso_url) setDocumentoVersoUrl(data.documento_verso_url);
+
         // Verificar se faltam novos campos obrigatórios
         const incomplete = !mapped.documento_valor || !mapped.assinatura;
         setIsIncomplete(incomplete);
@@ -481,9 +485,15 @@ const Anamnese: React.FC = () => {
       toast.error('Erro ao enviar documento', { description: msg });
     } finally {
       setUploading(false);
-      // Limpar input para permitir re-upload do mesmo arquivo
-      if (side === 'frente' && docFrenteInputRef.current) docFrenteInputRef.current.value = '';
-      if (side === 'verso' && docVersoInputRef.current) docVersoInputRef.current.value = '';
+      // Limpar inputs para permitir re-upload do mesmo arquivo
+      if (side === 'frente') {
+        if (docFrenteInputRef.current) docFrenteInputRef.current.value = '';
+        if (docFrenteCameraRef.current) docFrenteCameraRef.current.value = '';
+      }
+      if (side === 'verso') {
+        if (docVersoInputRef.current) docVersoInputRef.current.value = '';
+        if (docVersoCameraRef.current) docVersoCameraRef.current.value = '';
+      }
     }
   };
 
@@ -1045,6 +1055,46 @@ const Anamnese: React.FC = () => {
                 )}
               </CardContent>
             </Card>
+
+            {/* Fotos do Documento */}
+            {(documentoFrenteUrl || documentoVersoUrl) && (
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardTitle className="font-display text-lg flex items-center gap-2">
+                    <IdCard className="w-5 h-5 text-primary" />
+                    Fotos do Documento
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-2 gap-3">
+                    {documentoFrenteUrl && (
+                      <div className="space-y-1">
+                        <p className="text-xs text-muted-foreground font-medium">Frente</p>
+                        <div className="rounded-lg overflow-hidden border border-border bg-muted aspect-[3/2]">
+                          <img
+                            src={documentoFrenteUrl}
+                            alt="Documento frente"
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                      </div>
+                    )}
+                    {documentoVersoUrl && (
+                      <div className="space-y-1">
+                        <p className="text-xs text-muted-foreground font-medium">Verso</p>
+                        <div className="rounded-lg overflow-hidden border border-border bg-muted aspect-[3/2]">
+                          <img
+                            src={documentoVersoUrl}
+                            alt="Documento verso"
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
 
             {/* Saúde */}
             <Card>
