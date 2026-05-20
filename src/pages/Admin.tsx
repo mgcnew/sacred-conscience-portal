@@ -160,6 +160,9 @@ const Admin: React.FC = () => {
   const [roleFilter, setRoleFilter] = useState<'todos' | 'membro' | 'guardiao' | 'admin'>('todos');
   const [expandedCerimonias, setExpandedCerimonias] = useState<Set<string>>(new Set());
   const [selectedCerimoniaId, setSelectedCerimoniaId] = useState<string>('todas');
+  const [inscricoesSearch, setInscricoesSearch] = useState('');
+  const [showCanceladas, setShowCanceladas] = useState(false);
+  const [unmarkPaymentDialog, setUnmarkPaymentDialog] = useState<{ open: boolean; inscricaoId: string; nome: string }>({ open: false, inscricaoId: '', nome: '' });
   
   // State para cancelamento de inscrição
   const [cancelInscricaoDialog, setCancelInscricaoDialog] = useState<{
@@ -379,8 +382,12 @@ const Admin: React.FC = () => {
         formaPagamento: inscricao.forma_pagamento,
       });
     } else {
-      // Se estiver desmarcando, apenas atualizar status
-      togglePaymentMutation.mutate({ inscricaoId: inscricao.id, pago: false });
+      // Desmarcar pagamento exige confirmação
+      setUnmarkPaymentDialog({
+        open: true,
+        inscricaoId: inscricao.id,
+        nome: inscricao.profiles?.full_name || 'Participante',
+      });
     }
   };
 
@@ -532,39 +539,37 @@ const Admin: React.FC = () => {
     )
   }), [filteredProfiles, consagradoresPage, membrosPageSize]);
 
-  // Filtrar inscrições baseado na cerimônia selecionada
+  // Filtrar inscrições baseado na cerimônia, busca e canceladas
   const inscricoesFiltradas = useMemo(() => {
     if (!inscricoes) return [];
-    
-    // Filtro por cerimônia
-    if (selectedCerimoniaId !== 'todas') {
-      return inscricoes.filter(i => i.cerimonia_id === selectedCerimoniaId);
-    }
-    
-    // Se "todas", ordenar por data da cerimônia (mais próxima primeiro)
-    return [...inscricoes].sort((a, b) => {
-      const dataA = new Date(a.cerimonias?.data || 0).getTime();
-      const dataB = new Date(b.cerimonias?.data || 0).getTime();
-      return dataB - dataA; // Decrescente (mais recente primeiro)
-    });
-  }, [inscricoes, selectedCerimoniaId]);
 
-  // Encontrar a próxima cerimônia ativa para selecionar por padrão
+    let filtered = selectedCerimoniaId !== 'todas'
+      ? inscricoes.filter(i => i.cerimonia_id === selectedCerimoniaId)
+      : [...inscricoes].sort((a, b) => new Date(b.cerimonias?.data || 0).getTime() - new Date(a.cerimonias?.data || 0).getTime());
+
+    if (!showCanceladas) {
+      filtered = filtered.filter(i => !i.cancelada);
+    }
+
+    if (inscricoesSearch.trim()) {
+      const q = inscricoesSearch.toLowerCase();
+      filtered = filtered.filter(i => i.profiles?.full_name?.toLowerCase().includes(q));
+    }
+
+    return filtered;
+  }, [inscricoes, selectedCerimoniaId, showCanceladas, inscricoesSearch]);
+
+  // Selecionar a cerimônia mais recente por padrão (próxima futura; se não houver, a mais recente do passado)
   React.useEffect(() => {
     if (cerimonias && cerimonias.length > 0 && selectedCerimoniaId === 'todas') {
       const hoje = new Date();
       hoje.setHours(0, 0, 0, 0);
-      
-      // Encontrar a próxima cerimônia (data >= hoje)
-      const proximaCerimonia = cerimonias
-        .filter(c => new Date(c.data) >= hoje)
-        .sort((a, b) => new Date(a.data).getTime() - new Date(b.data).getTime())[0];
-        
-      if (proximaCerimonia) {
-        setSelectedCerimoniaId(proximaCerimonia.id);
-      }
+      const sorted = [...cerimonias].sort((a, b) => new Date(a.data).getTime() - new Date(b.data).getTime());
+      const proxima = sorted.find(c => new Date(c.data) >= hoje);
+      const default_ = proxima ?? sorted[sorted.length - 1];
+      if (default_) setSelectedCerimoniaId(default_.id);
     }
-  }, [cerimonias]); // Executar apenas quando as cerimônias forem carregadas
+  }, [cerimonias]);
 
   // Paginated Inscricoes (memoized)
   const { totalInscricoesPages, paginatedInscricoes } = useMemo(() => ({
@@ -1697,80 +1702,131 @@ const Admin: React.FC = () => {
 
           {/* INSCRICOES TAB */}
           <TabsContent value="inscricoes" className="space-y-6 ">
-            <div className="flex flex-col md:flex-row justify-between gap-4 items-end">
-              {/* Filtro de Cerimônia */}
-              <div className="w-full md:w-[300px] space-y-1.5">
-                <Label className="text-sm text-muted-foreground ml-1">Filtrar por Cerimônia</Label>
-                <Select value={selectedCerimoniaId} onValueChange={(value) => {
-                  setSelectedCerimoniaId(value);
-                  setInscricoesPage(1);
-                }}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecione uma cerimônia" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="todas">Todas as Cerimônias</SelectItem>
-                    {cerimonias?.map((cerimonia) => (
-                      <SelectItem key={cerimonia.id} value={cerimonia.id}>
-                        {cerimonia.nome || cerimonia.medicina_principal} - {formatDateBR(cerimonia.data)}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
 
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleExportInscricoes}
-                className="gap-2 w-full md:w-auto"
-              >
-                <Download className="w-4 h-4" />
-                Exportar CSV
-              </Button>
-            </div>
+            {/* Filtros: cerimônia + busca + canceladas + export */}
+            <Card className="border-primary/10">
+              <CardContent className="p-4 space-y-3">
+                <div className="flex flex-col md:flex-row gap-3 items-stretch md:items-center">
+                  {/* Cerimônia */}
+                  <div className="flex-1 min-w-0">
+                    <Select value={selectedCerimoniaId} onValueChange={(value) => {
+                      setSelectedCerimoniaId(value);
+                      setInscricoesPage(1);
+                      setInscricoesSearch('');
+                    }}>
+                      <SelectTrigger className="h-11">
+                        <SelectValue placeholder="Selecione uma cerimônia" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="todas">Todas as Cerimônias</SelectItem>
+                        {[...(cerimonias || [])].sort((a, b) => new Date(b.data).getTime() - new Date(a.data).getTime()).map((cerimonia) => (
+                          <SelectItem key={cerimonia.id} value={cerimonia.id}>
+                            {cerimonia.nome || cerimonia.medicina_principal} · {formatDateBR(cerimonia.data)}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  {/* Busca por nome */}
+                  <div className="relative flex-1 min-w-0 md:max-w-xs">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+                    <Input
+                      placeholder="Buscar por nome..."
+                      className="pl-10 h-11"
+                      value={inscricoesSearch}
+                      onChange={(e) => { setInscricoesSearch(e.target.value); setInscricoesPage(1); }}
+                    />
+                  </div>
+                  <Button variant="outline" size="sm" onClick={handleExportInscricoes} className="gap-2 h-11 whitespace-nowrap">
+                    <Download className="w-4 h-4" /> Exportar CSV
+                  </Button>
+                </div>
+                {/* Linha secundária: mostrar canceladas */}
+                <div className="flex items-center gap-2 pt-1 border-t border-border/50">
+                  <Switch id="show-canceladas" checked={showCanceladas} onCheckedChange={setShowCanceladas} />
+                  <Label htmlFor="show-canceladas" className="text-sm text-muted-foreground cursor-pointer">
+                    Mostrar inscrições canceladas
+                  </Label>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Métricas da cerimônia selecionada */}
+            {selectedCerimoniaId !== 'todas' && (() => {
+              const todasInscricoes = inscricoes?.filter(i => i.cerimonia_id === selectedCerimoniaId) || [];
+              const ativas = todasInscricoes.filter(i => !i.cancelada);
+              const pagas = ativas.filter(i => i.pago);
+              const pendentes = ativas.filter(i => !i.pago);
+              const cerimonia = cerimonias?.find(c => c.id === selectedCerimoniaId);
+              const vagas = cerimonia?.vagas;
+              return (
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                  {[
+                    { label: 'Inscritos', value: ativas.length, icon: Users, color: 'text-primary', bg: 'bg-primary/10', sub: vagas ? `${vagas - ativas.length} vagas livres` : undefined },
+                    { label: 'Confirmados', value: pagas.length, icon: CheckCircle2, color: 'text-green-600', bg: 'bg-green-50 dark:bg-green-950/30', sub: undefined },
+                    { label: 'Pendentes', value: pendentes.length, icon: AlertTriangle, color: 'text-amber-600', bg: 'bg-amber-50 dark:bg-amber-950/30', sub: undefined },
+                    { label: 'Cancelados', value: todasInscricoes.filter(i => i.cancelada).length, icon: XCircle, color: 'text-destructive', bg: 'bg-destructive/10', sub: undefined },
+                  ].map(({ label, value, icon: Icon, color, bg, sub }) => (
+                    <Card key={label} className="border-border/50">
+                      <CardContent className="p-4 flex items-center gap-3">
+                        <div className={cn('w-10 h-10 rounded-full flex items-center justify-center shrink-0', bg)}>
+                          <Icon className={cn('w-5 h-5', color)} />
+                        </div>
+                        <div className="min-w-0">
+                          <p className="text-2xl font-bold">{value}</p>
+                          <p className="text-xs text-muted-foreground">{label}</p>
+                          {sub && <p className="text-xs text-muted-foreground/70">{sub}</p>}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              );
+            })()}
+
             <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <CreditCard className="w-5 h-5 text-primary" />
-                  Gestão de Pagamentos
+              <CardHeader className="pb-3">
+                <CardTitle className="flex items-center gap-2 text-base">
+                  <FileText className="w-4 h-4 text-primary" />
+                  {selectedCerimoniaId === 'todas' ? 'Todas as Inscrições' : `Inscrições · ${cerimonias?.find(c => c.id === selectedCerimoniaId)?.nome || cerimonias?.find(c => c.id === selectedCerimoniaId)?.medicina_principal}`}
                 </CardTitle>
-                <CardDescription>
-                  {selectedCerimoniaId === 'todas' 
-                    ? 'Visualizando todas as inscrições.' 
-                    : `Inscrições para ${cerimonias?.find(c => c.id === selectedCerimoniaId)?.nome || 'cerimônia selecionada'}.`}
-                </CardDescription>
+                {inscricoesFiltradas.length > 0 && (
+                  <p className="text-xs text-muted-foreground">{inscricoesFiltradas.length} inscrição(ões) encontrada(s)</p>
+                )}
               </CardHeader>
-              <CardContent>
+              <CardContent className="p-0 md:p-0">
                 {/* Desktop Table */}
                 <div className="hidden md:block">
                   <Table>
                     <TableHeader>
                       <TableRow>
                         <TableHead>Membro</TableHead>
-                        <TableHead>Cerimônia</TableHead>
+                        {selectedCerimoniaId === 'todas' && <TableHead>Cerimônia</TableHead>}
                         <TableHead>Data Inscrição</TableHead>
                         <TableHead>Forma Pagamento</TableHead>
-                        <TableHead className="text-center">Pago</TableHead>
+                        <TableHead className="text-center">Status</TableHead>
                       </TableRow>
                     </TableHeader>
                     {isLoadingInscricoes ? (
-                      <TableSkeleton rows={8} columns={5} />
+                      <TableSkeleton rows={8} columns={selectedCerimoniaId === 'todas' ? 5 : 4} />
                     ) : (
                     <TableBody>
                       {paginatedInscricoes?.map((inscricao) => (
-                        <TableRow key={inscricao.id}>
+                        <TableRow key={inscricao.id} className={cn(inscricao.cancelada && 'opacity-50')}>
                           <TableCell className="font-medium">
-                            {inscricao.profiles?.full_name || 'Sem nome'}
-                          </TableCell>
-                          <TableCell>
-                            <div className="flex flex-col">
-                              <span className="font-medium">{inscricao.cerimonias?.nome || inscricao.cerimonias?.medicina_principal}</span>
-                              <span className="text-xs text-muted-foreground">
-                                {formatDateBR(inscricao.cerimonias?.data)}
-                              </span>
+                            <div className="flex items-center gap-2">
+                              {inscricao.profiles?.full_name || 'Sem nome'}
+                              {inscricao.cancelada && <Badge variant="destructive" className="text-xs">Cancelado</Badge>}
                             </div>
                           </TableCell>
+                          {selectedCerimoniaId === 'todas' && (
+                            <TableCell>
+                              <div className="flex flex-col">
+                                <span className="font-medium">{inscricao.cerimonias?.nome || inscricao.cerimonias?.medicina_principal}</span>
+                                <span className="text-xs text-muted-foreground">{formatDateBR(inscricao.cerimonias?.data)}</span>
+                              </div>
+                            </TableCell>
+                          )}
                           <TableCell>
                             {inscricao.data_inscricao ? format(new Date(inscricao.data_inscricao), "dd/MM 'às' HH:mm", { locale: ptBR }) : '-'}
                           </TableCell>
@@ -1780,7 +1836,82 @@ const Admin: React.FC = () => {
                             </Badge>
                           </TableCell>
                           <TableCell className="text-center">
-                            <div className="flex items-center justify-center gap-2">
+                            {inscricao.cancelada ? (
+                              <Badge variant="destructive" className="text-xs">Cancelado</Badge>
+                            ) : (
+                              <div className="flex items-center justify-center gap-2">
+                                {updatingPaymentId === inscricao.id ? (
+                                  <div className="w-9 h-5 flex items-center justify-center">
+                                    <div className="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+                                  </div>
+                                ) : (
+                                  <Switch
+                                    checked={inscricao.pago || false}
+                                    onCheckedChange={(checked) => handleTogglePayment(inscricao, checked)}
+                                    disabled={togglePaymentMutation.isPending}
+                                  />
+                                )}
+                                {inscricao.pago ? (
+                                  <Badge className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100">
+                                    <DollarSign className="w-3 h-3 mr-1" /> Pago
+                                  </Badge>
+                                ) : (
+                                  <Badge variant="outline" className="text-amber-600 border-amber-300">Pendente</Badge>
+                                )}
+                              </div>
+                            )}
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                    )}
+                  </Table>
+                </div>
+
+                {/* Mobile Cards - Inscrições */}
+                <div className="md:hidden p-4 space-y-3">
+                  {isLoadingInscricoes ? (
+                    <CardSkeleton count={5} />
+                  ) : (
+                    paginatedInscricoes?.map((inscricao) => (
+                      <MobileCard key={inscricao.id} className={cn(inscricao.cancelada && 'opacity-60')}>
+                        <MobileCardHeader>
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                              <span>{inscricao.profiles?.full_name || 'Sem nome'}</span>
+                              {inscricao.cancelada && <Badge variant="destructive" className="text-xs">Cancelado</Badge>}
+                            </div>
+                            {!inscricao.cancelada && (inscricao.pago ? (
+                              <Badge className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100 text-xs">
+                                <DollarSign className="w-3 h-3 mr-1" /> Pago
+                              </Badge>
+                            ) : (
+                              <Badge variant="outline" className="text-amber-600 border-amber-300 text-xs">Pendente</Badge>
+                            ))}
+                          </div>
+                        </MobileCardHeader>
+                        {selectedCerimoniaId === 'todas' && (
+                          <MobileCardRow label="Cerimônia">
+                            <div className="text-right">
+                              <span className="block">{inscricao.cerimonias?.nome || inscricao.cerimonias?.medicina_principal}</span>
+                              <span className="text-xs text-muted-foreground">{formatDateBR(inscricao.cerimonias?.data)}</span>
+                            </div>
+                          </MobileCardRow>
+                        )}
+                        <MobileCardRow label="Inscrição">
+                          {inscricao.data_inscricao ? format(new Date(inscricao.data_inscricao), "dd/MM HH:mm", { locale: ptBR }) : '-'}
+                        </MobileCardRow>
+                        <MobileCardRow label="Pagamento">
+                          <Badge variant="outline" className="capitalize text-xs">
+                            {inscricao.forma_pagamento || 'Não informado'}
+                          </Badge>
+                        </MobileCardRow>
+                        {!inscricao.cancelada && (
+                          <MobileCardActions>
+                            <div className="flex items-center justify-between w-full">
+                              <span className="text-sm text-muted-foreground">
+                                {inscricao.pago ? 'Pago — desmarcar?' : 'Marcar como pago'}
+                              </span>
                               {updatingPaymentId === inscricao.id ? (
                                 <div className="w-9 h-5 flex items-center justify-center">
                                   <div className="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin" />
@@ -1792,77 +1923,9 @@ const Admin: React.FC = () => {
                                   disabled={togglePaymentMutation.isPending}
                                 />
                               )}
-                              {inscricao.pago ? (
-                                <Badge className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100">
-                                  <DollarSign className="w-3 h-3 mr-1" /> Pago
-                                </Badge>
-                              ) : (
-                                <Badge variant="outline" className="text-amber-600 border-amber-300">
-                                  Pendente
-                                </Badge>
-                              )}
                             </div>
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                    )}
-                  </Table>
-                </div>
-
-                {/* Mobile Cards - Inscrições */}
-                <div className="md:hidden space-y-3">
-                  {isLoadingInscricoes ? (
-                    <CardSkeleton count={5} />
-                  ) : (
-                    paginatedInscricoes?.map((inscricao) => (
-                      <MobileCard key={inscricao.id}>
-                        <MobileCardHeader>
-                          <div className="flex items-center justify-between">
-                            <span>{inscricao.profiles?.full_name || 'Sem nome'}</span>
-                            {inscricao.pago ? (
-                              <Badge className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100 text-xs">
-                                <DollarSign className="w-3 h-3 mr-1" /> Pago
-                              </Badge>
-                            ) : (
-                              <Badge variant="outline" className="text-amber-600 border-amber-300 text-xs">
-                                Pendente
-                              </Badge>
-                            )}
-                          </div>
-                        </MobileCardHeader>
-                        <MobileCardRow label="Cerimônia">
-                          <div className="text-right">
-                            <span className="block">{inscricao.cerimonias?.nome || inscricao.cerimonias?.medicina_principal}</span>
-                            <span className="text-xs text-muted-foreground">
-                              {formatDateBR(inscricao.cerimonias?.data)}
-                            </span>
-                          </div>
-                        </MobileCardRow>
-                        <MobileCardRow label="Inscrição">
-                          {inscricao.data_inscricao ? format(new Date(inscricao.data_inscricao), "dd/MM HH:mm", { locale: ptBR }) : '-'}
-                        </MobileCardRow>
-                        <MobileCardRow label="Pagamento">
-                          <Badge variant="outline" className="capitalize text-xs">
-                            {inscricao.forma_pagamento || 'Não informado'}
-                          </Badge>
-                        </MobileCardRow>
-                        <MobileCardActions>
-                          <div className="flex items-center justify-between w-full">
-                            <span className="text-sm text-muted-foreground">Marcar como pago</span>
-                            {updatingPaymentId === inscricao.id ? (
-                              <div className="w-9 h-5 flex items-center justify-center">
-                                <div className="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-                              </div>
-                            ) : (
-                              <Switch
-                                checked={inscricao.pago || false}
-                                onCheckedChange={(checked) => handleTogglePayment(inscricao, checked)}
-                                disabled={togglePaymentMutation.isPending}
-                              />
-                            )}
-                          </div>
-                        </MobileCardActions>
+                          </MobileCardActions>
+                        )}
                       </MobileCard>
                     ))
                   )}
@@ -2267,6 +2330,33 @@ const Admin: React.FC = () => {
                 <Check className="w-4 h-4" />
               )}
               Confirmar e Registrar
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Dialog: confirmar desmarcação de pagamento */}
+      <Dialog open={unmarkPaymentDialog.open} onOpenChange={(open) => setUnmarkPaymentDialog(p => ({ ...p, open }))}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle>Desmarcar pagamento?</DialogTitle>
+            <DialogDescription>
+              Tem certeza que deseja marcar a inscrição de <strong>{unmarkPaymentDialog.nome}</strong> como <strong>pendente</strong>? Esta ação não desfaz registros financeiros já criados.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="gap-2">
+            <Button variant="outline" onClick={() => setUnmarkPaymentDialog(p => ({ ...p, open: false }))}>
+              Cancelar
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={() => {
+                togglePaymentMutation.mutate({ inscricaoId: unmarkPaymentDialog.inscricaoId, pago: false });
+                setUnmarkPaymentDialog(p => ({ ...p, open: false }));
+              }}
+              disabled={togglePaymentMutation.isPending}
+            >
+              {togglePaymentMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Confirmar'}
             </Button>
           </DialogFooter>
         </DialogContent>
