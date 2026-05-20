@@ -12,8 +12,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { toast } from 'sonner';
 import { TOAST_MESSAGES } from '@/constants/messages';
-import { Upload, Link, X, Loader2, Plus, Image } from 'lucide-react';
+import { Upload, Link, X, Loader2, Plus, Image, ChevronRight, ChevronLeft } from 'lucide-react';
 import { useIsMobile } from '@/hooks/useIsMobile';
+import { cn } from '@/lib/utils';
 import type { Cerimonia, MedicinaDB, TipoConsagracao } from '@/types';
 
 type DialogMode = 'create' | 'edit';
@@ -38,6 +39,15 @@ interface CeremonyFormData {
   banner_url: string;
 }
 
+type WizardStep = 1 | 2 | 3;
+
+const STEP_LABELS = ['Essencial', 'Logística', 'Conteúdo'];
+const STEP_FIELDS: Record<WizardStep, (keyof CeremonyFormData)[]> = {
+  1: ['nome', 'data', 'horario', 'local'],
+  2: ['vagas'],
+  3: [],
+};
+
 const formatCentavosToReal = (centavos: number): string => {
   if (!centavos) return '';
   return (centavos / 100).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -59,12 +69,50 @@ const SectionLabel = ({ children }: { children: React.ReactNode }) => (
 const FieldError = ({ message }: { message?: string }) =>
   message ? <p className="text-xs text-destructive mt-0.5">{message}</p> : null;
 
+// Indicador de progresso do wizard
+const WizardProgress: React.FC<{ currentStep: WizardStep }> = ({ currentStep }) => (
+  <div className="flex items-center justify-center gap-0 mb-5">
+    {STEP_LABELS.map((label, i) => {
+      const step = (i + 1) as WizardStep;
+      const isActive = currentStep === step;
+      const isDone = currentStep > step;
+      return (
+        <div key={step} className="flex items-center">
+          <div className="flex flex-col items-center gap-1">
+            <div className={cn(
+              'w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold transition-colors',
+              isDone ? 'bg-primary text-primary-foreground' :
+              isActive ? 'bg-primary text-primary-foreground ring-4 ring-primary/20' :
+              'bg-muted text-muted-foreground'
+            )}>
+              {isDone ? '✓' : step}
+            </div>
+            <span className={cn(
+              'text-[10px] font-medium whitespace-nowrap transition-colors',
+              isActive ? 'text-primary' : isDone ? 'text-primary/70' : 'text-muted-foreground'
+            )}>
+              {label}
+            </span>
+          </div>
+          {i < STEP_LABELS.length - 1 && (
+            <div className={cn(
+              'h-px w-12 mx-1 mb-4 transition-colors',
+              isDone ? 'bg-primary' : 'bg-border'
+            )} />
+          )}
+        </div>
+      );
+    })}
+  </div>
+);
+
 const CeremonyFormDialog: React.FC<CeremonyFormDialogProps> = ({ isOpen, onClose, mode, ceremony }) => {
   const isMobile = useIsMobile();
   const queryClient = useQueryClient();
-  const { register, handleSubmit, reset, setValue, formState: { errors } } = useForm<CeremonyFormData>();
+  const { register, handleSubmit, reset, setValue, trigger, formState: { errors } } = useForm<CeremonyFormData>();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  const [currentStep, setCurrentStep] = useState<WizardStep>(1);
   const [imageMode, setImageMode] = useState<'url' | 'upload'>('url');
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
@@ -82,7 +130,6 @@ const CeremonyFormDialog: React.FC<CeremonyFormDialogProps> = ({ isOpen, onClose
 
   const isEditMode = mode === 'edit';
 
-  // Tipos de consagração
   const { data: tiposConsagracao, refetch: refetchTipos } = useQuery({
     queryKey: ['tipos-consagracao'],
     queryFn: async () => {
@@ -92,7 +139,6 @@ const CeremonyFormDialog: React.FC<CeremonyFormDialogProps> = ({ isOpen, onClose
     },
   });
 
-  // Medicinas disponíveis
   const { data: medicinasDisponiveis, refetch: refetchMedicinas } = useQuery({
     queryKey: ['medicinas'],
     queryFn: async () => {
@@ -143,10 +189,8 @@ const CeremonyFormDialog: React.FC<CeremonyFormDialogProps> = ({ isOpen, onClose
     },
   });
 
-  // Preenche formulário no modo edição
   useEffect(() => {
     if (!ceremony || !isOpen || !isEditMode) return;
-
     setValue('nome', ceremony.nome || '');
     setValue('data', ceremony.data);
     setValue('horario', ceremony.horario);
@@ -155,26 +199,22 @@ const CeremonyFormDialog: React.FC<CeremonyFormDialogProps> = ({ isOpen, onClose
     setValue('vagas', ceremony.vagas || 0);
     setValue('observacoes', ceremony.observacoes || '');
     setValue('banner_url', ceremony.banner_url || '');
-
     const valorCentavos = ceremony.valor || 0;
     setValue('valor', valorCentavos);
     setValorDisplay(formatCentavosToReal(valorCentavos));
-
     if (ceremony.banner_url) setPreviewUrl(ceremony.banner_url);
-
     if (ceremony.tipo_consagracao_id) {
       setSelectedTipoId(ceremony.tipo_consagracao_id);
       setValue('tipo_consagracao_id', ceremony.tipo_consagracao_id);
     }
-
     if (ceremony.cerimonias_medicinas?.length) {
       setSelectedMedicinas(ceremony.cerimonias_medicinas.map(cm => cm.medicinas));
     }
   }, [ceremony, isOpen, isEditMode, setValue]);
 
-  // Reset ao fechar
   useEffect(() => {
     if (!isOpen) {
+      setCurrentStep(1);
       setSelectedFile(null); setPreviewUrl(null); setImageMode('url');
       setShowAddTipo(false); setNovoTipo(''); setSelectedTipoId('');
       setSelectedMedicinas([]); setShowAddMedicina(false); setNovaMedicina('');
@@ -279,10 +319,16 @@ const CeremonyFormDialog: React.FC<CeremonyFormDialogProps> = ({ isOpen, onClose
   };
 
   const handleClose = () => {
-    reset(); setSelectedFile(null); setPreviewUrl(null); setImageMode('url');
+    reset(); setCurrentStep(1);
+    setSelectedFile(null); setPreviewUrl(null); setImageMode('url');
     setShowAddTipo(false); setNovoTipo(''); setSelectedTipoId('');
     setSelectedMedicinas([]); setShowAddMedicina(false); setNovaMedicina('');
     setValorDisplay(''); onClose();
+  };
+
+  const handleNext = async () => {
+    const valid = await trigger(STEP_FIELDS[currentStep]);
+    if (valid) setCurrentStep(s => (s + 1) as WizardStep);
   };
 
   const isPending = isEditMode ? updateMutation.isPending : createMutation.isPending || isUploading;
@@ -297,13 +343,10 @@ const CeremonyFormDialog: React.FC<CeremonyFormDialogProps> = ({ isOpen, onClose
     m => !selectedMedicinas.some(s => s.id === m.id)
   ) ?? [];
 
-  const formContent = (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+  // ── Blocos de campos reutilizados em mobile e desktop ──
 
-      {/* — Identificação — */}
-      <SectionLabel>Identificação</SectionLabel>
-
-      {/* Nome da Cerimônia */}
+  const fieldsEssencial = (
+    <div className="space-y-4">
       <div className="space-y-1.5">
         <Label className="text-sm font-medium">Nome da Cerimônia *</Label>
         <Input
@@ -314,7 +357,6 @@ const CeremonyFormDialog: React.FC<CeremonyFormDialogProps> = ({ isOpen, onClose
         <FieldError message={errors.nome?.message} />
       </div>
 
-      {/* Tipo de Consagração */}
       <div className="space-y-1.5">
         <div className="flex items-center justify-between">
           <Label className="text-sm font-medium">Tipo de Consagração</Label>
@@ -341,7 +383,6 @@ const CeremonyFormDialog: React.FC<CeremonyFormDialogProps> = ({ isOpen, onClose
         <input type="hidden" {...register('tipo_consagracao_id')} />
       </div>
 
-      {/* Medicinas (multi-select) */}
       <div className="space-y-1.5">
         <div className="flex items-center justify-between">
           <Label className="text-sm font-medium">Medicinas Consagradas</Label>
@@ -349,7 +390,6 @@ const CeremonyFormDialog: React.FC<CeremonyFormDialogProps> = ({ isOpen, onClose
             <Plus className="w-3 h-3 mr-1" />Nova medicina
           </Button>
         </div>
-
         {showAddMedicina && (
           <div className="flex gap-2 p-2 bg-muted/50 rounded-lg">
             <Input placeholder="Nome da medicina..." value={novaMedicina} onChange={(e) => setNovaMedicina(e.target.value)} className="flex-1 h-8 text-sm" />
@@ -358,8 +398,6 @@ const CeremonyFormDialog: React.FC<CeremonyFormDialogProps> = ({ isOpen, onClose
             </Button>
           </div>
         )}
-
-        {/* Tags das medicinas selecionadas */}
         {selectedMedicinas.length > 0 && (
           <div className="flex flex-wrap gap-1.5 p-2 bg-muted/30 rounded-lg min-h-[36px]">
             {selectedMedicinas.map(m => (
@@ -372,8 +410,6 @@ const CeremonyFormDialog: React.FC<CeremonyFormDialogProps> = ({ isOpen, onClose
             ))}
           </div>
         )}
-
-        {/* Dropdown para adicionar medicina */}
         {medicinasNaoSelecionadas.length > 0 && (
           <Select onValueChange={(id) => {
             const m = medicinasDisponiveis?.find(m => m.id === id);
@@ -391,172 +427,140 @@ const CeremonyFormDialog: React.FC<CeremonyFormDialogProps> = ({ isOpen, onClose
         )}
       </div>
 
-      {/* — Quando e Onde — */}
-      <SectionLabel>Quando e Onde</SectionLabel>
-
       <div className="grid grid-cols-2 gap-3">
         <div className="space-y-1.5">
           <Label className="text-sm font-medium">Data *</Label>
-          <Input
-            type="date"
-            {...register('data', { required: 'Informe a data' })}
-            className={errors.data ? 'border-destructive' : ''}
-          />
+          <Input type="date" {...register('data', { required: 'Informe a data' })} className={errors.data ? 'border-destructive' : ''} />
           <FieldError message={errors.data?.message} />
         </div>
         <div className="space-y-1.5">
           <Label className="text-sm font-medium">Horário *</Label>
-          <Input
-            type="time"
-            {...register('horario', { required: 'Informe o horário' })}
-            className={errors.horario ? 'border-destructive' : ''}
-          />
+          <Input type="time" {...register('horario', { required: 'Informe o horário' })} className={errors.horario ? 'border-destructive' : ''} />
           <FieldError message={errors.horario?.message} />
         </div>
       </div>
 
       <div className="space-y-1.5">
         <Label className="text-sm font-medium">Local *</Label>
-        <Input
-          placeholder="Ex: Templo Principal, Sítio..."
-          {...register('local', { required: 'Informe o local' })}
-          className={errors.local ? 'border-destructive' : ''}
-        />
+        <Input placeholder="Ex: Templo Principal, Sítio..." {...register('local', { required: 'Informe o local' })} className={errors.local ? 'border-destructive' : ''} />
         <FieldError message={errors.local?.message} />
       </div>
+    </div>
+  );
 
-      {/* — Logística — */}
-      <SectionLabel>Logística</SectionLabel>
-
+  const fieldsLogistica = (
+    <div className="space-y-4">
       <div className="grid grid-cols-2 gap-3">
         <div className="space-y-1.5">
           <Label className="text-sm font-medium">Vagas *</Label>
-          <Input
-            type="number"
-            placeholder="20"
-            {...register('vagas', { required: 'Informe as vagas', min: { value: 1, message: 'Mínimo 1 vaga' } })}
-            className={errors.vagas ? 'border-destructive' : ''}
-          />
+          <Input type="number" placeholder="20" {...register('vagas', { required: 'Informe as vagas', min: { value: 1, message: 'Mínimo 1 vaga' } })} className={errors.vagas ? 'border-destructive' : ''} />
           <FieldError message={errors.vagas?.message} />
         </div>
         <div className="space-y-1.5">
           <Label className="text-sm font-medium">Valor (R$)</Label>
-          <Input
-            type="text"
-            inputMode="decimal"
-            placeholder="0,00"
-            value={valorDisplay}
-            onChange={handleValorChange}
-          />
+          <Input type="text" inputMode="decimal" placeholder="0,00" value={valorDisplay} onChange={handleValorChange} />
           <input type="hidden" {...register('valor')} />
         </div>
       </div>
 
-      {/* — Banner — */}
-      <SectionLabel>Banner</SectionLabel>
-
       <div className="space-y-3">
-        {/* Seletor de modo */}
+        <Label className="text-sm font-medium">Banner</Label>
         <div className="grid grid-cols-2 gap-2">
-          <button
-            type="button"
-            onClick={() => { setImageMode('url'); setSelectedFile(null); }}
-            className={`flex items-center justify-center gap-2 py-2 px-3 rounded-lg border text-sm font-medium transition-colors ${
-              imageMode === 'url'
-                ? 'bg-primary text-primary-foreground border-primary'
-                : 'bg-background text-muted-foreground border-border hover:border-primary/50'
-            }`}
-          >
-            <Link className="w-4 h-4" />
-            URL
+          <button type="button" onClick={() => { setImageMode('url'); setSelectedFile(null); }}
+            className={`flex items-center justify-center gap-2 py-2 px-3 rounded-lg border text-sm font-medium transition-colors ${imageMode === 'url' ? 'bg-primary text-primary-foreground border-primary' : 'bg-background text-muted-foreground border-border hover:border-primary/50'}`}>
+            <Link className="w-4 h-4" />URL
           </button>
-          <button
-            type="button"
-            onClick={() => setImageMode('upload')}
-            className={`flex items-center justify-center gap-2 py-2 px-3 rounded-lg border text-sm font-medium transition-colors ${
-              imageMode === 'upload'
-                ? 'bg-primary text-primary-foreground border-primary'
-                : 'bg-background text-muted-foreground border-border hover:border-primary/50'
-            }`}
-          >
-            <Upload className="w-4 h-4" />
-            Upload
+          <button type="button" onClick={() => setImageMode('upload')}
+            className={`flex items-center justify-center gap-2 py-2 px-3 rounded-lg border text-sm font-medium transition-colors ${imageMode === 'upload' ? 'bg-primary text-primary-foreground border-primary' : 'bg-background text-muted-foreground border-border hover:border-primary/50'}`}>
+            <Upload className="w-4 h-4" />Upload
           </button>
         </div>
-
-        {/* Conteúdo conforme modo */}
         {imageMode === 'url' ? (
-          <Input
-            placeholder="https://..."
-            {...register('banner_url')}
-            onChange={(e) => { setValue('banner_url', e.target.value); setPreviewUrl(e.target.value || null); setSelectedFile(null); }}
-          />
+          <Input placeholder="https://..." {...register('banner_url')} onChange={(e) => { setValue('banner_url', e.target.value); setPreviewUrl(e.target.value || null); setSelectedFile(null); }} />
         ) : (
           <div>
             <input ref={fileInputRef} type="file" accept="image/*" onChange={handleFileSelect} className="hidden" />
-            <button
-              type="button"
-              onClick={() => fileInputRef.current?.click()}
-              className="w-full flex flex-col items-center justify-center gap-2 py-4 border-2 border-dashed border-border rounded-lg hover:border-primary/50 transition-colors text-muted-foreground hover:text-foreground"
-            >
+            <button type="button" onClick={() => fileInputRef.current?.click()}
+              className="w-full flex flex-col items-center justify-center gap-2 py-4 border-2 border-dashed border-border rounded-lg hover:border-primary/50 transition-colors text-muted-foreground hover:text-foreground">
               <Image className="w-6 h-6" />
               <span className="text-sm">{selectedFile ? selectedFile.name : 'Clique para selecionar uma imagem'}</span>
               <span className="text-xs">JPG, PNG, WebP — máx. 5MB</span>
             </button>
           </div>
         )}
-
-        {/* Preview */}
         {previewUrl && (
           <div className="relative rounded-lg overflow-hidden border">
-            <img
-              src={previewUrl}
-              alt="Preview do banner"
-              className="w-full h-40 object-cover"
-              onError={() => setPreviewUrl(null)}
-            />
-            <Button
-              type="button"
-              variant="destructive"
-              size="icon"
-              className="absolute top-2 right-2 h-7 w-7"
-              onClick={handleRemoveImage}
-            >
+            <img src={previewUrl} alt="Preview do banner" className="w-full h-40 object-cover" onError={() => setPreviewUrl(null)} />
+            <Button type="button" variant="destructive" size="icon" className="absolute top-2 right-2 h-7 w-7" onClick={handleRemoveImage}>
               <X className="w-3.5 h-3.5" />
             </Button>
           </div>
         )}
       </div>
+    </div>
+  );
 
-      {/* — Conteúdo — */}
-      <SectionLabel>Conteúdo</SectionLabel>
-
+  const fieldsConteudo = (
+    <div className="space-y-4">
       <div className="space-y-1.5">
         <Label className="text-sm font-medium">Descrição</Label>
-        <Textarea
-          placeholder="Detalhes sobre a cerimônia, preparação, intenção..."
-          {...register('descricao')}
-          className="min-h-[72px] resize-none"
-        />
+        <Textarea placeholder="Detalhes sobre a cerimônia, preparação, intenção..." {...register('descricao')} className="min-h-[100px] resize-none" />
       </div>
-
       <div className="space-y-1.5">
         <Label className="text-sm font-medium">Observações internas</Label>
-        <Textarea
-          placeholder="Notas para a equipe (não visível aos participantes)..."
-          {...register('observacoes')}
-          className="min-h-[60px] resize-none"
-        />
+        <Textarea placeholder="Notas para a equipe (não visível aos participantes)..." {...register('observacoes')} className="min-h-[80px] resize-none" />
       </div>
+    </div>
+  );
 
-      {/* Botões */}
+  // ── Desktop: form longo único ──
+  const desktopForm = (
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+      <SectionLabel>Identificação</SectionLabel>
+      {fieldsEssencial}
+      <SectionLabel>Logística</SectionLabel>
+      {fieldsLogistica}
+      <SectionLabel>Conteúdo</SectionLabel>
+      {fieldsConteudo}
       <div className="flex gap-2 pt-2 pb-1">
         <Button type="button" variant="outline" onClick={handleClose} className="flex-1">Cancelar</Button>
         <Button type="submit" disabled={isPending} className="flex-1">
-          {isUploading
-            ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Enviando imagem...</>
-            : isPending ? config.pendingText : config.submitText}
+          {isUploading ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Enviando imagem...</> : isPending ? config.pendingText : config.submitText}
         </Button>
+      </div>
+    </form>
+  );
+
+  // ── Mobile: wizard por passos ──
+  const mobileWizard = (
+    <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col h-full">
+      <div className="flex-1 overflow-y-auto px-4 pt-2 pb-4">
+        <WizardProgress currentStep={currentStep} />
+
+        {currentStep === 1 && fieldsEssencial}
+        {currentStep === 2 && fieldsLogistica}
+        {currentStep === 3 && fieldsConteudo}
+      </div>
+
+      {/* Navegação fixa no fundo */}
+      <div className="shrink-0 px-4 py-3 border-t bg-background flex gap-2">
+        {currentStep > 1 ? (
+          <Button type="button" variant="outline" onClick={() => setCurrentStep(s => (s - 1) as WizardStep)} className="flex-1 gap-1">
+            <ChevronLeft className="w-4 h-4" />Voltar
+          </Button>
+        ) : (
+          <Button type="button" variant="outline" onClick={handleClose} className="flex-1">Cancelar</Button>
+        )}
+
+        {currentStep < 3 ? (
+          <Button type="button" onClick={handleNext} className="flex-1 gap-1">
+            Próximo<ChevronRight className="w-4 h-4" />
+          </Button>
+        ) : (
+          <Button type="submit" disabled={isPending} className="flex-1">
+            {isUploading ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Enviando...</> : isPending ? config.pendingText : config.submitText}
+          </Button>
+        )}
       </div>
     </form>
   );
@@ -564,12 +568,14 @@ const CeremonyFormDialog: React.FC<CeremonyFormDialogProps> = ({ isOpen, onClose
   if (isMobile) {
     return (
       <Drawer open={isOpen} onOpenChange={(open) => !open && handleClose()}>
-        <DrawerContent className="max-h-[92vh] flex flex-col">
-          <DrawerHeader className="shrink-0 pb-2">
+        <DrawerContent className="h-[92vh] flex flex-col">
+          <DrawerHeader className="shrink-0 pb-0 pt-4">
             <DrawerTitle className="font-display text-lg text-primary">{config.title}</DrawerTitle>
             <DrawerDescription className="sr-only">Formulário de cerimônia</DrawerDescription>
           </DrawerHeader>
-          <div className="flex-1 overflow-y-auto px-4 pb-6">{formContent}</div>
+          <div className="flex-1 flex flex-col overflow-hidden">
+            {mobileWizard}
+          </div>
         </DrawerContent>
       </Drawer>
     );
@@ -582,7 +588,7 @@ const CeremonyFormDialog: React.FC<CeremonyFormDialogProps> = ({ isOpen, onClose
           <DialogTitle className="font-display text-xl text-primary">{config.title}</DialogTitle>
           <DialogDescription className="sr-only">Formulário de cerimônia</DialogDescription>
         </DialogHeader>
-        {formContent}
+        {desktopForm}
       </DialogContent>
     </Dialog>
   );
