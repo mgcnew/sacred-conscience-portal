@@ -264,7 +264,7 @@ const Anamnese: React.FC = () => {
         const incomplete = !mapped.documento_valor || !mapped.assinatura;
         setIsIncomplete(incomplete);
         
-        setViewMode('view'); // Mostrar modo visualização quando já existe ficha
+        setViewMode(prev => prev === 'edit' ? 'edit' : 'view'); // Preserva edição em andamento
         // Clear any draft since we have real data
         try {
           localStorage.removeItem(STORAGE_KEYS.ANAMNESE_DRAFT);
