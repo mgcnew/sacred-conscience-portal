@@ -1,13 +1,12 @@
-import { Calendar, MapPin, Users, AlertCircle, CalendarDays } from "lucide-react";
+import { Calendar, MapPin, Users, AlertCircle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { CeremonySkeleton } from "./skeletons/CeremonySkeleton";
 import { ROUTES } from "@/constants/routes";
-import { formatDateExtensoBR } from "@/lib/date-utils";
 import type { CerimoniasComVagas } from "@/hooks/queries/useUpcomingCeremonies";
 
 interface UpcomingCeremoniesSectionProps {
@@ -17,10 +16,6 @@ interface UpcomingCeremoniesSectionProps {
   hasAnamnese: boolean;
 }
 
-/**
- * Seção de próximas cerimônias disponíveis
- * Requirements: 2.1, 2.2, 2.3, 2.4, 2.5
- */
 export function UpcomingCeremoniesSection({
   ceremonies,
   isLoading,
@@ -29,138 +24,95 @@ export function UpcomingCeremoniesSection({
 }: UpcomingCeremoniesSectionProps) {
   const navigate = useNavigate();
 
-  // Loading state (Req 5.3)
   if (isLoading) {
-    return (
-      <Card className="w-full">
-        <CardHeader className="pb-2">
-          <CardTitle className="flex items-center gap-2 text-lg">
-            <CalendarDays className="h-5 w-5" />
-            Próximas Cerimônias
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <CeremonySkeleton count={3} />
-        </CardContent>
-      </Card>
-    );
+    return <CeremonySkeleton count={3} />;
   }
 
-  // Error state (Req 5.4)
   if (error) {
     return (
-      <Card className="w-full">
-        <CardHeader className="pb-2">
-          <CardTitle className="flex items-center gap-2 text-lg">
-            <CalendarDays className="h-5 w-5" />
-            Próximas Cerimônias
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="flex flex-col items-center justify-center py-8 text-muted-foreground">
-            <AlertCircle className="h-12 w-12 mb-2" />
-            <p>Erro ao carregar cerimônias</p>
-          </div>
-        </CardContent>
-      </Card>
+      <div className="flex flex-col items-center justify-center py-10 text-muted-foreground gap-2">
+        <AlertCircle className="h-10 w-10" />
+        <p className="text-sm">Erro ao carregar cerimônias</p>
+      </div>
     );
   }
 
-  // Empty state (Req 2.4)
   if (!ceremonies || ceremonies.length === 0) {
     return (
-      <Card className="w-full">
-        <CardHeader className="pb-2">
-          <CardTitle className="flex items-center gap-2 text-lg">
-            <CalendarDays className="h-5 w-5" />
-            Próximas Cerimônias
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="flex flex-col items-center justify-center py-8 text-muted-foreground">
-            <Calendar className="h-12 w-12 mb-2" />
-            <p className="text-center">
-              Não há cerimônias disponíveis no momento.
-              <br />
-              <span className="text-sm">Novas datas serão anunciadas em breve!</span>
-            </p>
-          </div>
-        </CardContent>
-      </Card>
+      <div className="flex flex-col items-center justify-center py-10 text-muted-foreground gap-2 text-center">
+        <Calendar className="h-10 w-10" />
+        <p className="text-sm">
+          Não há cerimônias disponíveis no momento.
+          <br />
+          <span className="text-xs">Novas datas serão anunciadas em breve!</span>
+        </p>
+      </div>
     );
   }
 
   return (
-    <Card className="w-full">
-      <CardHeader className="pb-2">
-        <CardTitle className="flex items-center gap-2 text-lg">
-          <CalendarDays className="h-5 w-5" />
-          Próximas Cerimônias
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
-        {/* Anamnese warning (Req 2.5) */}
-        {!hasAnamnese && (
-          <Alert className="mb-4 border-amber-500/50 bg-amber-500/10">
-            <AlertCircle className="h-4 w-4 text-amber-600 dark:text-amber-500" />
-            <AlertDescription className="text-sm">
-              Você precisa preencher sua{" "}
-              <button
-                onClick={() => navigate(ROUTES.ANAMNESE)}
-                className="font-medium underline underline-offset-2 hover:text-amber-700 dark:hover:text-amber-400"
-              >
-                ficha de anamnese
-              </button>{" "}
-              antes de se inscrever nas cerimônias.
-            </AlertDescription>
-          </Alert>
-        )}
-
-        {/* Ceremony cards (Req 2.2) */}
-        <div className="space-y-3">
-          {ceremonies.map((ceremony) => (
-            <Card
-              key={ceremony.id}
-              className="overflow-hidden cursor-pointer transition-colors hover:bg-accent/50"
-              onClick={() => navigate(`${ROUTES.CERIMONIAS}#${ceremony.id}`)}
+    <div className="space-y-3">
+      {!hasAnamnese && (
+        <Alert className="border-amber-500/50 bg-amber-500/10">
+          <AlertCircle className="h-4 w-4 text-amber-600 dark:text-amber-500" />
+          <AlertDescription className="text-sm">
+            Você precisa preencher sua{" "}
+            <button
+              onClick={() => navigate(ROUTES.ANAMNESE)}
+              className="font-medium underline underline-offset-2 hover:text-amber-700 dark:hover:text-amber-400"
             >
-              <CardContent className="p-4">
-                <div className="flex flex-col gap-3 min-w-0 w-full">
-                  {/* Title (Req 2.2) */}
-                  <h3 className="font-semibold text-base leading-tight truncate">
+              ficha de anamnese
+            </button>{" "}
+            antes de se inscrever nas cerimônias.
+          </AlertDescription>
+        </Alert>
+      )}
+
+      {ceremonies.map((ceremony) => {
+        const [year, month, day] = ceremony.data.split('-').map(Number);
+        const dateObj = new Date(year, month - 1, day);
+        const dayNum = dateObj.getDate();
+        const monthShort = dateObj.toLocaleDateString('pt-BR', { month: 'short' }).replace('.', '');
+
+        return (
+          <Card
+            key={ceremony.id}
+            className="overflow-hidden cursor-pointer border border-border/60 shadow-sm hover:shadow-md hover:border-primary/30 transition-all active:scale-[0.99]"
+            onClick={() => navigate(`${ROUTES.CERIMONIAS}#${ceremony.id}`)}
+          >
+            <CardContent className="p-0">
+              <div className="flex items-stretch">
+                {/* Date badge */}
+                <div className="flex flex-col items-center justify-center bg-primary/8 border-r border-border/40 px-3 py-4 min-w-[60px]">
+                  <span className="text-xl font-bold text-primary leading-none">{dayNum}</span>
+                  <span className="text-[10px] font-semibold text-primary/70 uppercase tracking-wide mt-0.5">
+                    {monthShort}
+                  </span>
+                </div>
+
+                {/* Content */}
+                <div className="flex-1 p-3 min-w-0">
+                  <h3 className="font-semibold text-sm leading-tight truncate mb-1.5">
                     {ceremony.nome || "Cerimônia"}
                   </h3>
-
-                  {/* Date and location (Req 2.2) */}
-                  <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-muted-foreground">
-                    <div className="flex items-center gap-2 shrink-0">
-                      <Calendar className="h-4 w-4 shrink-0" />
-                      <span>
-                        {formatDateExtensoBR(ceremony.data)}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-2 min-w-0">
-                      <MapPin className="h-4 w-4 shrink-0" />
-                      <span className="truncate">{ceremony.local}</span>
-                    </div>
+                  <div className="flex items-center gap-1 text-xs text-muted-foreground mb-2">
+                    <MapPin className="h-3 w-3 shrink-0" />
+                    <span className="truncate">{ceremony.local}</span>
                   </div>
-
-                  {/* Vagas disponíveis and action button (Req 2.2) */}
-                  <div className="flex items-center justify-between">
+                  <div className="flex items-center justify-between gap-2">
                     <Badge
                       variant={ceremony.vagas_disponiveis > 0 ? "default" : "secondary"}
-                      className="flex items-center gap-1"
+                      className="flex items-center gap-1 text-[10px] h-5"
                     >
-                      <Users className="h-3 w-3" />
+                      <Users className="h-2.5 w-2.5" />
                       {ceremony.vagas_disponiveis > 0
-                        ? `${ceremony.vagas_disponiveis} ${
-                            ceremony.vagas_disponiveis === 1 ? "vaga" : "vagas"
-                          }`
+                        ? `${ceremony.vagas_disponiveis} ${ceremony.vagas_disponiveis === 1 ? "vaga" : "vagas"}`
                         : "Esgotado"}
                     </Badge>
                     <Button
                       size="sm"
                       variant="ghost"
+                      className="h-7 text-xs text-primary px-2"
                       onClick={(e) => {
                         e.stopPropagation();
                         navigate(`${ROUTES.CERIMONIAS}#${ceremony.id}`);
@@ -170,11 +122,11 @@ export function UpcomingCeremoniesSection({
                     </Button>
                   </div>
                 </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      </CardContent>
-    </Card>
+              </div>
+            </CardContent>
+          </Card>
+        );
+      })}
+    </div>
   );
 }

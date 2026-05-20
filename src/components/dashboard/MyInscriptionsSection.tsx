@@ -1,9 +1,9 @@
 import { format, differenceInDays } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { Calendar, AlertCircle, BookOpen, CheckCircle2 } from "lucide-react";
+import { Calendar, AlertCircle, CheckCircle2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import StatusBadge from "@/components/shared/StatusBadge";
 import { InscriptionSkeleton } from "./skeletons/InscriptionSkeleton";
@@ -17,10 +17,6 @@ interface MyInscriptionsSectionProps {
   error: Error | null;
 }
 
-/**
- * Seção de minhas inscrições em cerimônias
- * Requirements: 3.1, 3.2, 3.3, 3.4, 3.5
- */
 export function MyInscriptionsSection({
   inscriptions,
   isLoading,
@@ -29,217 +25,143 @@ export function MyInscriptionsSection({
   const navigate = useNavigate();
   const confirmarPresenca = useConfirmarPresenca();
 
-  // Loading state (Req 5.3)
   if (isLoading) {
-    return (
-      <Card className="w-full">
-        <CardHeader className="pb-2">
-          <CardTitle className="flex items-center gap-2 text-lg">
-            <BookOpen className="h-5 w-5" />
-            Minhas Consagrações
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <InscriptionSkeleton count={3} />
-        </CardContent>
-      </Card>
-    );
+    return <InscriptionSkeleton count={3} />;
   }
 
-  // Error state (Req 5.4)
   if (error) {
     return (
-      <Card className="w-full">
-        <CardHeader className="pb-2">
-          <CardTitle className="flex items-center gap-2 text-lg">
-            <BookOpen className="h-5 w-5" />
-            Minhas Consagrações
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="flex flex-col items-center justify-center py-8 text-muted-foreground">
-            <AlertCircle className="h-12 w-12 mb-2" />
-            <p>Erro ao carregar inscrições</p>
-          </div>
-        </CardContent>
-      </Card>
+      <div className="flex flex-col items-center justify-center py-10 text-muted-foreground gap-2">
+        <AlertCircle className="h-10 w-10" />
+        <p className="text-sm">Erro ao carregar inscrições</p>
+      </div>
     );
   }
 
-  // Empty state (Req 3.4)
   if (!inscriptions || inscriptions.length === 0) {
-    return (
-      <Card className="w-full">
-        <CardHeader className="pb-2">
-          <CardTitle className="flex items-center gap-2 text-lg">
-            <BookOpen className="h-5 w-5" />
-            Minhas Consagrações
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="flex flex-col items-center justify-center py-8 text-muted-foreground">
-            <Calendar className="h-12 w-12 mb-2" />
-            <p className="text-center mb-4">
-              Você ainda não participou de nenhuma cerimônia.
-            </p>
-            <Button
-              variant="default"
-              onClick={() => navigate(ROUTES.CERIMONIAS)}
-            >
-              Participar da primeira cerimônia
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
-    );
+    return null;
   }
 
   return (
-    <Card className="w-full">
-      <CardHeader className="pb-2">
-        <CardTitle className="flex items-center gap-2 text-lg">
-          <BookOpen className="h-5 w-5" />
-          Minhas Consagrações
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
-        {/* Inscription cards (Req 3.2) */}
-        <div className="space-y-3">
-          {inscriptions.map((inscription) => {
-            // Calculate days until ceremony (Req 3.5)
-            // Parse date string as local time to avoid timezone issues
-            const [year, month, day] = inscription.cerimonia.data.split('-').map(Number);
-            const ceremonyDate = new Date(year, month - 1, day); // month is 0-indexed
-            
-            const today = new Date();
-            today.setHours(0, 0, 0, 0);
-            
-            const daysUntil = differenceInDays(ceremonyDate, today);
-            const isUpcoming = daysUntil >= 0 && daysUntil <= 7;
-            const isPast = daysUntil < 0;
+    <div className="space-y-3">
+      {inscriptions.map((inscription) => {
+        const [year, month, day] = inscription.cerimonia.data.split('-').map(Number);
+        const ceremonyDate = new Date(year, month - 1, day);
 
-            return (
-              <Card
-                key={inscription.id}
-                className={`overflow-hidden cursor-pointer transition-colors hover:bg-accent/50 ${
-                  isUpcoming ? "border-amber-500/50 bg-amber-500/5" : ""
-                }`}
-                onClick={() => {
-                  const targetTab = isPast ? '?tab=historico' : '';
-                  if (!inscription.pago && inscription.status !== 'cancelada') {
-                    navigate(`${ROUTES.CERIMONIAS}${targetTab}#pagar-${inscription.cerimonia.id}`);
-                  } else {
-                    navigate(`${ROUTES.CERIMONIAS}${targetTab}#${inscription.cerimonia.id}`);
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
+        const daysUntil = differenceInDays(ceremonyDate, today);
+        const isUpcoming = daysUntil >= 0 && daysUntil <= 7;
+        const isPast = daysUntil < 0;
+
+        return (
+          <Card
+            key={inscription.id}
+            className={`overflow-hidden cursor-pointer border border-border/60 shadow-sm hover:shadow-md transition-all active:scale-[0.99] ${
+              isUpcoming ? "border-amber-500/50 bg-amber-500/5 hover:border-amber-500/70" : "hover:border-primary/30"
+            }`}
+            onClick={() => {
+              const targetTab = isPast ? '?tab=historico' : '';
+              if (!inscription.pago && inscription.status !== 'cancelada') {
+                navigate(`${ROUTES.CERIMONIAS}${targetTab}#pagar-${inscription.cerimonia.id}`);
+              } else {
+                navigate(`${ROUTES.CERIMONIAS}${targetTab}#${inscription.cerimonia.id}`);
+              }
+            }}
+          >
+            <CardContent className="p-3">
+              <div className="flex items-start justify-between gap-2 mb-2">
+                <h3 className="font-semibold text-sm leading-tight flex-1">
+                  {inscription.cerimonia.nome || "Cerimônia"}
+                </h3>
+                <StatusBadge
+                  status={
+                    inscription.status === "confirmada"
+                      ? "success"
+                      : inscription.status === "cancelada"
+                      ? "error"
+                      : "pending"
                   }
-                }}
-              >
-                <CardContent className="p-4">
-                  <div className="flex flex-col gap-3">
-                    {/* Ceremony name and status (Req 3.2) */}
-                    <div className="flex items-start justify-between gap-2">
-                      <h3 className="font-semibold text-base leading-tight flex-1">
-                        {inscription.cerimonia.nome || "Cerimônia"}
-                      </h3>
-                      <StatusBadge
-                        status={
-                          inscription.status === "confirmada"
-                            ? "success"
-                            : inscription.status === "cancelada"
-                            ? "error"
-                            : "pending"
-                        }
-                        label={
-                          inscription.status === "confirmada"
-                            ? "Confirmada"
-                            : inscription.status === "cancelada"
-                            ? "Cancelada"
-                            : "Pendente"
-                        }
-                      />
+                  label={
+                    inscription.status === "confirmada"
+                      ? "Confirmada"
+                      : inscription.status === "cancelada"
+                      ? "Cancelada"
+                      : "Pendente"
+                  }
+                />
+              </div>
+
+              <div className="flex items-center gap-1.5 text-xs text-muted-foreground mb-2.5">
+                <Calendar className="h-3 w-3 shrink-0" />
+                <span>
+                  {format(ceremonyDate, "dd 'de' MMMM 'de' yyyy", { locale: ptBR })}
+                </span>
+              </div>
+
+              {isUpcoming && (
+                <p className="text-xs font-medium text-amber-700 dark:text-amber-400 mb-2.5">
+                  {daysUntil === 0 ? "🔔 Hoje!" : daysUntil === 1 ? "🔔 Amanhã!" : `🔔 Em ${daysUntil} dias`}
+                </p>
+              )}
+
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                {!inscription.pago && inscription.status !== 'cancelada' && (
+                  <Button
+                    size="sm"
+                    variant="destructive"
+                    className="h-7 text-xs font-bold"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      const targetTab = isPast ? '?tab=historico' : '';
+                      navigate(`${ROUTES.CERIMONIAS}${targetTab}#pagar-${inscription.cerimonia.id}`);
+                    }}
+                  >
+                    Pagar Agora
+                  </Button>
+                )}
+
+                {daysUntil >= 0 && daysUntil <= 7 && inscription.pago && (
+                  inscription.presenca_confirmada ? (
+                    <div className="flex items-center gap-1 text-xs text-green-600 dark:text-green-400">
+                      <CheckCircle2 className="w-3.5 h-3.5 shrink-0" />
+                      <span>Presença confirmada</span>
                     </div>
+                  ) : (
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="h-7 text-xs text-primary border-primary/30 hover:bg-primary/10"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        confirmarPresenca.mutate(inscription.id);
+                      }}
+                      disabled={confirmarPresenca.isPending}
+                    >
+                      <CheckCircle2 className="w-3.5 h-3.5 mr-1 shrink-0" />
+                      Confirmar presença
+                    </Button>
+                  )
+                )}
 
-                    {/* Date (Req 3.2) */}
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <Calendar className="h-4 w-4" />
-                      <span>
-                        {format(ceremonyDate, "dd 'de' MMMM 'de' yyyy", {
-                          locale: ptBR,
-                        })}
-                      </span>
-                    </div>
-
-                    {/* Upcoming ceremony highlight (Req 3.5) */}
-                    {isUpcoming && (
-                      <div className="text-sm font-medium text-amber-700 dark:text-amber-400">
-                        {daysUntil === 0
-                          ? "🔔 Hoje!"
-                          : daysUntil === 1
-                          ? "🔔 Amanhã!"
-                          : `🔔 Em ${daysUntil} dias`}
-                      </div>
-                    )}
-
-                    {/* Action buttons */}
-                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
-                      {/* Botão de Pagar - Prioridade se não pago */}
-                      {!inscription.pago && inscription.status !== 'cancelada' && (
-                        <Button
-                          size="sm"
-                          variant="destructive"
-                          className="w-full sm:w-auto h-8 text-xs font-bold"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            const targetTab = isPast ? '?tab=historico' : '';
-                            navigate(`${ROUTES.CERIMONIAS}${targetTab}#pagar-${inscription.cerimonia.id}`);
-                          }}
-                        >
-                          Pagar Agora
-                        </Button>
-                      )}
-
-                      {/* Botão de confirmar presença - só aparece para cerimônias futuras e pagas */}
-                      {daysUntil >= 0 && daysUntil <= 7 && inscription.pago && (
-                        inscription.presenca_confirmada ? (
-                          <div className="flex items-center gap-1 text-sm text-green-600 dark:text-green-400">
-                            <CheckCircle2 className="w-4 h-4 flex-shrink-0" />
-                            <span className="truncate">Presença confirmada</span>
-                          </div>
-                        ) : (
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            className="text-primary border-primary/30 hover:bg-primary/10 w-full sm:w-auto"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              confirmarPresenca.mutate(inscription.id);
-                            }}
-                            disabled={confirmarPresenca.isPending}
-                          >
-                            <CheckCircle2 className="w-4 h-4 mr-1 flex-shrink-0" />
-                            <span className="truncate">Confirmar presença</span>
-                          </Button>
-                        )
-                      )}
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        className="sm:ml-auto w-full sm:w-auto"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          const targetTab = isPast ? '?tab=historico' : '';
-                          navigate(`${ROUTES.CERIMONIAS}${targetTab}#${inscription.cerimonia.id}`);
-                        }}
-                      >
-                        Ver detalhes
-                      </Button>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            );
-          })}
-        </div>
-      </CardContent>
-    </Card>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  className="h-7 text-xs ml-auto"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    const targetTab = isPast ? '?tab=historico' : '';
+                    navigate(`${ROUTES.CERIMONIAS}${targetTab}#${inscription.cerimonia.id}`);
+                  }}
+                >
+                  Ver detalhes
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        );
+      })}
+    </div>
   );
 }
