@@ -28,6 +28,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/component
 import { useIsMobile } from '@/hooks/use-mobile';
 import { cn } from '@/lib/utils';
 import { PaginationControls } from '@/components/ui/pagination-controls';
+import { SearchInput } from '@/components/ui/search-input';
 import {
   MobileCard,
   MobileCardHeader,
@@ -874,18 +875,12 @@ const Admin: React.FC = () => {
               <CardContent className="p-4 space-y-4">
                 {/* Search Bar */}
                 <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
-                  <div className="relative w-full md:max-w-md">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
-                    <Input
-                      placeholder="Buscar membro por nome..."
-                      className="pl-10 h-11"
-                      value={searchTerm}
-                      onChange={(e) => {
-                        setSearchTerm(e.target.value);
-                        setConsagradoresPage(1);
-                      }}
-                    />
-                  </div>
+                  <SearchInput
+                    placeholder="Buscar membro por nome..."
+                    value={searchTerm}
+                    onChange={(v) => { setSearchTerm(v); setConsagradoresPage(1); }}
+                    containerClassName="w-full md:max-w-md"
+                  />
                   <Button
                     variant="outline"
                     onClick={handleExportConsagradores}
@@ -1751,15 +1746,12 @@ const Admin: React.FC = () => {
                     </Select>
                   </div>
                   {/* Busca por nome */}
-                  <div className="relative flex-1 min-w-0 md:max-w-xs">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
-                    <Input
-                      placeholder="Buscar por nome..."
-                      className="pl-10 h-11"
-                      value={inscricoesSearch}
-                      onChange={(e) => { setInscricoesSearch(e.target.value); setInscricoesPage(1); }}
-                    />
-                  </div>
+                  <SearchInput
+                    placeholder="Buscar por nome..."
+                    value={inscricoesSearch}
+                    onChange={(v) => { setInscricoesSearch(v); setInscricoesPage(1); }}
+                    containerClassName="flex-1 min-w-0 md:max-w-xs"
+                  />
                   <Button variant="outline" size="sm" onClick={handleExportInscricoes} className="gap-2 h-11 whitespace-nowrap">
                     <Download className="w-4 h-4" /> Exportar CSV
                   </Button>

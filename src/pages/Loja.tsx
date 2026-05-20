@@ -5,7 +5,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Input } from '@/components/ui/input';
+import { SearchInput } from '@/components/ui/search-input';
 import {
   Select,
   SelectContent,
@@ -202,15 +202,12 @@ const Loja: React.FC = () => {
       {/* Filtros e Categorias */}
       <div className="space-y-6 mb-10">
         <div className="flex flex-col md:flex-row gap-4">
-          <div className="relative flex-1 group">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
-            <Input
-              placeholder="O que você está procurando?"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10 h-12 rounded-2xl border-muted bg-card/50 focus-visible:ring-primary/20"
-            />
-          </div>
+          <SearchInput
+            placeholder="O que você está procurando?"
+            value={searchTerm}
+            onChange={setSearchTerm}
+            containerClassName="flex-1 rounded-2xl border-muted bg-card/50"
+          />
           <Select value={selectedCategory} onValueChange={setSelectedCategory}>
             <SelectTrigger className="w-full md:w-[240px] h-12 rounded-2xl border-muted bg-card/50">
               <Filter className="w-4 h-4 mr-2 text-muted-foreground" />

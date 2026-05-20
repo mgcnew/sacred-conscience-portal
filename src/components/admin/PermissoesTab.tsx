@@ -3,7 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Input } from '@/components/ui/input';
+import { SearchInput } from '@/components/ui/search-input';
 import { Switch } from '@/components/ui/switch';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from '@/components/ui/dialog';
@@ -167,21 +167,14 @@ export const PermissoesTab: React.FC = () => {
         </CardHeader>
         <CardContent className="space-y-4">
           {/* Busca com autosugestão */}
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
-            <Input
-              placeholder="Buscar usuário por nome ou email..."
-              className="pl-10"
-              value={searchTerm}
-              autoComplete="off"
-              onChange={(e) => {
-                setSearchTerm(e.target.value);
-                // Limpar seleção ao digitar
-                if (selectedUserId && e.target.value === '') {
-                  setSelectedUserId(null);
-                }
-              }}
-            />
+          <SearchInput
+            placeholder="Buscar usuário por nome ou email..."
+            value={searchTerm}
+            onChange={(v) => {
+              setSearchTerm(v);
+              if (selectedUserId && v === '') setSelectedUserId(null);
+            }}
+          />
             
             {/* Dropdown de sugestões */}
             {searchTerm && searchTerm.length >= 1 && !selectedUserId && filteredProfiles.length > 0 && (

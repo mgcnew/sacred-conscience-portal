@@ -9,6 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Skeleton } from '@/components/ui/skeleton';
+import { SearchInput } from '@/components/ui/search-input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { PageHeader, PageContainer } from '@/components/shared';
 import { Progress } from '@/components/ui/progress';
@@ -21,7 +22,7 @@ import {
 } from '@/components/ui/alert-dialog';
 import {
   BookOpen, Library, ShoppingBag, Star, BookMarked, Upload, FileText,
-  Trash2, Loader2, ImagePlus, Link, X, Search, Play,
+  Trash2, Loader2, ImagePlus, Link, X, Play,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
@@ -357,21 +358,12 @@ const Biblioteca: React.FC = () => {
             </Card>
           ) : (
             <>
-              {/* Search */}
-              <div className="relative max-w-sm">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
-                <Input
-                  placeholder="Buscar livro..."
-                  value={searchMeus}
-                  onChange={e => setSearchMeus(e.target.value)}
-                  className="pl-9 pr-8"
-                />
-                {searchMeus && (
-                  <button onClick={() => setSearchMeus('')} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
-                    <X className="w-3.5 h-3.5" />
-                  </button>
-                )}
-              </div>
+              <SearchInput
+                placeholder="Buscar livro..."
+                value={searchMeus}
+                onChange={setSearchMeus}
+                containerClassName="max-w-sm"
+              />
 
               {meusEbooksFiltrados.length === 0 ? (
                 <p className="text-sm text-muted-foreground text-center py-8">Nenhum livro encontrado</p>
@@ -443,20 +435,12 @@ const Biblioteca: React.FC = () => {
             <>
               {/* Search + Upload button */}
               <div className="flex items-center gap-2">
-                <div className="relative flex-1 max-w-sm">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
-                  <Input
-                    placeholder="Buscar upload..."
-                    value={searchUploads}
-                    onChange={e => setSearchUploads(e.target.value)}
-                    className="pl-9 pr-8"
-                  />
-                  {searchUploads && (
-                    <button onClick={() => setSearchUploads('')} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
-                      <X className="w-3.5 h-3.5" />
-                    </button>
-                  )}
-                </div>
+                <SearchInput
+                  placeholder="Buscar upload..."
+                  value={searchUploads}
+                  onChange={setSearchUploads}
+                  containerClassName="flex-1 max-w-sm"
+                />
                 <Button size="sm" onClick={() => fileInputRef.current?.click()} className="shrink-0">
                   <Upload className="w-4 h-4 mr-2" />
                   Enviar Ebook
@@ -567,21 +551,12 @@ const Biblioteca: React.FC = () => {
             </Card>
           ) : (
             <>
-              {/* Search */}
-              <div className="relative max-w-sm">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
-                <Input
-                  placeholder="Buscar na loja..."
-                  value={searchLoja}
-                  onChange={e => setSearchLoja(e.target.value)}
-                  className="pl-9 pr-8"
-                />
-                {searchLoja && (
-                  <button onClick={() => setSearchLoja('')} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
-                    <X className="w-3.5 h-3.5" />
-                  </button>
-                )}
-              </div>
+              <SearchInput
+                placeholder="Buscar na loja..."
+                value={searchLoja}
+                onChange={setSearchLoja}
+                containerClassName="max-w-sm"
+              />
 
               {lojaFiltrada.length === 0 ? (
                 <p className="text-sm text-muted-foreground text-center py-8">Nenhum ebook encontrado</p>

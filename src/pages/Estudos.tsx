@@ -1,5 +1,6 @@
 import { useState, useMemo, useRef } from 'react';
-import { BookOpen, Search, Filter, Sparkles, Plus, Loader2, Upload } from 'lucide-react';
+import { BookOpen, Filter, Sparkles, Plus, Loader2, Upload } from 'lucide-react';
+import { SearchInput } from '@/components/ui/search-input';
 import { toast } from 'sonner';
 import { VirtuosoGrid } from 'react-virtuoso';
 import { PageHeader, PageContainer } from '@/components/shared';
@@ -302,15 +303,12 @@ const Estudos: React.FC = () => {
 
       {/* Filtros */}
       <div className="flex flex-col sm:flex-row gap-3 mb-6">
-        <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none z-10" />
-          <Input
-            placeholder="Buscar materiais..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-10"
-          />
-        </div>
+        <SearchInput
+          placeholder="Buscar materiais..."
+          value={searchTerm}
+          onChange={setSearchTerm}
+          containerClassName="flex-1"
+        />
         <Select value={selectedCategoria} onValueChange={setSelectedCategoria}>
           <SelectTrigger className="w-full sm:w-[180px]">
             <Filter className="w-4 h-4 mr-2" />

@@ -2,14 +2,14 @@ import { useState, useMemo, useCallback, memo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Skeleton } from '@/components/ui/skeleton';
 import { PaginationControls } from '@/components/ui/pagination-controls';
+import { SearchInput } from '@/components/ui/search-input';
 import {
-  Search, Filter, RefreshCw, Activity, User, Calendar, FileText,
+  Filter, RefreshCw, Activity, User, Calendar, FileText,
   ShoppingBag, CreditCard, MessageSquare, X, ChevronDown, ChevronUp,
 } from 'lucide-react';
 import { format, formatDistanceToNow, subDays, startOfDay } from 'date-fns';
@@ -435,24 +435,12 @@ export const LogsTab: React.FC = () => {
 
         {/* Filters */}
         <div className="flex flex-col sm:flex-row gap-2">
-          <div className="relative flex-1 min-w-0">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
-            <Input
-              placeholder="Buscar na página atual..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-9 h-12 md:h-10 text-base md:text-sm pr-8"
-            />
-            {searchTerm && (
-              <button
-                onClick={() => setSearchTerm('')}
-                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
-                aria-label="Limpar busca"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            )}
-          </div>
+          <SearchInput
+            placeholder="Buscar na página atual..."
+            value={searchTerm}
+            onChange={setSearchTerm}
+            containerClassName="flex-1 min-w-0"
+          />
 
           <Select value={actionFilter} onValueChange={(v) => { setActionFilter(v); resetPage(); }}>
             <SelectTrigger className="w-full sm:w-[200px]">

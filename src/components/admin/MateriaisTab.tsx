@@ -17,6 +17,7 @@ import {
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { SearchInput } from '@/components/ui/search-input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
@@ -232,15 +233,12 @@ export function MateriaisTab() {
     <div className="space-y-4">
       {/* Header */}
       <div className="flex flex-col sm:flex-row gap-3 justify-between">
-        <div className="relative flex-1 max-w-sm">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-          <Input
-            placeholder="Buscar materiais..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-9"
-          />
-        </div>
+        <SearchInput
+          placeholder="Buscar materiais..."
+          value={searchTerm}
+          onChange={setSearchTerm}
+          containerClassName="flex-1 max-w-sm"
+        />
         <Button onClick={handleOpenCreate}>
           <Plus className="w-4 h-4 mr-2" />
           Novo Material
