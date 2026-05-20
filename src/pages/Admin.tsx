@@ -121,6 +121,7 @@ const Admin: React.FC = () => {
   const [updatingPaymentId, setUpdatingPaymentId] = useState<string | null>(null);
   const [updatingRoleUserId, setUpdatingRoleUserId] = useState<string | null>(null);
   const [consagradoresPage, setConsagradoresPage] = useState(1);
+  const [membrosPageSize, setMembrosPageSize] = useState(10);
   const [inscricoesPage, setInscricoesPage] = useState(1);
   
   // State para o dialog de histórico de consagrações (Requirements: 1.1)
@@ -524,12 +525,12 @@ const Admin: React.FC = () => {
 
   // Paginated Profiles (memoized)
   const { totalConsagradoresPages, paginatedConsagradores } = useMemo(() => ({
-    totalConsagradoresPages: Math.ceil((filteredProfiles?.length || 0) / ITEMS_PER_PAGE),
+    totalConsagradoresPages: Math.ceil((filteredProfiles?.length || 0) / membrosPageSize),
     paginatedConsagradores: filteredProfiles?.slice(
-      (consagradoresPage - 1) * ITEMS_PER_PAGE,
-      consagradoresPage * ITEMS_PER_PAGE
+      (consagradoresPage - 1) * membrosPageSize,
+      consagradoresPage * membrosPageSize
     )
-  }), [filteredProfiles, consagradoresPage]);
+  }), [filteredProfiles, consagradoresPage, membrosPageSize]);
 
   // Filtrar inscrições baseado na cerimônia selecionada
   const inscricoesFiltradas = useMemo(() => {
@@ -1677,14 +1678,19 @@ const Admin: React.FC = () => {
                 </Drawer>
 
                 {/* Pagination */}
-                {totalConsagradoresPages > 1 && (
-                  <PaginationControls
-                    currentPage={consagradoresPage}
-                    totalPages={totalConsagradoresPages}
-                    onPageChange={setConsagradoresPage}
-                    isLoading={isLoadingProfiles}
-                  />
-                )}
+                <PaginationControls
+                  currentPage={consagradoresPage}
+                  totalPages={Math.max(1, totalConsagradoresPages)}
+                  onPageChange={setConsagradoresPage}
+                  isLoading={isLoadingProfiles}
+                  pageSize={membrosPageSize}
+                  onPageSizeChange={(size) => {
+                    setMembrosPageSize(size);
+                    setConsagradoresPage(1);
+                  }}
+                  pageSizeOptions={[5, 10, 20]}
+                  totalItems={filteredProfiles?.length}
+                />
               </CardContent>
             </Card>
           </TabsContent>
