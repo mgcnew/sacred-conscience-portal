@@ -11,7 +11,16 @@ export { useCerimoniasFuturas, useCerimoniasAdmin, useCerimoniasSelect } from '.
 export { useProfiles, useAnamneses, useUserAnamnese, useMeuPerfil } from './useProfiles';
 
 // Inscrições
-export { useMinhasInscricoes, useInscricoesAdmin, useHistoricoInscricoes, useCerimoniasProximas } from './useInscricoes';
+export {
+  useMinhasInscricoes,
+  useInscricoesAdmin,
+  useHistoricoInscricoes,
+  useCerimoniasProximas,
+  useHistoricoCerimoniasAdmin,
+  useParticipantesCerimonia,
+  type CerimoniaPassada,
+  type ParticipanteCerimonia,
+} from './useInscricoes';
 
 // Histórico de Consagrações (Admin)
 export { 

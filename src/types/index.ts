@@ -105,6 +105,7 @@ export interface Inscricao {
   forma_pagamento: string | null;
   pago: boolean;
   observacoes_admin: string | null;
+  presenca_confirmada?: boolean | null;
   // Campos de cancelamento
   cancelada?: boolean | null;
   cancelada_em?: string | null;

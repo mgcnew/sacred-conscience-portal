@@ -425,7 +425,12 @@ const Cerimonias: React.FC = () => {
         </TabsContent>
 
         <TabsContent value="historico">
-          <CerimoniasHistorico userId={user?.id} onOpenPayment={handleOpenPayment} />
+          <CerimoniasHistorico
+            userId={user?.id}
+            onOpenPayment={handleOpenPayment}
+            isAdmin={isAdmin}
+            podeVerHistoricoCompleto={podeVerListaPresentes}
+          />
         </TabsContent>
 
         {podeVerListaPresentes && (
