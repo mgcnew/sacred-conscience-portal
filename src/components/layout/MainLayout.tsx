@@ -330,7 +330,6 @@ const MainLayout: React.FC = () => {
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <ChatBell />
             <NotificationBell />
             <ModeToggle />
           </div>
