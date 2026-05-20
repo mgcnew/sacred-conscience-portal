@@ -1,13 +1,12 @@
 import { useState } from 'react';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Leaf, BookOpen } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Leaf } from 'lucide-react';
 import { PageHeader, PageContainer } from '@/components/shared';
-import { MEDICINAS, Medicina } from '@/constants/medicinas';
+import { MEDICINAS } from '@/constants/medicinas';
 import MedicinaModal from '@/components/medicinas/MedicinaModal';
 
 const Medicinas = () => {
-  const [selectedMedicina, setSelectedMedicina] = useState<Medicina | null>(null);
+  const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
 
   return (
     <PageContainer maxWidth="2xl">
@@ -20,45 +19,58 @@ const Medicinas = () => {
       />
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {MEDICINAS.map((medicina) => {
+        {MEDICINAS.map((medicina, i) => {
           const IconComponent = medicina.icone;
           return (
-            <Card 
+            <Card
               key={medicina.id}
-              className="cursor-pointer overflow-hidden h-full flex flex-col hover:shadow-md"
-              onClick={() => setSelectedMedicina(medicina)}
+              className="cursor-pointer overflow-hidden h-full flex flex-col hover:shadow-lg transition-all duration-300 group border-border/60"
+              onClick={() => setSelectedIndex(i)}
             >
-              <CardHeader className="pb-4">
-                <div className="w-14 h-14 rounded-2xl bg-primary/5 flex items-center justify-center mb-4">
-                  <IconComponent className={`w-8 h-8 ${medicina.cor}`} />
+              {/* Banner com imagem */}
+              <div className="relative h-44 bg-gradient-to-br from-muted to-muted/60 overflow-hidden shrink-0">
+                <img
+                  src={medicina.imagem}
+                  alt={medicina.nome}
+                  className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                  onError={(e) => { e.currentTarget.style.opacity = '0'; }}
+                />
+                {/* Gradient overlay sempre visível */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent" />
+
+                {/* Ícone no canto inferior esquerdo */}
+                <div className="absolute bottom-3 left-3 w-10 h-10 rounded-xl bg-white/15 backdrop-blur-sm border border-white/20 flex items-center justify-center">
+                  <IconComponent className={`w-5 h-5 ${medicina.cor}`} />
                 </div>
-                <CardTitle className="font-display text-2xl">
-                  {medicina.nome}
-                </CardTitle>
-                <CardDescription className="text-sm font-medium text-primary/80">
-                  {medicina.origem}
-                </CardDescription>
+
+                {/* Origem no canto superior direito */}
+                <div className="absolute top-3 right-3 bg-black/40 backdrop-blur-sm text-white text-[10px] font-medium px-2 py-0.5 rounded-full border border-white/10">
+                  {medicina.origem.split('(')[0].trim()}
+                </div>
+              </div>
+
+              {/* Texto */}
+              <CardHeader className="pb-2 pt-4">
+                <CardTitle className="font-display text-xl">{medicina.nome}</CardTitle>
               </CardHeader>
-              <CardContent className="flex-grow">
-                <p className="text-muted-foreground leading-relaxed line-clamp-3">
+              <CardContent className="flex-grow pt-0">
+                <p className="text-muted-foreground leading-relaxed text-sm line-clamp-3">
                   {medicina.resumo}
                 </p>
               </CardContent>
-              <CardFooter className="pt-4 border-t border-border/30 bg-muted/20">
-                <Button variant="ghost" className="w-full">
-                  <BookOpen className="w-4 h-4 mr-2" />
-                  Ler Estudo Completo
-                </Button>
-              </CardFooter>
             </Card>
           );
         })}
       </div>
 
-      <MedicinaModal 
-        medicina={selectedMedicina} 
-        onClose={() => setSelectedMedicina(null)} 
-      />
+      {selectedIndex !== null && (
+        <MedicinaModal
+          medicinas={MEDICINAS}
+          currentIndex={selectedIndex}
+          onNavigate={setSelectedIndex}
+          onClose={() => setSelectedIndex(null)}
+        />
+      )}
     </PageContainer>
   );
 };
