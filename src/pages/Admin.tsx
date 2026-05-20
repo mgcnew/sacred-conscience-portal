@@ -39,7 +39,6 @@ import { HistoricoConsagracoesDialog } from '@/components/admin/HistoricoConsagr
 import { ConsagradorActions, BloqueadoBadge } from '@/components/admin/ConsagradorActions';
 import ParticipantesList from '@/components/admin/ParticipantesList';
 import { CursosTab } from '@/components/admin/CursosTab';
-import { FluxoCaixaTab } from '@/components/admin/FluxoCaixaTab';
 import { LogsTab } from '@/components/admin/LogsTab';
 import { TaxasMPTab } from '@/components/admin/TaxasMPTab';
 import { DashboardTab } from '@/components/admin/DashboardTab';
@@ -751,7 +750,6 @@ const Admin: React.FC = () => {
     }
     if (isSuperAdmin()) {
       tabs.push({ value: 'cursos', label: isMobile ? 'Cursos' : 'Cursos/Eventos' });
-      tabs.push({ value: 'financeiro', label: isMobile ? 'Caixa' : 'Financeiro' });
       tabs.push({ value: 'vendas', label: isMobile ? 'Loja' : 'Vendas Loja' });
       tabs.push({ value: 'permissoes', label: isMobile ? 'Perms' : 'Permissões' });
     }
@@ -2300,13 +2298,6 @@ const Admin: React.FC = () => {
           {isSuperAdmin() && (
             <TabsContent value="cursos" className="space-y-6 ">
               <CursosTab />
-            </TabsContent>
-          )}
-
-          {/* FLUXO DE CAIXA TAB - Apenas Super Admin */}
-          {isSuperAdmin() && (
-            <TabsContent value="financeiro" className="space-y-6 ">
-              <FluxoCaixaTab />
             </TabsContent>
           )}
 

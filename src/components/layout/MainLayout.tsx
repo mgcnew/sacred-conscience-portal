@@ -15,11 +15,13 @@ import { ScrollToTop } from '@/components/ui/scroll-to-top';
 import { getAllNavItems } from '@/constants/navigation';
 import { useUserAnamnese } from '@/hooks/queries/useProfiles';
 import { useOnboarding } from '@/hooks/useOnboarding';
+import { useCheckPermissao } from '@/components/auth/PermissionGate';
 
 const SIDEBAR_COLLAPSED_KEY = 'sidebar-collapsed';
 
 const MainLayout: React.FC = () => {
   const { user, isAdmin, signOut } = useAuth();
+  const { isSuperAdmin } = useCheckPermissao();
   const navigate = useNavigate();
   const location = useLocation();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false);
@@ -145,7 +147,7 @@ const MainLayout: React.FC = () => {
     });
   };
 
-  const allNavItems = getAllNavItems(isAdmin);
+  const allNavItems = getAllNavItems(isAdmin, isSuperAdmin());
 
   // Se está carregando a verificação de anamnese, mostrar loading
   if (isLoadingAnamnese && !isAnamnesePage) {

@@ -10,6 +10,7 @@ import {
 import { LogOut, ChevronLeft, ChevronRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { getNavGroups, NavItem } from '@/constants/navigation';
+import { useCheckPermissao } from '@/components/auth/PermissionGate';
 
 interface SidebarProps {
   isAdmin: boolean;
@@ -73,7 +74,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
 }) => {
   const navigate = useNavigate();
   const location = useLocation();
-  const navGroups = getNavGroups(isAdmin);
+  const { isSuperAdmin } = useCheckPermissao();
+  const navGroups = getNavGroups(isAdmin, isSuperAdmin());
 
   return (
     <TooltipProvider>

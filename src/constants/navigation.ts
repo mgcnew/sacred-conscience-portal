@@ -11,6 +11,7 @@ import {
   Library,
   GraduationCap,
   BookOpen,
+  Wallet,
   LucideIcon,
 } from 'lucide-react';
 import { ROUTES, AppRoute } from '@/constants/routes';
@@ -20,6 +21,7 @@ export interface NavItem {
   label: string;
   path: AppRoute;
   adminOnly?: boolean;
+  superAdminOnly?: boolean;
   highlight?: boolean; // Para itens que precisam de destaque visual
 }
 
@@ -71,6 +73,13 @@ export const adminNavItem: NavItem = {
   adminOnly: true,
 };
 
+export const financeiroNavItem: NavItem = {
+  icon: Wallet,
+  label: 'Financeiro',
+  path: ROUTES.FINANCEIRO,
+  superAdminOnly: true,
+};
+
 // ========================================
 // EXPORTS PARA COMPATIBILIDADE
 // ========================================
@@ -84,18 +93,22 @@ export const secondaryNavItems = [
 ];
 
 // Grupos organizados para sidebar desktop
-export const getNavGroups = (isAdmin: boolean): NavGroup[] => {
-  const groups: NavGroup[] = [
+export const getNavGroups = (isAdmin: boolean, isSuperAdmin = false): NavGroup[] => {
+  const sistemaItems = [
+    settingsNavItem,
+    ...(isAdmin ? [adminNavItem] : []),
+    ...(isSuperAdmin ? [financeiroNavItem] : []),
+  ];
+  return [
     { label: 'Principal', items: essentialNavItems },
     { label: 'Conteúdo', items: contentNavItems },
     { label: 'Comunidade', items: communityNavItems },
-    { label: 'Sistema', items: [settingsNavItem, ...(isAdmin ? [adminNavItem] : [])] },
+    { label: 'Sistema', items: sistemaItems },
   ];
-  return groups;
 };
 
 // Lista plana para menu mobile
-export const getAllNavItems = (isAdmin: boolean): NavItem[] => {
+export const getAllNavItems = (isAdmin: boolean, isSuperAdmin = false): NavItem[] => {
   const items = [
     ...essentialNavItems,
     ...contentNavItems,
@@ -103,8 +116,7 @@ export const getAllNavItems = (isAdmin: boolean): NavItem[] => {
     ...supportNavItems,
     settingsNavItem,
   ];
-  if (isAdmin) {
-    items.push(adminNavItem);
-  }
+  if (isAdmin) items.push(adminNavItem);
+  if (isSuperAdmin) items.push(financeiroNavItem);
   return items;
 };

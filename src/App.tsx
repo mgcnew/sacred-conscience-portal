@@ -33,6 +33,7 @@ const Historico = lazy(() => import("./pages/Historico"));
 const FAQ = lazy(() => import("./pages/FAQ"));
 const Emergencia = lazy(() => import("./pages/Emergencia"));
 const Admin = lazy(() => import("./pages/Admin"));
+const Financeiro = lazy(() => import("./pages/Financeiro"));
 const Settings = lazy(() => import("./pages/Settings"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
@@ -96,6 +97,14 @@ const App = () => (
                 element={
                   <ProtectedRoute requireAdmin>
                     <Suspense fallback={<PageLoader />}><Admin /></Suspense>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path={ROUTES.FINANCEIRO}
+                element={
+                  <ProtectedRoute requireAdmin>
+                    <Suspense fallback={<PageLoader />}><Financeiro /></Suspense>
                   </ProtectedRoute>
                 }
               />

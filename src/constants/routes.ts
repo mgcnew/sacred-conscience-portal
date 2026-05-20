@@ -30,7 +30,10 @@ export const ROUTES = {
   
   // Admin (requer permissão)
   ADMIN: '/admin',
-  
+
+  // Financeiro (requer super_admin)
+  FINANCEIRO: '/financeiro',
+
   // Cursos e Eventos
   CURSOS: '/cursos',
   
