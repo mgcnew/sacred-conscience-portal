@@ -125,6 +125,7 @@ const Anamnese: React.FC = () => {
   const [showContraindicacaoModal, setShowContraindicacaoModal] = useState(false);
   const [isIncomplete, setIsIncomplete] = useState(false);
   const [isFullScreenSignature, setIsFullScreenSignature] = useState(false);
+  const [stepDirection, setStepDirection] = useState<'forward' | 'backward'>('forward');
 
   // Estados para upload de documentos
   const [documentoFrenteUrl, setDocumentoFrenteUrl] = useState<string | null>(null);
@@ -558,6 +559,7 @@ const Anamnese: React.FC = () => {
     }
 
     setErrors({});
+    setStepDirection('forward');
     setStep(step + 1);
   };
 
@@ -1209,14 +1211,18 @@ const Anamnese: React.FC = () => {
 
         {/* Header */}
         <div className="text-center mb-8 animate-fade-in">
-          <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
-            <FileText className="w-8 h-8 text-primary" />
+          <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4 ring-4 ring-primary/10">
+            <Heart className="w-8 h-8 text-primary" />
           </div>
-          <h1 className="font-display text-3xl font-medium text-foreground mb-2">
-            Ficha de Anamnese
+          <h1 className="font-display text-2xl md:text-3xl font-medium text-foreground mb-2">
+            {viewMode === 'edit' ? 'Atualize sua Ficha' : 'Sua Ficha de Saúde'}
           </h1>
-          <p className="text-muted-foreground font-body">
-            {viewMode === 'edit' ? 'Edite suas informações de saúde.' : 'Preencha sua ficha para participar das cerimônias.'}
+          <p className="text-muted-foreground font-body text-sm max-w-sm mx-auto leading-relaxed">
+            {viewMode === 'edit'
+              ? 'Atualize suas informações para que possamos continuar cuidando de você.'
+              : formData.nome_completo
+                ? `Olá, ${formData.nome_completo.split(' ')[0]}! Leva poucos minutos e é fundamental para sua segurança.`
+                : 'Estas informações são confidenciais e essenciais para sua segurança nas cerimônias.'}
           </p>
           {viewMode === 'edit' && (
             <Button
@@ -1231,49 +1237,82 @@ const Anamnese: React.FC = () => {
           )}
         </div>
 
-        {/* Barra de Progresso */}
-        <div className="mb-6 px-2">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-sm text-muted-foreground">Progresso da ficha</span>
-            <div className="flex items-center gap-2">
-              {lastSaved && viewMode !== 'view' && (
-                <span className="text-xs text-muted-foreground flex items-center gap-1">
-                  <Cloud className="w-3 h-3 text-green-500" />
-                  Rascunho salvo
-                </span>
-              )}
-              <span className="text-sm font-medium text-primary">{calculateProgress()}%</span>
+        {/* Stepper — mobile */}
+        <div className="sm:hidden flex items-center justify-between mb-6 px-1">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-sm font-bold shadow-md shadow-primary/30">
+              {step}
+            </div>
+            <div>
+              <p className="text-[11px] text-muted-foreground">Passo {step} de {steps.length}</p>
+              <p className="text-sm font-semibold">{steps[step - 1].title}</p>
             </div>
           </div>
-          <Progress value={calculateProgress()} className="h-2" />
+          <div className="flex gap-1 items-center">
+            {lastSaved && (
+              <Cloud className="w-3 h-3 text-green-500 mr-1" />
+            )}
+            {steps.map((s) => (
+              <div
+                key={s.number}
+                className={`h-1.5 rounded-full transition-all duration-300 ${
+                  s.number < step ? 'w-5 bg-primary' :
+                  s.number === step ? 'w-5 bg-primary/60' :
+                  'w-3 bg-muted'
+                }`}
+              />
+            ))}
+          </div>
         </div>
 
-        {/* Step Indicator */}
-        <div className="flex justify-center gap-2 mb-8">
-          {steps.map((s) => (
-            <button
-              key={s.number}
-              onClick={() => setStep(s.number)}
-              className={`flex items-center gap-2 px-3 py-2 rounded-full text-sm font-body transition-all cursor-pointer hover:scale-105 ${
-                step === s.number
-                  ? 'bg-primary text-primary-foreground shadow-lg'
-                  : step > s.number
-                  ? 'bg-primary/20 text-primary'
-                  : 'bg-muted text-muted-foreground hover:bg-muted/80'
-              }`}
-            >
-              {step > s.number ? (
-                <Check className="w-4 h-4" />
-              ) : (
-                <s.icon className="w-4 h-4" />
+        {/* Stepper — desktop */}
+        <div className="hidden sm:flex items-start justify-center mb-8 px-2">
+          {steps.map((s, i) => (
+            <React.Fragment key={s.number}>
+              <button
+                type="button"
+                onClick={() => { if (s.number < step) { setStepDirection('backward'); setStep(s.number); } }}
+                className={`flex flex-col items-center gap-1.5 ${s.number < step ? 'cursor-pointer' : 'cursor-default'}`}
+              >
+                <div className={`w-9 h-9 rounded-full flex items-center justify-center border-2 transition-all duration-300 ${
+                  step === s.number
+                    ? 'bg-primary border-primary text-primary-foreground shadow-lg shadow-primary/30 scale-110'
+                    : step > s.number
+                    ? 'bg-primary/15 border-primary text-primary'
+                    : 'bg-background border-border text-muted-foreground'
+                }`}>
+                  {step > s.number ? <Check className="w-4 h-4" /> : <s.icon className="w-4 h-4" />}
+                </div>
+                <span className={`text-[11px] font-medium whitespace-nowrap transition-colors ${
+                  step === s.number ? 'text-primary' :
+                  step > s.number ? 'text-primary/70' :
+                  'text-muted-foreground'
+                }`}>
+                  {s.title}
+                </span>
+              </button>
+              {i < steps.length - 1 && (
+                <div className={`flex-1 h-0.5 mt-4 mx-1 transition-all duration-500 ${
+                  step > s.number + 1 ? 'bg-primary' :
+                  step > s.number ? 'bg-primary/40' :
+                  'bg-border'
+                }`} />
               )}
-              <span className="hidden sm:inline">{s.title}</span>
-            </button>
+            </React.Fragment>
           ))}
         </div>
 
+        {lastSaved && (
+          <div className="hidden sm:flex justify-center mb-3">
+            <span className="text-xs text-muted-foreground flex items-center gap-1">
+              <Cloud className="w-3 h-3 text-green-500" />
+              Rascunho salvo automaticamente
+            </span>
+          </div>
+        )}
+
         {/* Form Card */}
-        <Card className="animate-fade-in-up">
+        <Card key={step} className={stepDirection === 'forward' ? 'animate-slide-in-right' : 'animate-slide-in-left'}>
           {/* Step 1: Dados Pessoais */}
           {step === 1 && (
             <>
@@ -1282,6 +1321,9 @@ const Anamnese: React.FC = () => {
                   <User className="w-5 h-5 text-primary" />
                   Dados Pessoais
                 </CardTitle>
+                <CardDescription className="text-xs leading-relaxed pt-1">
+                  Precisamos conhecer você para garantir um acolhimento personalizado e seguro.
+                </CardDescription>
                 <CardDescription>Informações básicas para contato.</CardDescription>
               </CardHeader>
               <CardContent className="space-y-5 md:space-y-4">
@@ -1633,16 +1675,18 @@ const Anamnese: React.FC = () => {
                   <Heart className="w-5 h-5 text-primary" />
                   Histórico de Saúde
                 </CardTitle>
-                <CardDescription>Marque as condições que se aplicam a você ou selecione "Não possuo doenças".</CardDescription>
+                <CardDescription className="text-xs leading-relaxed pt-1">
+                  A Ayahuasca interage com o organismo de formas específicas. Seja honesto — estas informações são confidenciais e nos ajudam a cuidar de você com segurança.
+                </CardDescription>
               </CardHeader>
-              <CardContent className="space-y-4">
+              <CardContent className="space-y-5">
                 {hasContraindicacoes && (
-                  <div className="p-4 bg-destructive/10 border border-destructive/30 rounded-lg flex items-start gap-3">
+                  <div className="p-4 bg-destructive/10 border border-destructive/30 rounded-xl flex items-start gap-3">
                     <AlertTriangle className="w-5 h-5 text-destructive flex-shrink-0 mt-0.5" />
                     <div>
-                      <p className="font-medium text-destructive">Atenção: Contraindicações detectadas</p>
-                      <p className="text-sm text-muted-foreground">
-                        Algumas condições marcadas podem representar contraindicações. 
+                      <p className="font-semibold text-destructive text-sm">Atenção: Contraindicações detectadas</p>
+                      <p className="text-xs text-muted-foreground mt-0.5">
+                        Algumas condições marcadas podem representar contraindicações.
                         Converse com o facilitador antes de participar.
                       </p>
                     </div>
@@ -1650,77 +1694,103 @@ const Anamnese: React.FC = () => {
                 )}
 
                 {/* Opção de não ter doenças */}
-                <div className="p-4 bg-primary/5 border border-primary/20 rounded-lg">
-                  <div className="flex items-center space-x-3">
-                    <Checkbox
-                      id="sem_doencas"
-                      checked={formData.sem_doencas}
-                      onCheckedChange={(checked) => {
-                        if (checked) {
-                          // Desmarcar todas as doenças se marcar "não tenho"
-                          updateMultipleFields({
-                            sem_doencas: true,
-                            pressao_alta: false,
-                            problemas_cardiacos: false,
-                            historico_convulsivo: false,
-                            diabetes: false,
-                            problemas_respiratorios: false,
-                            problemas_renais: false,
-                            problemas_hepaticos: false,
-                            transtorno_psiquiatrico: false,
-                            gestante_lactante: false,
-                            uso_antidepressivos: false,
-                          });
-                        } else {
-                          updateField('sem_doencas', false);
-                        }
-                      }}
-                    />
-                    <Label htmlFor="sem_doencas" className="cursor-pointer font-medium text-primary">
-                      Não possuo nenhuma doença ou condição de saúde
-                    </Label>
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (!formData.sem_doencas) {
+                      updateMultipleFields({
+                        sem_doencas: true,
+                        pressao_alta: false,
+                        problemas_cardiacos: false,
+                        historico_convulsivo: false,
+                        diabetes: false,
+                        problemas_respiratorios: false,
+                        problemas_renais: false,
+                        problemas_hepaticos: false,
+                        transtorno_psiquiatrico: false,
+                        gestante_lactante: false,
+                        uso_antidepressivos: false,
+                      });
+                    } else {
+                      updateField('sem_doencas', false);
+                    }
+                  }}
+                  className={`w-full flex items-center gap-3 p-4 rounded-xl border-2 text-left transition-all ${
+                    formData.sem_doencas
+                      ? 'bg-primary/10 border-primary text-primary'
+                      : 'bg-background border-border text-muted-foreground hover:border-primary/40'
+                  }`}
+                >
+                  <div className={`w-5 h-5 rounded-full border-2 flex-shrink-0 flex items-center justify-center transition-all ${
+                    formData.sem_doencas ? 'bg-primary border-primary' : 'border-muted-foreground'
+                  }`}>
+                    {formData.sem_doencas && <Check className="w-3 h-3 text-white" />}
                   </div>
-                </div>
+                  <span className="font-medium text-sm">Não possuo nenhuma doença ou condição de saúde</span>
+                </button>
 
-                <div className="space-y-4 md:space-y-3">
-                  <p className="text-sm text-muted-foreground">
-                    {formData.sem_doencas ? 'Você indicou não possuir doenças.' : 'Marque as condições que se aplicam:'}
+                <div className="space-y-3">
+                  <p className="text-xs text-muted-foreground font-medium uppercase tracking-wide">
+                    {formData.sem_doencas ? 'Nenhuma condição selecionada' : 'Selecione as condições que se aplicam a você:'}
                   </p>
-                  {[
-                    { id: 'pressao_alta', label: 'Pressão Alta (Hipertensão)', warning: true },
-                    { id: 'problemas_cardiacos', label: 'Problemas Cardíacos', warning: true },
-                    { id: 'historico_convulsivo', label: 'Histórico de Convulsões', warning: true },
-                    { id: 'diabetes', label: 'Diabetes', warning: false },
-                    { id: 'problemas_respiratorios', label: 'Problemas Respiratórios (Asma, etc.)', warning: false },
-                    { id: 'problemas_renais', label: 'Problemas Renais', warning: false },
-                    { id: 'problemas_hepaticos', label: 'Problemas Hepáticos (Fígado)', warning: false },
-                    { id: 'transtorno_psiquiatrico', label: 'Transtorno Psiquiátrico', warning: true },
-                    { id: 'gestante_lactante', label: 'Gestante ou Lactante', warning: true },
-                    { id: 'uso_antidepressivos', label: 'Uso de Antidepressivos', warning: true },
-                  ].map((item) => (
-                    <div key={item.id} className={`flex items-center space-x-3 min-h-[44px] md:min-h-0 ${formData.sem_doencas ? 'opacity-50' : ''}`}>
-                      <Checkbox
-                        id={item.id}
-                        checked={formData[item.id as keyof AnamneseFormData] as boolean}
-                        disabled={formData.sem_doencas}
-                        onCheckedChange={(checked) => {
-                          updateField(item.id as keyof AnamneseFormData, checked as boolean);
-                          if (checked) updateField('sem_doencas', false);
-                        }}
-                      />
-                      <Label 
-                        htmlFor={item.id} 
-                        className={`flex-1 py-2 md:py-0 ${formData.sem_doencas ? 'cursor-not-allowed' : 'cursor-pointer'} ${item.warning && formData[item.id as keyof AnamneseFormData] ? 'text-destructive font-medium' : ''}`}
-                      >
-                        {item.label}
-                        {item.warning && !formData.sem_doencas && <span className="text-xs text-destructive ml-2">(contraindicação)</span>}
-                      </Label>
-                    </div>
-                  ))}
+                  <div className={`grid grid-cols-1 gap-2 transition-opacity ${formData.sem_doencas ? 'opacity-40 pointer-events-none' : ''}`}>
+                    {[
+                      { id: 'pressao_alta', label: 'Pressão Alta', sub: 'Hipertensão', warning: true },
+                      { id: 'problemas_cardiacos', label: 'Prob. Cardíacos', sub: null, warning: true },
+                      { id: 'historico_convulsivo', label: 'Histórico de Convulsões', sub: null, warning: true },
+                      { id: 'diabetes', label: 'Diabetes', sub: null, warning: false },
+                      { id: 'problemas_respiratorios', label: 'Prob. Respiratórios', sub: 'Asma, etc.', warning: false },
+                      { id: 'problemas_renais', label: 'Prob. Renais', sub: null, warning: false },
+                      { id: 'problemas_hepaticos', label: 'Prob. Hepáticos', sub: 'Fígado', warning: false },
+                      { id: 'transtorno_psiquiatrico', label: 'Transtorno Psiquiátrico', sub: null, warning: true },
+                      { id: 'gestante_lactante', label: 'Gestante ou Lactante', sub: null, warning: true },
+                      { id: 'uso_antidepressivos', label: 'Uso de Antidepressivos', sub: null, warning: true },
+                    ].map((item) => {
+                      const isChecked = formData[item.id as keyof AnamneseFormData] as boolean;
+                      return (
+                        <button
+                          key={item.id}
+                          type="button"
+                          onClick={() => {
+                            updateField(item.id as keyof AnamneseFormData, !isChecked);
+                            if (!isChecked) updateField('sem_doencas', false);
+                          }}
+                          className={`flex items-center gap-3 p-3 rounded-xl border-2 text-left transition-all ${
+                            isChecked
+                              ? item.warning
+                                ? 'bg-destructive/10 border-destructive'
+                                : 'bg-primary/10 border-primary'
+                              : 'bg-background border-border hover:border-primary/30'
+                          }`}
+                        >
+                          <div className={`w-5 h-5 rounded-full border-2 flex-shrink-0 flex items-center justify-center transition-all ${
+                            isChecked
+                              ? item.warning ? 'bg-destructive border-destructive' : 'bg-primary border-primary'
+                              : 'border-muted-foreground/40'
+                          }`}>
+                            {isChecked && <Check className="w-3 h-3 text-white" />}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <span className={`text-sm font-medium ${isChecked && item.warning ? 'text-destructive' : isChecked ? 'text-primary' : 'text-foreground'}`}>
+                              {item.label}
+                            </span>
+                            {item.sub && <span className="text-xs text-muted-foreground ml-1">({item.sub})</span>}
+                          </div>
+                          {item.warning && (
+                            <span className={`text-[10px] font-medium px-1.5 py-0.5 rounded-full flex-shrink-0 ${
+                              isChecked ? 'bg-destructive/20 text-destructive' : 'bg-muted text-muted-foreground'
+                            }`}>
+                              ⚠ contraindicação
+                            </span>
+                          )}
+                        </button>
+                      );
+                    })}
+                  </div>
 
                   {formData.transtorno_psiquiatrico && !formData.sem_doencas && (
-                    <div className="space-y-2 ml-7 animate-fade-in">
-                      <Label htmlFor="transtorno_qual">Qual transtorno?</Label>
+                    <div className="space-y-2 animate-fade-in">
+                      <Label htmlFor="transtorno_qual">Qual transtorno psiquiátrico?</Label>
                       <Input
                         id="transtorno_qual"
                         value={formData.transtorno_psiquiatrico_qual}
@@ -1731,8 +1801,8 @@ const Anamnese: React.FC = () => {
                   )}
 
                   {formData.uso_antidepressivos && !formData.sem_doencas && (
-                    <div className="space-y-2 ml-7 animate-fade-in">
-                      <Label htmlFor="tipo_antidepressivo">Qual medicamento?</Label>
+                    <div className="space-y-2 animate-fade-in">
+                      <Label htmlFor="tipo_antidepressivo">Qual antidepressivo?</Label>
                       <Input
                         id="tipo_antidepressivo"
                         value={formData.tipo_antidepressivo}
@@ -1784,105 +1854,110 @@ const Anamnese: React.FC = () => {
                   <Pill className="w-5 h-5 text-primary" />
                   Uso de Substâncias
                 </CardTitle>
-                <CardDescription>Informações sobre consumo de substâncias. Seja honesto, isso é importante para sua segurança.</CardDescription>
+                <CardDescription className="text-xs leading-relaxed pt-1">
+                  Substâncias podem interagir com a medicina sagrada. Não há julgamentos aqui — apenas cuidado com a sua segurança e bem-estar.
+                </CardDescription>
               </CardHeader>
-              <CardContent className="space-y-4">
-                {/* Opção de não ter vícios */}
-                <div className="p-4 bg-primary/5 border border-primary/20 rounded-lg">
-                  <div className="flex items-center space-x-3">
-                    <Checkbox
-                      id="sem_vicios"
-                      checked={formData.sem_vicios}
-                      onCheckedChange={(checked) => {
-                        if (checked) {
-                          updateMultipleFields({
-                            sem_vicios: true,
-                            tabaco: false,
-                            alcool: false,
-                            cannabis: false,
-                            tabaco_frequencia: '',
-                            alcool_frequencia: '',
-                            outras_substancias: '',
-                          });
-                        } else {
-                          updateField('sem_vicios', false);
-                        }
-                      }}
-                    />
-                    <Label htmlFor="sem_vicios" className="cursor-pointer font-medium text-primary">
-                      Não faço uso de nenhuma substância
-                    </Label>
+              <CardContent className="space-y-5">
+                {/* Opção de não usar substâncias */}
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (!formData.sem_vicios) {
+                      updateMultipleFields({
+                        sem_vicios: true,
+                        tabaco: false,
+                        alcool: false,
+                        cannabis: false,
+                        tabaco_frequencia: '',
+                        alcool_frequencia: '',
+                        outras_substancias: '',
+                      });
+                    } else {
+                      updateField('sem_vicios', false);
+                    }
+                  }}
+                  className={`w-full flex items-center gap-3 p-4 rounded-xl border-2 text-left transition-all ${
+                    formData.sem_vicios
+                      ? 'bg-primary/10 border-primary text-primary'
+                      : 'bg-background border-border text-muted-foreground hover:border-primary/40'
+                  }`}
+                >
+                  <div className={`w-5 h-5 rounded-full border-2 flex-shrink-0 flex items-center justify-center transition-all ${
+                    formData.sem_vicios ? 'bg-primary border-primary' : 'border-muted-foreground'
+                  }`}>
+                    {formData.sem_vicios && <Check className="w-3 h-3 text-white" />}
                   </div>
-                </div>
+                  <span className="font-medium text-sm">Não faço uso de nenhuma substância</span>
+                </button>
 
-                <div className="space-y-4">
-                  <p className="text-sm text-muted-foreground">
-                    {formData.sem_vicios ? 'Você indicou não fazer uso de substâncias.' : 'Marque as substâncias que você utiliza:'}
+                <div className="space-y-3">
+                  <p className="text-xs text-muted-foreground font-medium uppercase tracking-wide">
+                    {formData.sem_vicios ? 'Nenhuma substância selecionada' : 'Selecione as que se aplicam:'}
                   </p>
-                  
-                  <div className="space-y-3">
-                    <div className={`flex items-center space-x-3 ${formData.sem_vicios ? 'opacity-50' : ''}`}>
-                      <Checkbox
-                        id="tabaco"
-                        checked={formData.tabaco}
-                        disabled={formData.sem_vicios}
-                        onCheckedChange={(checked) => {
-                          updateField('tabaco', checked as boolean);
-                          if (checked) updateField('sem_vicios', false);
-                          if (!checked) updateField('tabaco_frequencia', '');
-                        }}
-                      />
-                      <Label htmlFor="tabaco" className={formData.sem_vicios ? 'cursor-not-allowed' : 'cursor-pointer'}>Tabaco (cigarro, charuto, etc.)</Label>
-                    </div>
-                    {formData.tabaco && !formData.sem_vicios && (
-                      <div className="ml-7 animate-fade-in">
-                        <Input
-                          value={formData.tabaco_frequencia}
-                          onChange={(e) => updateField('tabaco_frequencia', e.target.value)}
-                          placeholder="Com que frequência? (ex: 10 cigarros/dia)"
-                        />
-                      </div>
-                    )}
-
-                    <div className={`flex items-center space-x-3 ${formData.sem_vicios ? 'opacity-50' : ''}`}>
-                      <Checkbox
-                        id="alcool"
-                        checked={formData.alcool}
-                        disabled={formData.sem_vicios}
-                        onCheckedChange={(checked) => {
-                          updateField('alcool', checked as boolean);
-                          if (checked) updateField('sem_vicios', false);
-                          if (!checked) updateField('alcool_frequencia', '');
-                        }}
-                      />
-                      <Label htmlFor="alcool" className={formData.sem_vicios ? 'cursor-not-allowed' : 'cursor-pointer'}>Bebidas Alcoólicas</Label>
-                    </div>
-                    {formData.alcool && !formData.sem_vicios && (
-                      <div className="ml-7 animate-fade-in">
-                        <Input
-                          value={formData.alcool_frequencia}
-                          onChange={(e) => updateField('alcool_frequencia', e.target.value)}
-                          placeholder="Com que frequência? (ex: socialmente, diariamente)"
-                        />
-                      </div>
-                    )}
-
-                    <div className={`flex items-center space-x-3 ${formData.sem_vicios ? 'opacity-50' : ''}`}>
-                      <Checkbox
-                        id="cannabis"
-                        checked={formData.cannabis}
-                        disabled={formData.sem_vicios}
-                        onCheckedChange={(checked) => {
-                          updateField('cannabis', checked as boolean);
-                          if (checked) updateField('sem_vicios', false);
-                        }}
-                      />
-                      <Label htmlFor="cannabis" className={formData.sem_vicios ? 'cursor-not-allowed' : 'cursor-pointer'}>Cannabis (maconha)</Label>
-                    </div>
+                  <div className={`grid grid-cols-1 gap-2 transition-opacity ${formData.sem_vicios ? 'opacity-40 pointer-events-none' : ''}`}>
+                    {[
+                      { id: 'tabaco', label: 'Tabaco', sub: 'cigarro, charuto, etc.' },
+                      { id: 'alcool', label: 'Bebidas Alcoólicas', sub: null },
+                      { id: 'cannabis', label: 'Cannabis', sub: 'maconha' },
+                    ].map((item) => {
+                      const isChecked = formData[item.id as keyof AnamneseFormData] as boolean;
+                      return (
+                        <button
+                          key={item.id}
+                          type="button"
+                          onClick={() => {
+                            updateField(item.id as keyof AnamneseFormData, !isChecked);
+                            if (!isChecked) updateField('sem_vicios', false);
+                            if (isChecked && item.id === 'tabaco') updateField('tabaco_frequencia', '');
+                            if (isChecked && item.id === 'alcool') updateField('alcool_frequencia', '');
+                          }}
+                          className={`flex items-center gap-3 p-3 rounded-xl border-2 text-left transition-all ${
+                            isChecked
+                              ? 'bg-primary/10 border-primary'
+                              : 'bg-background border-border hover:border-primary/30'
+                          }`}
+                        >
+                          <div className={`w-5 h-5 rounded-full border-2 flex-shrink-0 flex items-center justify-center transition-all ${
+                            isChecked ? 'bg-primary border-primary' : 'border-muted-foreground/40'
+                          }`}>
+                            {isChecked && <Check className="w-3 h-3 text-white" />}
+                          </div>
+                          <div className="flex-1">
+                            <span className={`text-sm font-medium ${isChecked ? 'text-primary' : 'text-foreground'}`}>
+                              {item.label}
+                            </span>
+                            {item.sub && <span className="text-xs text-muted-foreground ml-1">({item.sub})</span>}
+                          </div>
+                        </button>
+                      );
+                    })}
                   </div>
 
-                  <div className={`space-y-2 ${formData.sem_vicios ? 'opacity-50' : ''}`}>
-                    <Label htmlFor="outras">Outras substâncias</Label>
+                  {formData.tabaco && !formData.sem_vicios && (
+                    <div className="space-y-1.5 animate-fade-in">
+                      <Label className="text-xs">Com que frequência usa tabaco?</Label>
+                      <Input
+                        value={formData.tabaco_frequencia}
+                        onChange={(e) => updateField('tabaco_frequencia', e.target.value)}
+                        placeholder="Ex: 10 cigarros/dia, socialmente..."
+                      />
+                    </div>
+                  )}
+
+                  {formData.alcool && !formData.sem_vicios && (
+                    <div className="space-y-1.5 animate-fade-in">
+                      <Label className="text-xs">Com que frequência consome álcool?</Label>
+                      <Input
+                        value={formData.alcool_frequencia}
+                        onChange={(e) => updateField('alcool_frequencia', e.target.value)}
+                        placeholder="Ex: socialmente, diariamente..."
+                      />
+                    </div>
+                  )}
+
+                  <div className={`space-y-1.5 ${formData.sem_vicios ? 'opacity-40 pointer-events-none' : ''}`}>
+                    <Label htmlFor="outras" className="text-xs">Outras substâncias</Label>
                     <Textarea
                       id="outras"
                       value={formData.outras_substancias}
@@ -1904,7 +1979,7 @@ const Anamnese: React.FC = () => {
                   <Sparkles className="w-5 h-5 text-primary" />
                   Experiência Espiritual
                 </CardTitle>
-                <CardDescription>Conte-nos sobre suas experiências anteriores e intenções.</CardDescription>
+                <CardDescription className="text-xs leading-relaxed pt-1">Conhecer sua jornada nos ajuda a oferecer o suporte certo antes, durante e após a cerimônia.</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="flex items-center space-x-3">
@@ -1986,124 +2061,121 @@ const Anamnese: React.FC = () => {
               <CardHeader>
                 <CardTitle className="font-display text-xl flex items-center gap-2">
                   <CheckCircle2 className="w-5 h-5 text-primary" />
-                  Termo de Consentimento
+                  Termos e Consentimento
                 </CardTitle>
-                <CardDescription>Leia atentamente e confirme sua concordância.</CardDescription>
+                <CardDescription className="text-xs leading-relaxed pt-1">
+                  Estes são compromissos reais. Por favor, leia cada item com atenção antes de aceitar — eles existem para proteger você.
+                </CardDescription>
               </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="p-4 bg-muted rounded-lg space-y-3 text-sm">
-                  <p><strong>Contraindicações importantes:</strong></p>
-                  <ul className="list-disc list-inside space-y-1 text-muted-foreground">
+              <CardContent className="space-y-3">
+                {/* Resumo de contraindicações */}
+                <div className="p-3 bg-muted/60 rounded-xl border text-xs space-y-1.5">
+                  <p className="font-semibold text-foreground flex items-center gap-1.5">
+                    <AlertTriangle className="w-3.5 h-3.5 text-destructive" />
+                    Contraindicações da Ayahuasca:
+                  </p>
+                  <ul className="space-y-0.5 text-muted-foreground list-disc list-inside">
                     <li>Gestantes e lactantes não devem participar</li>
-                    <li>Pessoas com transtornos psiquiátricos graves devem consultar previamente</li>
-                    <li>Uso de antidepressivos ISRS é contraindicado com Ayahuasca</li>
+                    <li>Transtornos psiquiátricos graves requerem consulta prévia</li>
+                    <li>Antidepressivos ISRS são contraindicados com Ayahuasca</li>
                     <li>Problemas cardíacos graves podem representar riscos</li>
                     <li>Histórico de convulsões requer avaliação especial</li>
                   </ul>
                 </div>
 
-                <div className="space-y-4">
-                  <div className="flex items-start space-x-3">
-                    <Checkbox
-                      id="aceite1"
-                      checked={formData.aceite_contraindicacoes}
-                      onCheckedChange={(checked) => updateField('aceite_contraindicacoes', checked as boolean)}
-                    />
-                    <Label htmlFor="aceite1" className="cursor-pointer text-sm leading-relaxed">
-                      Li e compreendi as contraindicações acima. Caso me enquadre em alguma, 
-                      comprometo-me a conversar com o facilitador antes da cerimônia.
-                    </Label>
-                  </div>
-                  {errors.aceite_contraindicacoes && (
-                    <p className="text-sm text-destructive ml-7">{errors.aceite_contraindicacoes}</p>
-                  )}
+                {/* Cards de aceite */}
+                {[
+                  {
+                    id: 'aceite_contraindicacoes',
+                    field: 'aceite_contraindicacoes' as keyof AnamneseFormData,
+                    icon: AlertTriangle,
+                    title: 'Contraindicações',
+                    text: 'Li e compreendi as contraindicações acima. Caso me enquadre em alguma, comprometo-me a conversar com o facilitador antes da cerimônia.',
+                    error: errors.aceite_contraindicacoes,
+                  },
+                  {
+                    id: 'aceite_livre_vontade',
+                    field: 'aceite_livre_vontade' as keyof AnamneseFormData,
+                    icon: Heart,
+                    title: 'Livre e Espontânea Vontade',
+                    text: 'Declaro que estou participando por livre e espontânea vontade, ciente de que se trata de uma prática espiritual com uso de medicinas sagradas.',
+                    error: errors.aceite_livre_vontade,
+                  },
+                  {
+                    id: 'aceite_termo_responsabilidade',
+                    field: 'aceite_termo_responsabilidade' as keyof AnamneseFormData,
+                    icon: FileText,
+                    title: 'Termo de Responsabilidade',
+                    text: 'Aceito o termo de responsabilidade e me comprometo a seguir as orientações do facilitador durante toda a cerimônia.',
+                    error: errors.aceite_termo_responsabilidade,
+                  },
+                  {
+                    id: 'aceite_permanencia',
+                    field: 'aceite_permanencia' as keyof AnamneseFormData,
+                    icon: Clock,
+                    title: 'Permanência no Templo',
+                    text: 'Declaro que me comprometo a permanecer no templo até que esteja em plenas condições físicas e mentais para sair com segurança, respeitando o tempo necessário para integração da experiência.',
+                    error: errors.aceite_permanencia,
+                  },
+                ].map((term) => {
+                  const isChecked = formData[term.field] as boolean;
+                  const Icon = term.icon;
+                  return (
+                    <div key={term.id}>
+                      <button
+                        type="button"
+                        onClick={() => updateField(term.field, !isChecked)}
+                        className={`w-full flex items-start gap-3 p-4 rounded-xl border-2 text-left transition-all ${
+                          isChecked
+                            ? 'bg-primary/8 border-primary'
+                            : term.error
+                            ? 'border-destructive bg-destructive/5'
+                            : 'border-border hover:border-primary/40 bg-background'
+                        }`}
+                      >
+                        <div className={`mt-0.5 w-5 h-5 rounded-full border-2 flex-shrink-0 flex items-center justify-center transition-all ${
+                          isChecked ? 'bg-primary border-primary' : term.error ? 'border-destructive' : 'border-muted-foreground/40'
+                        }`}>
+                          {isChecked && <Check className="w-3 h-3 text-white" />}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className={`text-sm font-semibold mb-0.5 flex items-center gap-1.5 ${isChecked ? 'text-primary' : 'text-foreground'}`}>
+                            <Icon className="w-3.5 h-3.5 flex-shrink-0" />
+                            {term.title}
+                          </p>
+                          <p className="text-xs text-muted-foreground leading-relaxed">{term.text}</p>
+                        </div>
+                      </button>
+                      {term.error && <p className="text-xs text-destructive mt-1 ml-1">{term.error}</p>}
+                    </div>
+                  );
+                })}
 
-                  <div className="flex items-start space-x-3">
-                    <Checkbox
-                      id="aceite2"
-                      checked={formData.aceite_livre_vontade}
-                      onCheckedChange={(checked) => updateField('aceite_livre_vontade', checked as boolean)}
-                    />
-                    <Label htmlFor="aceite2" className="cursor-pointer text-sm leading-relaxed">
-                      Declaro que estou participando por livre e espontânea vontade, 
-                      ciente de que se trata de uma prática espiritual com uso de medicinas sagradas.
-                    </Label>
+                {/* Autorização de Uso de Imagem — opcional, tom diferente */}
+                <div className={`flex items-start gap-3 p-4 rounded-xl border-2 cursor-pointer transition-all ${
+                  formData.aceite_uso_imagem
+                    ? 'border-amber-400 bg-amber-50/60 dark:bg-amber-950/20'
+                    : 'border-border hover:border-amber-300 bg-background'
+                }`}
+                  onClick={() => updateField('aceite_uso_imagem', !formData.aceite_uso_imagem)}
+                >
+                  <div className={`mt-0.5 w-5 h-5 rounded-full border-2 flex-shrink-0 flex items-center justify-center transition-all ${
+                    formData.aceite_uso_imagem ? 'bg-amber-500 border-amber-500' : 'border-muted-foreground/40'
+                  }`}>
+                    {formData.aceite_uso_imagem && <Check className="w-3 h-3 text-white" />}
                   </div>
-                  {errors.aceite_livre_vontade && (
-                    <p className="text-sm text-destructive ml-7">{errors.aceite_livre_vontade}</p>
-                  )}
-
-                  <div className="flex items-start space-x-3">
-                    <Checkbox
-                      id="aceite3"
-                      checked={formData.aceite_termo_responsabilidade}
-                      onCheckedChange={(checked) => updateField('aceite_termo_responsabilidade', checked as boolean)}
-                    />
-                    <Label htmlFor="aceite3" className="cursor-pointer text-sm leading-relaxed">
-                      Aceito o termo de responsabilidade e me comprometo a seguir 
-                      as orientações do facilitador durante toda a cerimônia.
-                    </Label>
-                  </div>
-                  {errors.aceite_termo_responsabilidade && (
-                    <p className="text-sm text-destructive ml-7">{errors.aceite_termo_responsabilidade}</p>
-                  )}
-                </div>
-
-                {/* Aceite de Permanência no Templo */}
-                <div className="p-4 bg-primary/5 border border-primary/20 rounded-lg space-y-3">
-                  <p className="font-medium text-primary flex items-center gap-2">
-                    <Clock className="w-4 h-4" />
-                    Permanência no Templo
-                  </p>
-                  <p className="text-sm text-muted-foreground">
-                    Por segurança e bem-estar de todos, é importante que você permaneça no templo 
-                    até que esteja em condições adequadas para sair, especialmente se ainda estiver 
-                    sob efeito das medicinas sagradas.
-                  </p>
-                  <div className="flex items-start space-x-3 pt-2">
-                    <Checkbox
-                      id="aceite_permanencia"
-                      checked={formData.aceite_permanencia}
-                      onCheckedChange={(checked) => updateField('aceite_permanencia', checked as boolean)}
-                    />
-                    <Label htmlFor="aceite_permanencia" className="cursor-pointer text-sm leading-relaxed">
-                      <strong>Declaro</strong> que me comprometo a permanecer no templo até que esteja 
-                      em plenas condições físicas e mentais para sair com segurança, respeitando o tempo 
-                      necessário para integração da experiência.
-                    </Label>
-                  </div>
-                  {errors.aceite_permanencia && (
-                    <p className="text-sm text-destructive ml-7">{errors.aceite_permanencia}</p>
-                  )}
-                </div>
-
-                {/* Autorização de Uso de Imagem */}
-                <div className="p-4 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-lg space-y-3">
-                  <p className="font-medium text-amber-800 dark:text-amber-200 flex items-center gap-2">
-                    <Camera className="w-4 h-4" />
-                    Autorização de Uso de Imagem
-                  </p>
-                  <p className="text-sm text-amber-700 dark:text-amber-300">
-                    Durante as cerimônias e eventos, podem ser feitos registros fotográficos e de vídeo 
-                    para divulgação nas redes sociais e materiais institucionais da Consciência Divinal.
-                  </p>
-                  <div className="flex items-start space-x-3 pt-2">
-                    <Checkbox
-                      id="aceite_imagem"
-                      checked={formData.aceite_uso_imagem}
-                      onCheckedChange={(checked) => updateField('aceite_uso_imagem', checked as boolean)}
-                    />
-                    <Label htmlFor="aceite_imagem" className="cursor-pointer text-sm leading-relaxed text-amber-800 dark:text-amber-200">
-                      <strong>Autorizo</strong> o uso da minha imagem em fotos e vídeos para divulgação 
-                      nas redes sociais e materiais da Consciência Divinal. Entendo que posso solicitar 
-                      a remoção de qualquer conteúdo a qualquer momento.
-                    </Label>
-                  </div>
-                  {!formData.aceite_uso_imagem && (
-                    <p className="text-xs text-amber-600 dark:text-amber-400 italic">
-                      Caso não autorize, sua imagem não será utilizada em nenhum material de divulgação.
+                  <div className="flex-1">
+                    <p className={`text-sm font-semibold mb-0.5 flex items-center gap-1.5 ${formData.aceite_uso_imagem ? 'text-amber-700 dark:text-amber-400' : 'text-foreground'}`}>
+                      <Camera className="w-3.5 h-3.5 flex-shrink-0" />
+                      Autorização de Uso de Imagem <span className="text-xs font-normal text-muted-foreground ml-1">(opcional)</span>
                     </p>
-                  )}
+                    <p className="text-xs text-muted-foreground leading-relaxed">
+                      Autorizo o uso da minha imagem em fotos e vídeos para divulgação nas redes sociais e materiais da Consciência Divinal. Posso solicitar remoção a qualquer momento.
+                    </p>
+                    {!formData.aceite_uso_imagem && (
+                      <p className="text-xs text-muted-foreground/60 mt-1 italic">Caso não autorize, sua imagem não será utilizada.</p>
+                    )}
+                  </div>
                 </div>
               </CardContent>
             </>
@@ -2117,8 +2189,8 @@ const Anamnese: React.FC = () => {
                   <CheckCircle2 className="w-5 h-5 text-primary" />
                   Confirmação e Assinatura
                 </CardTitle>
-                <CardDescription>
-                  Revise seus dados básicos e assine para finalizar.
+                <CardDescription className="text-xs leading-relaxed pt-1">
+                  Ao assinar, você confirma que todas as informações são verdadeiras e que compreendeu os termos aceitos.
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
@@ -2202,23 +2274,25 @@ const Anamnese: React.FC = () => {
           )}
 
           {/* Navigation Buttons */}
-          <div className="flex justify-between p-6 pt-0">
+          <div className="flex justify-between items-center p-6 pt-2 gap-3">
             <Button
-              variant="outline"
-              onClick={() => setStep(Math.max(1, step - 1))}
+              variant="ghost"
+              size="sm"
+              onClick={() => { setStepDirection('backward'); setStep(Math.max(1, step - 1)); }}
               disabled={step === 1}
+              className="text-muted-foreground"
             >
-              <ChevronLeft className="w-4 h-4 mr-2" />
-              Anterior
+              <ChevronLeft className="w-4 h-4 mr-1" />
+              Voltar
             </Button>
 
             {step < 6 ? (
-              <Button onClick={nextStep}>
-                Próximo
-                <ChevronRight className="w-4 h-4 ml-2" />
+              <Button onClick={nextStep} className="gap-2 px-8 shadow-md shadow-primary/20">
+                Continuar
+                <ChevronRight className="w-4 h-4" />
               </Button>
             ) : (
-              <Button onClick={handleSubmit} disabled={isLoading || !formData.assinatura}>
+              <Button onClick={handleSubmit} disabled={isLoading || !formData.assinatura} className="gap-2 px-8 shadow-md shadow-primary/20">
                 {isLoading ? (
                   <Loader2 className="w-4 h-4 animate-spin" />
                 ) : (
