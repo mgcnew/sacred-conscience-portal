@@ -307,8 +307,8 @@ const Biblioteca: React.FC = () => {
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
         {/* Pill-style tabs */}
-        <div className="mb-6">
-          <TabsList className="inline-flex gap-1 bg-muted/70 p-1 rounded-full h-auto">
+        <div className="mb-6 overflow-x-auto scrollbar-none">
+          <TabsList className="inline-flex gap-1 bg-muted/70 p-1 rounded-full h-auto min-w-max">
             <TabsTrigger value="meus-livros" className={triggerCls}>
               <BookMarked className="w-3.5 h-3.5" />
               <span>Meus Livros</span>
@@ -439,11 +439,11 @@ const Biblioteca: React.FC = () => {
                   placeholder="Buscar upload..."
                   value={searchUploads}
                   onChange={setSearchUploads}
-                  containerClassName="flex-1 max-w-sm"
+                  containerClassName="flex-1"
                 />
                 <Button size="sm" onClick={() => fileInputRef.current?.click()} className="shrink-0">
-                  <Upload className="w-4 h-4 mr-2" />
-                  Enviar Ebook
+                  <Upload className="w-4 h-4 sm:mr-2" />
+                  <span className="hidden sm:inline">Enviar Ebook</span>
                 </Button>
               </div>
 
