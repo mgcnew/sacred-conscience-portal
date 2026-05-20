@@ -112,17 +112,6 @@ export {
   useSairListaEspera,
 } from './useListaEspera';
 
-// Chat interno
-export {
-  useConversas,
-  useMensagens,
-  useEnviarMensagem,
-  useGetOrCreateConversa,
-  useTotalNaoLidas,
-  type Conversa,
-  type Mensagem,
-} from './useChat';
-
 // Confirmação de presença
 export { useConfirmarPresenca } from './useConfirmacaoPresenca';
 
