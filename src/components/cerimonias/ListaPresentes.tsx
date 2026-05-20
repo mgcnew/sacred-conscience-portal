@@ -1,8 +1,9 @@
 import React, { useState, useMemo } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -19,6 +20,8 @@ import {
   ChevronDown,
   ChevronUp,
   Pill,
+  UserCheck,
+  UserX,
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -53,6 +56,7 @@ interface InscritoComDetalhes {
   forma_pagamento: string | null;
   pago: boolean;
   cancelada: boolean;
+  presenca_confirmada: boolean;
   data_inscricao: string;
   profile: {
     id: string;
@@ -75,8 +79,10 @@ interface Cerimonia {
 }
 
 const ListaPresentes: React.FC = () => {
+  const queryClient = useQueryClient();
   const [selectedCerimonia, setSelectedCerimonia] = useState<string>('');
   const [expandedCards, setExpandedCards] = useState<Set<string>>(new Set());
+  const [updatingPresencaId, setUpdatingPresencaId] = useState<string | null>(null);
 
   // Helper para verificar se tem condições de saúde
   const temCondicoesSaude = (anamnese: AnamneseDetalhes | null): boolean => {
@@ -134,7 +140,7 @@ const ListaPresentes: React.FC = () => {
       // Buscar inscrições (não canceladas)
       const { data: inscricoes, error: errInsc } = await supabase
         .from('inscricoes')
-        .select('id, user_id, cerimonia_id, forma_pagamento, pago, cancelada, data_inscricao')
+        .select('id, user_id, cerimonia_id, forma_pagamento, pago, cancelada, presenca_confirmada, data_inscricao')
         .eq('cerimonia_id', selectedCerimonia)
         .eq('cancelada', false)
         .order('data_inscricao', { ascending: true });
@@ -181,22 +187,40 @@ const ListaPresentes: React.FC = () => {
 
   // Estatísticas
   const stats = useMemo(() => {
-    if (!inscritos) return { total: 0, pagos: 0, pendentes: 0, comCondicoes: 0, autorizamImagem: 0, usaMedicamentos: 0 };
-    
+    if (!inscritos) return { total: 0, pagos: 0, pendentes: 0, presentes: 0, comCondicoes: 0, autorizamImagem: 0, usaMedicamentos: 0 };
+
     const pagos = inscritos.filter(i => i.pago || i.pagamento?.mp_status === 'approved').length;
+    const presentes = inscritos.filter(i => i.presenca_confirmada).length;
     const comCondicoes = inscritos.filter(i => temCondicoesSaude(i.anamnese)).length;
     const autorizamImagem = inscritos.filter(i => i.anamnese?.aceite_uso_imagem).length;
     const usaMedicamentos = inscritos.filter(i => i.anamnese?.uso_medicamentos && i.anamnese.uso_medicamentos.trim() !== '').length;
-    
+
     return {
       total: inscritos.length,
       pagos,
       pendentes: inscritos.length - pagos,
+      presentes,
       comCondicoes,
       autorizamImagem,
       usaMedicamentos,
     };
   }, [inscritos]);
+
+  const togglePresencaMutation = useMutation({
+    mutationFn: async ({ id, atual }: { id: string; atual: boolean }) => {
+      const { error } = await supabase
+        .from('inscricoes')
+        .update({ presenca_confirmada: !atual })
+        .eq('id', id);
+      if (error) throw error;
+    },
+    onMutate: ({ id }) => setUpdatingPresencaId(id),
+    onSettled: () => {
+      setUpdatingPresencaId(null);
+      queryClient.invalidateQueries({ queryKey: ['inscritos-cerimonia', selectedCerimonia] });
+      queryClient.invalidateQueries({ queryKey: ['admin-inscricoes'] });
+    },
+  });
 
   const toggleExpand = (id: string) => {
     setExpandedCards(prev => {
@@ -258,13 +282,22 @@ const ListaPresentes: React.FC = () => {
 
       {/* Estatísticas */}
       {selectedCerimonia && inscritos && (
-        <div className="grid grid-cols-2 md:grid-cols-6 gap-2">
+        <div className="grid grid-cols-2 md:grid-cols-7 gap-2">
           <Card className="p-3">
             <div className="flex items-center gap-2">
               <Users className="w-4 h-4 text-primary" />
               <div>
                 <p className="text-xs text-muted-foreground">Total</p>
                 <p className="text-lg font-bold">{stats.total}</p>
+              </div>
+            </div>
+          </Card>
+          <Card className="p-3">
+            <div className="flex items-center gap-2">
+              <UserCheck className="w-4 h-4 text-emerald-500" />
+              <div>
+                <p className="text-xs text-muted-foreground">Presentes</p>
+                <p className="text-lg font-bold text-emerald-600">{stats.presentes}</p>
               </div>
             </div>
           </Card>
@@ -354,22 +387,27 @@ const ListaPresentes: React.FC = () => {
             const isExpanded = expandedCards.has(inscrito.id);
             const StatusIcon = statusPag.icon;
 
+            const isUpdating = updatingPresencaId === inscrito.id;
+
             return (
-              <Card key={inscrito.id} className="overflow-hidden">
+              <Card
+                key={inscrito.id}
+                className={cn("overflow-hidden transition-colors", inscrito.presenca_confirmada && "border-emerald-300 dark:border-emerald-700")}
+              >
                 <CardContent className="p-0">
                   {/* Header do card - sempre visível */}
-                  <button
-                    onClick={() => toggleExpand(inscrito.id)}
-                    className="w-full p-3 flex items-center gap-3 hover:bg-muted/50 transition-colors text-left"
-                  >
-                    <span className="text-xs text-muted-foreground w-6">{index + 1}.</span>
-                    <Avatar className="w-9 h-9">
+                  <div className="p-3 flex items-center gap-3">
+                    <span className="text-xs text-muted-foreground w-6 shrink-0">{index + 1}.</span>
+                    <Avatar className="w-9 h-9 shrink-0">
                       <AvatarImage src={inscrito.profile?.avatar_url || undefined} />
                       <AvatarFallback className="text-xs">
                         {inscrito.profile?.full_name?.charAt(0)?.toUpperCase() || '?'}
                       </AvatarFallback>
                     </Avatar>
-                    <div className="flex-1 min-w-0">
+                    <button
+                      onClick={() => toggleExpand(inscrito.id)}
+                      className="flex-1 min-w-0 text-left"
+                    >
                       <p className="font-medium text-sm truncate">
                         {inscrito.profile?.full_name || 'Sem nome'}
                       </p>
@@ -391,13 +429,36 @@ const ListaPresentes: React.FC = () => {
                           </Badge>
                         )}
                       </div>
-                    </div>
-                    {isExpanded ? (
-                      <ChevronUp className="w-4 h-4 text-muted-foreground" />
-                    ) : (
-                      <ChevronDown className="w-4 h-4 text-muted-foreground" />
-                    )}
-                  </button>
+                    </button>
+                    {/* Presence toggle button */}
+                    <Button
+                      size="sm"
+                      variant={inscrito.presenca_confirmada ? 'default' : 'outline'}
+                      className={cn(
+                        "h-9 w-9 p-0 shrink-0 rounded-full",
+                        inscrito.presenca_confirmada && "bg-emerald-600 hover:bg-emerald-700 border-emerald-600"
+                      )}
+                      disabled={isUpdating}
+                      onClick={() => togglePresencaMutation.mutate({ id: inscrito.id, atual: inscrito.presenca_confirmada })}
+                      aria-label={inscrito.presenca_confirmada ? 'Desmarcar presença' : 'Marcar presença'}
+                    >
+                      {inscrito.presenca_confirmada
+                        ? <UserCheck className="w-4 h-4" />
+                        : <UserX className="w-4 h-4 text-muted-foreground" />
+                      }
+                    </Button>
+                    <button
+                      onClick={() => toggleExpand(inscrito.id)}
+                      className="shrink-0 p-1 text-muted-foreground"
+                      aria-label="Expandir detalhes"
+                    >
+                      {isExpanded ? (
+                        <ChevronUp className="w-4 h-4" />
+                      ) : (
+                        <ChevronDown className="w-4 h-4" />
+                      )}
+                    </button>
+                  </div>
 
                   {/* Detalhes expandidos */}
                   {isExpanded && (
