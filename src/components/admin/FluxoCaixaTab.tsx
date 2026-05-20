@@ -12,6 +12,7 @@ import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerFooter } from '
 import { useIsMobile } from '@/hooks/use-mobile';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { PaginationControls } from '@/components/ui/pagination-controls';
 import {
   Plus, Trash2, TrendingUp, TrendingDown, DollarSign, ArrowUpCircle, ArrowDownCircle,
   BarChart3, PieChart, Wallet, Tag, RefreshCw, Download, FileText, Target, AlertTriangle, Settings,
@@ -104,6 +105,10 @@ export const FluxoCaixaTab: React.FC = () => {
   // Reconciliação
   const [transacoesSelecionadas, setTransacoesSelecionadas] = useState<Set<string>>(new Set());
   const [mostrarApenasNaoReconciliadas, setMostrarApenasNaoReconciliadas] = useState(false);
+
+  // Paginação do extrato
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
 
   // Queries
   const { data: categorias } = useCategoriasFinanceiras();
@@ -437,6 +442,17 @@ export const FluxoCaixaTab: React.FC = () => {
     return transacoes?.filter(t => !t.reconciliada);
   }, [transacoes, mostrarApenasNaoReconciliadas]);
 
+  // Paginação do extrato (client-side — dados já filtrados por período)
+  const totalTransacoes = transacoesFiltradas?.length ?? 0;
+  const totalPages = Math.max(1, Math.ceil(totalTransacoes / pageSize));
+  const transacoesPage = useMemo(() => {
+    const from = (currentPage - 1) * pageSize;
+    return transacoesFiltradas?.slice(from, from + pageSize) ?? [];
+  }, [transacoesFiltradas, currentPage, pageSize]);
+
+  // Resetar para p.1 quando filtros mudam
+  const handleFiltroChange = (fn: () => void) => { fn(); setCurrentPage(1); };
+
   const exportarRelatorio = () => {
     if (!transacoes?.length) {
       toast.error('Nenhuma transação para exportar');
@@ -486,6 +502,7 @@ export const FluxoCaixaTab: React.FC = () => {
     
     setFiltroDataInicio(format(inicio, 'yyyy-MM-dd'));
     setFiltroDataFim(format(fim, 'yyyy-MM-dd'));
+    setCurrentPage(1);
   };
 
   return (
@@ -583,71 +600,49 @@ export const FluxoCaixaTab: React.FC = () => {
         </Card>
       </div>
 
-      {/* Ações Rápidas - Desktop Only (Mobile uses FAB/Sticky) */}
-      <div className="hidden md:flex flex-col md:flex-row gap-2">
-        <div className="flex gap-2">
-          <Button onClick={() => handleOpenForm('entrada')} className="bg-primary hover:bg-primary/90 flex-1 md:flex-none" size="sm">
-            <Plus className="w-4 h-4 mr-1" />
-            Nova Entrada
-          </Button>
-          <Button onClick={() => handleOpenForm('saida')} variant="destructive" className="flex-1 md:flex-none" size="sm">
-            <Plus className="w-4 h-4 mr-1" />
-            Nova Saída
-          </Button>
-        </div>
+      {/* Ações Rápidas */}
+      <div className="flex flex-wrap items-center gap-2">
+        {/* Desktop: botões com texto; Mobile: apenas ícones visíveis via FAB sticky */}
+        <Button onClick={() => handleOpenForm('entrada')} className="bg-primary hover:bg-primary/90 hidden md:inline-flex" size="sm">
+          <Plus className="w-4 h-4 mr-1" />
+          Nova Entrada
+        </Button>
+        <Button onClick={() => handleOpenForm('saida')} variant="destructive" className="hidden md:inline-flex" size="sm">
+          <Plus className="w-4 h-4 mr-1" />
+          Nova Saída
+        </Button>
         <div className="flex-1" />
-        <div className="flex gap-2 justify-end">
-          <Button variant="outline" size="sm" onClick={exportarRelatorio}>
-            <Download className="w-4 h-4 mr-1" />
-            Exportar CSV
-          </Button>
-          <div className="flex gap-1 bg-muted p-0.5 rounded-lg">
-            <Button variant="ghost" size="sm" className="h-7 text-xs" onClick={() => aplicarFiltroRapido('mes')}>Mês</Button>
-            <Button variant="ghost" size="sm" className="h-7 text-xs" onClick={() => aplicarFiltroRapido('trimestre')}>Tri</Button>
-            <Button variant="ghost" size="sm" className="h-7 text-xs" onClick={() => aplicarFiltroRapido('ano')}>Ano</Button>
-          </div>
+        <div className="flex gap-1 bg-muted p-0.5 rounded-lg">
+          <Button variant="ghost" size="sm" className="h-7 text-xs px-2 md:px-3" onClick={() => aplicarFiltroRapido('mes')}>Mês</Button>
+          <Button variant="ghost" size="sm" className="h-7 text-xs px-2 md:px-3" onClick={() => aplicarFiltroRapido('trimestre')}>Tri</Button>
+          <Button variant="ghost" size="sm" className="h-7 text-xs px-2 md:px-3" onClick={() => aplicarFiltroRapido('ano')}>Ano</Button>
         </div>
+        <Button variant="outline" size="sm" onClick={exportarRelatorio} className="h-7 px-2 md:px-3">
+          <Download className="w-4 h-4 md:mr-1" />
+          <span className="hidden md:inline">Exportar CSV</span>
+        </Button>
       </div>
 
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as any)} className="w-full">
         <div className="relative mb-6">
-          <TabsList className="w-full h-auto p-0 bg-transparent border-b rounded-none justify-start overflow-x-auto scrollbar-none flex-nowrap md:justify-center">
-            <TabsTrigger 
-              value="resumo" 
-              className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary data-[state=active]:bg-transparent py-3 text-xs md:text-sm font-bold uppercase tracking-wider transition-all px-4"
-            >
-              <BarChart3 className="w-4 h-4 md:mr-2" />
-              <span>Painel</span>
-            </TabsTrigger>
-            <TabsTrigger 
-              value="transacoes" 
-              className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary data-[state=active]:bg-transparent py-3 text-xs md:text-sm font-bold uppercase tracking-wider transition-all px-4"
-            >
-              <DollarSign className="w-4 h-4 md:mr-2" />
-              <span>Extrato</span>
-            </TabsTrigger>
-            <TabsTrigger 
-              value="recorrentes" 
-              className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary data-[state=active]:bg-transparent py-3 text-xs md:text-sm font-bold uppercase tracking-wider transition-all px-4"
-            >
-              <RefreshCw className="w-4 h-4 md:mr-2" />
-              <span>Fixos</span>
-            </TabsTrigger>
-            <TabsTrigger 
-              value="categorias" 
-              className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary data-[state=active]:bg-transparent py-3 text-xs md:text-sm font-bold uppercase tracking-wider transition-all px-4"
-            >
-              <Tag className="w-4 h-4 md:mr-2" />
-              <span>Tags</span>
-            </TabsTrigger>
-            <TabsTrigger 
-              value="metas" 
-              className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary data-[state=active]:bg-transparent py-3 text-xs md:text-sm font-bold uppercase tracking-wider transition-all px-4"
-            >
-              <Target className="w-4 h-4 md:mr-2" />
-              <span>Metas</span>
-            </TabsTrigger>
+          <TabsList className="w-full h-auto p-0 bg-transparent border-b rounded-none justify-start overflow-x-auto scrollbar-none flex-nowrap">
+            {[
+              { value: 'resumo', icon: <BarChart3 className="w-4 h-4 shrink-0" />, label: 'Painel' },
+              { value: 'transacoes', icon: <DollarSign className="w-4 h-4 shrink-0" />, label: 'Extrato' },
+              { value: 'recorrentes', icon: <RefreshCw className="w-4 h-4 shrink-0" />, label: 'Fixos' },
+              { value: 'categorias', icon: <Tag className="w-4 h-4 shrink-0" />, label: 'Tags' },
+              { value: 'metas', icon: <Target className="w-4 h-4 shrink-0" />, label: 'Metas' },
+            ].map(tab => (
+              <TabsTrigger
+                key={tab.value}
+                value={tab.value}
+                className="flex items-center gap-1.5 rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary data-[state=active]:bg-transparent py-3 px-3 md:px-5 text-xs md:text-sm font-bold uppercase tracking-wider transition-all whitespace-nowrap"
+              >
+                {tab.icon}
+                {tab.label}
+              </TabsTrigger>
+            ))}
           </TabsList>
         </div>
 
@@ -721,22 +716,22 @@ export const FluxoCaixaTab: React.FC = () => {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="h-64 flex items-end gap-2">
+              <div className="h-64 flex items-end gap-1 md:gap-2">
                 {dadosMensais?.map((mes, i) => (
-                  <div key={i} className="flex-1 flex flex-col items-center gap-1">
+                  <div key={i} className="flex-1 flex flex-col items-center gap-1 min-w-0">
                     <div className="w-full flex gap-0.5 h-48 items-end">
                       <div
                         className="flex-1 bg-green-500 rounded-t transition-all hover:bg-green-400"
                         style={{ height: `${(mes.entradas / maxValorMensal) * 100}%`, minHeight: mes.entradas > 0 ? '4px' : '0' }}
-                        title={`Entradas: ${formatarValor(mes.entradas)}`}
+                        title={`Entradas ${MESES[i]}: ${formatarValor(mes.entradas)}`}
                       />
                       <div
                         className="flex-1 bg-red-500 rounded-t transition-all hover:bg-red-400"
                         style={{ height: `${(mes.saidas / maxValorMensal) * 100}%`, minHeight: mes.saidas > 0 ? '4px' : '0' }}
-                        title={`Saídas: ${formatarValor(mes.saidas)}`}
+                        title={`Saídas ${MESES[i]}: ${formatarValor(mes.saidas)}`}
                       />
                     </div>
-                    <span className={`text-xs ${i === hoje.getMonth() ? 'font-bold text-primary' : 'text-muted-foreground'}`}>
+                    <span className={`text-[9px] md:text-xs truncate w-full text-center ${i === hoje.getMonth() ? 'font-bold text-primary' : 'text-muted-foreground'}`}>
                       {MESES[i]}
                     </span>
                   </div>
@@ -874,29 +869,29 @@ export const FluxoCaixaTab: React.FC = () => {
           {/* Filtros */}
           <Card>
             <CardContent className="pt-4">
-              <div className="grid grid-cols-2 md:flex md:flex-wrap gap-3 md:gap-4 items-end">
-                <div className="grid gap-1.5">
+              <div className="flex flex-wrap gap-3 items-end">
+                <div className="grid gap-1.5 flex-1 min-w-[130px]">
                   <Label className="text-xs">De</Label>
                   <Input
                     type="date"
                     value={filtroDataInicio}
-                    onChange={(e) => setFiltroDataInicio(e.target.value)}
-                    className="w-full md:w-36"
+                    onChange={(e) => handleFiltroChange(() => setFiltroDataInicio(e.target.value))}
+                    className="w-full"
                   />
                 </div>
-                <div className="grid gap-1.5">
+                <div className="grid gap-1.5 flex-1 min-w-[130px]">
                   <Label className="text-xs">Até</Label>
                   <Input
                     type="date"
                     value={filtroDataFim}
-                    onChange={(e) => setFiltroDataFim(e.target.value)}
-                    className="w-full md:w-36"
+                    onChange={(e) => handleFiltroChange(() => setFiltroDataFim(e.target.value))}
+                    className="w-full"
                   />
                 </div>
-                <div className="grid gap-1.5">
+                <div className="grid gap-1.5 w-[120px]">
                   <Label className="text-xs">Tipo</Label>
-                  <Select value={filtroTipo} onValueChange={(v: any) => setFiltroTipo(v)}>
-                    <SelectTrigger className="w-full md:w-32">
+                  <Select value={filtroTipo} onValueChange={(v: any) => handleFiltroChange(() => setFiltroTipo(v))}>
+                    <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -910,8 +905,7 @@ export const FluxoCaixaTab: React.FC = () => {
                   <Button
                     variant={mostrarApenasNaoReconciliadas ? "default" : "outline"}
                     size="sm"
-                    onClick={() => setMostrarApenasNaoReconciliadas(!mostrarApenasNaoReconciliadas)}
-                    className="w-full md:w-auto"
+                    onClick={() => handleFiltroChange(() => setMostrarApenasNaoReconciliadas(!mostrarApenasNaoReconciliadas))}
                   >
                     <Circle className="w-3 h-3 mr-1" />
                     Pendentes
@@ -923,22 +917,20 @@ export const FluxoCaixaTab: React.FC = () => {
 
           {/* Ações em lote */}
           {transacoesSelecionadas.size > 0 && (
-            <div className="flex flex-col md:flex-row md:items-center gap-2 p-3 rounded-lg bg-muted">
+            <div className="flex flex-wrap items-center gap-2 p-3 rounded-lg bg-muted">
               <span className="text-sm font-medium">{transacoesSelecionadas.size} selecionadas</span>
-              <div className="hidden md:block flex-1" />
-              <div className="flex flex-wrap gap-2">
-                <Button size="sm" variant="outline" onClick={() => handleReconciliarSelecionadas(true)} className="flex-1 md:flex-none">
-                  <CheckCircle className="w-4 h-4 mr-1" />
-                  Reconciliar
-                </Button>
-                <Button size="sm" variant="outline" onClick={() => handleReconciliarSelecionadas(false)} className="flex-1 md:flex-none">
-                  <Circle className="w-4 h-4 mr-1" />
-                  Desmarcar
-                </Button>
-                <Button size="sm" variant="ghost" onClick={() => setTransacoesSelecionadas(new Set())}>
-                  Limpar
-                </Button>
-              </div>
+              <div className="flex-1" />
+              <Button size="sm" variant="outline" onClick={() => handleReconciliarSelecionadas(true)}>
+                <CheckCircle className="w-4 h-4 mr-1" />
+                Reconciliar
+              </Button>
+              <Button size="sm" variant="outline" onClick={() => handleReconciliarSelecionadas(false)}>
+                <Circle className="w-4 h-4 mr-1" />
+                Desmarcar
+              </Button>
+              <Button size="sm" variant="ghost" onClick={() => setTransacoesSelecionadas(new Set())}>
+                Limpar
+              </Button>
             </div>
           )}
 
@@ -947,7 +939,7 @@ export const FluxoCaixaTab: React.FC = () => {
             <CardContent className="pt-4">
               {isLoading ? (
                 <div className="text-center py-8 text-muted-foreground">Carregando...</div>
-              ) : !transacoesFiltradas?.length ? (
+              ) : !totalTransacoes ? (
                 <div className="text-center py-8 text-muted-foreground">
                   <DollarSign className="w-12 h-12 mx-auto mb-2 opacity-30" />
                   <p>Nenhuma transação no período</p>
@@ -983,7 +975,7 @@ export const FluxoCaixaTab: React.FC = () => {
                         </TableRow>
                       </TableHeader>
                       <TableBody>
-                        {transacoesFiltradas.map((t) => (
+                        {transacoesPage.map((t) => (
                           <TableRow key={t.id} className={t.reconciliada ? 'bg-green-50/50 dark:bg-green-900/10' : ''}>
                             <TableCell>
                               {t.referencia_tipo === 'manual' && !t.id.startsWith('mp-') ? (
@@ -1110,7 +1102,7 @@ export const FluxoCaixaTab: React.FC = () => {
                       </Button>
                     </div>
 
-                    {transacoesFiltradas.map((t) => (
+                    {transacoesPage.map((t) => (
                       <div
                         key={t.id}
                         className={`relative overflow-hidden rounded-2xl border shadow-sm transition-all active:scale-[0.98] ${
@@ -1234,6 +1226,18 @@ export const FluxoCaixaTab: React.FC = () => {
                       </div>
                     ))}
                   </div>
+                  {totalPages > 1 && (
+                    <PaginationControls
+                      currentPage={currentPage}
+                      totalPages={totalPages}
+                      onPageChange={setCurrentPage}
+                      isLoading={isLoading}
+                      pageSize={pageSize}
+                      onPageSizeChange={(s) => { setPageSize(s); setCurrentPage(1); }}
+                      pageSizeOptions={[10, 20, 50]}
+                      totalItems={totalTransacoes}
+                    />
+                  )}
                 </>
               )}
             </CardContent>
