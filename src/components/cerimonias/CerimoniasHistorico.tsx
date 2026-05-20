@@ -10,6 +10,14 @@ import {
   DialogDescription,
 } from '@/components/ui/dialog';
 import {
+  Drawer,
+  DrawerContent,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerDescription,
+} from '@/components/ui/drawer';
+import { useIsMobile } from '@/hooks/useIsMobile';
+import {
   Select,
   SelectContent,
   SelectItem,
@@ -40,6 +48,7 @@ import {
   useMeusDepoimentosAprovados,
   useHistoricoCerimoniasAdmin,
   useParticipantesCerimonia,
+  type ParticipanteCerimonia,
 } from '@/hooks/queries';
 import { ROUTES } from '@/constants';
 import { formatDateBR, formatDateExtensoBR, parseDateString } from '@/lib/date-utils';
@@ -82,9 +91,99 @@ function StatCard({ value, label, icon: Icon, color = 'text-primary' }: {
   );
 }
 
+// ---------- Dialog/Drawer content compartilhado ----------
+
+const ParticipantesDialogContent: React.FC<{
+  selectedCerimonia: CerimoniaPassada | null;
+  participantes: ParticipanteCerimonia[] | undefined;
+  loadingParticipantes: boolean;
+}> = ({ selectedCerimonia, participantes, loadingParticipantes }) => (
+  <div className="space-y-4">
+    {selectedCerimonia && (
+      <div className="grid grid-cols-3 gap-2">
+        <div className="p-3 rounded-lg bg-primary/5 text-center">
+          <p className="text-xl font-bold text-primary">{selectedCerimonia.total_inscritos}</p>
+          <p className="text-[10px] text-muted-foreground">Inscritos</p>
+        </div>
+        <div className="p-3 rounded-lg bg-green-500/5 text-center">
+          <p className="text-xl font-bold text-green-600 dark:text-green-400">{selectedCerimonia.total_presentes}</p>
+          <p className="text-[10px] text-muted-foreground">Presentes</p>
+        </div>
+        <div className="p-3 rounded-lg bg-amber-500/5 text-center">
+          <p className="text-xl font-bold text-amber-600">{selectedCerimonia.total_pagos}</p>
+          <p className="text-[10px] text-muted-foreground">Pagos</p>
+        </div>
+      </div>
+    )}
+
+    {loadingParticipantes ? (
+      <div className="flex justify-center py-8">
+        <Loader2 className="w-6 h-6 animate-spin text-primary" />
+      </div>
+    ) : !participantes || participantes.length === 0 ? (
+      <p className="text-center text-sm text-muted-foreground py-6">
+        Nenhum participante registrado.
+      </p>
+    ) : (
+      <div className="space-y-2">
+        <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+          Participantes ({participantes.filter(p => !p.cancelada).length})
+        </p>
+        {participantes.map(p => (
+          <div
+            key={p.id}
+            className={`flex items-center gap-3 p-3 rounded-lg border transition-colors ${
+              p.cancelada
+                ? 'opacity-50 bg-muted/30 border-border/30'
+                : 'bg-card border-border/60'
+            }`}
+          >
+            <div className="w-8 h-8 rounded-full bg-primary/15 border border-primary/20 flex items-center justify-center text-primary font-bold text-sm shrink-0">
+              {p.profiles?.full_name?.charAt(0)?.toUpperCase() || <User className="w-4 h-4" />}
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-medium truncate">
+                {p.profiles?.full_name || 'Participante sem nome'}
+              </p>
+              {p.forma_pagamento && (
+                <p className="text-[11px] text-muted-foreground flex items-center gap-1">
+                  <CreditCard className="w-3 h-3" />
+                  {p.forma_pagamento}
+                </p>
+              )}
+            </div>
+            <div className="flex flex-col gap-1 items-end shrink-0">
+              {p.cancelada ? (
+                <Badge variant="outline" className="text-[10px] h-5 bg-red-500/10 text-red-600 border-red-200">
+                  Cancelado
+                </Badge>
+              ) : (
+                <>
+                  <Badge
+                    variant={p.pago ? 'default' : 'outline'}
+                    className={`text-[10px] h-5 ${!p.pago ? 'border-amber-300 text-amber-700 dark:text-amber-400' : ''}`}
+                  >
+                    {p.pago ? '✓ Pago' : 'Pendente'}
+                  </Badge>
+                  {p.presenca_confirmada && (
+                    <Badge variant="outline" className="text-[10px] h-5 bg-green-500/10 text-green-700 dark:text-green-400 border-green-200">
+                      ✓ Presente
+                    </Badge>
+                  )}
+                </>
+              )}
+            </div>
+          </div>
+        ))}
+      </div>
+    )}
+  </div>
+);
+
 // ---------- Admin view ----------
 
 const AdminHistorico: React.FC<{ userId?: string }> = () => {
+  const isMobile = useIsMobile();
   const { data: cerimoniasPassadas, isLoading } = useHistoricoCerimoniasAdmin(true);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [filtroMedicina, setFiltroMedicina] = useState('todas');
@@ -211,111 +310,68 @@ const AdminHistorico: React.FC<{ userId?: string }> = () => {
         </div>
       )}
 
-      {/* Participant detail dialog */}
-      <Dialog open={!!selectedId} onOpenChange={open => !open && setSelectedId(null)}>
-        <DialogContent className="max-w-xl max-h-[85vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle className="font-display text-lg">
-              {selectedCerimonia?.nome || 'Cerimônia'}
-            </DialogTitle>
-            <DialogDescription className="flex flex-wrap items-center gap-3 text-xs mt-1">
-              {selectedCerimonia && (
-                <>
-                  <span className="flex items-center gap-1">
-                    <Calendar className="w-3 h-3" />
-                    {formatDateExtensoBR(selectedCerimonia.data)}
-                  </span>
-                  <span className="flex items-center gap-1">
-                    <MapPin className="w-3 h-3" />
-                    {selectedCerimonia.local}
-                  </span>
-                </>
-              )}
-            </DialogDescription>
-          </DialogHeader>
-
-          {/* Dialog stats */}
-          {selectedCerimonia && (
-            <div className="grid grid-cols-3 gap-2 my-2">
-              <div className="p-3 rounded-lg bg-primary/5 text-center">
-                <p className="text-xl font-bold text-primary">{selectedCerimonia.total_inscritos}</p>
-                <p className="text-[10px] text-muted-foreground">Inscritos</p>
-              </div>
-              <div className="p-3 rounded-lg bg-green-500/5 text-center">
-                <p className="text-xl font-bold text-green-600 dark:text-green-400">{selectedCerimonia.total_presentes}</p>
-                <p className="text-[10px] text-muted-foreground">Presentes</p>
-              </div>
-              <div className="p-3 rounded-lg bg-amber-500/5 text-center">
-                <p className="text-xl font-bold text-amber-600">{selectedCerimonia.total_pagos}</p>
-                <p className="text-[10px] text-muted-foreground">Pagos</p>
-              </div>
+      {/* Participant detail — Drawer no mobile, Dialog no desktop */}
+      {isMobile ? (
+        <Drawer open={!!selectedId} onOpenChange={open => !open && setSelectedId(null)}>
+          <DrawerContent className="max-h-[90vh] flex flex-col">
+            <DrawerHeader className="shrink-0 pb-2 text-left">
+              <DrawerTitle className="font-display text-lg text-primary">
+                {selectedCerimonia?.nome || 'Cerimônia'}
+              </DrawerTitle>
+              <DrawerDescription className="flex flex-wrap items-center gap-3 text-xs mt-1">
+                {selectedCerimonia && (
+                  <>
+                    <span className="flex items-center gap-1">
+                      <Calendar className="w-3 h-3" />
+                      {formatDateExtensoBR(selectedCerimonia.data)}
+                    </span>
+                    <span className="flex items-center gap-1">
+                      <MapPin className="w-3 h-3" />
+                      {selectedCerimonia.local}
+                    </span>
+                  </>
+                )}
+              </DrawerDescription>
+            </DrawerHeader>
+            <div className="flex-1 overflow-y-auto px-4 pb-6">
+              <ParticipantesDialogContent
+                selectedCerimonia={selectedCerimonia}
+                participantes={participantes}
+                loadingParticipantes={loadingParticipantes}
+              />
             </div>
-          )}
-
-          {/* Participant list */}
-          {loadingParticipantes ? (
-            <div className="flex justify-center py-8">
-              <Loader2 className="w-6 h-6 animate-spin text-primary" />
-            </div>
-          ) : !participantes || participantes.length === 0 ? (
-            <p className="text-center text-sm text-muted-foreground py-6">
-              Nenhum participante registrado.
-            </p>
-          ) : (
-            <div className="space-y-2 pt-1">
-              <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground px-0.5">
-                Participantes ({participantes.filter(p => !p.cancelada).length})
-              </p>
-              {participantes.map(p => (
-                <div
-                  key={p.id}
-                  className={`flex items-center gap-3 p-3 rounded-lg border transition-colors ${
-                    p.cancelada
-                      ? 'opacity-50 bg-muted/30 border-border/30'
-                      : 'bg-card border-border/60'
-                  }`}
-                >
-                  <div className="w-8 h-8 rounded-full bg-primary/15 border border-primary/20 flex items-center justify-center text-primary font-bold text-sm shrink-0">
-                    {p.profiles?.full_name?.charAt(0)?.toUpperCase() || <User className="w-4 h-4" />}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium truncate">
-                      {p.profiles?.full_name || 'Participante sem nome'}
-                    </p>
-                    {p.forma_pagamento && (
-                      <p className="text-[11px] text-muted-foreground flex items-center gap-1">
-                        <CreditCard className="w-3 h-3" />
-                        {p.forma_pagamento}
-                      </p>
-                    )}
-                  </div>
-                  <div className="flex flex-col gap-1 items-end shrink-0">
-                    {p.cancelada ? (
-                      <Badge variant="outline" className="text-[10px] h-5 bg-red-500/10 text-red-600 border-red-200">
-                        Cancelado
-                      </Badge>
-                    ) : (
-                      <>
-                        <Badge
-                          variant={p.pago ? 'default' : 'outline'}
-                          className={`text-[10px] h-5 ${!p.pago ? 'border-amber-300 text-amber-700 dark:text-amber-400' : ''}`}
-                        >
-                          {p.pago ? '✓ Pago' : 'Pendente'}
-                        </Badge>
-                        {p.presenca_confirmada && (
-                          <Badge variant="outline" className="text-[10px] h-5 bg-green-500/10 text-green-700 dark:text-green-400 border-green-200">
-                            ✓ Presente
-                          </Badge>
-                        )}
-                      </>
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
+          </DrawerContent>
+        </Drawer>
+      ) : (
+        <Dialog open={!!selectedId} onOpenChange={open => !open && setSelectedId(null)}>
+          <DialogContent className="sm:max-w-lg max-h-[85vh] overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+            <DialogHeader>
+              <DialogTitle className="font-display text-lg text-primary">
+                {selectedCerimonia?.nome || 'Cerimônia'}
+              </DialogTitle>
+              <DialogDescription className="flex flex-wrap items-center gap-3 text-xs mt-1">
+                {selectedCerimonia && (
+                  <>
+                    <span className="flex items-center gap-1">
+                      <Calendar className="w-3 h-3" />
+                      {formatDateExtensoBR(selectedCerimonia.data)}
+                    </span>
+                    <span className="flex items-center gap-1">
+                      <MapPin className="w-3 h-3" />
+                      {selectedCerimonia.local}
+                    </span>
+                  </>
+                )}
+              </DialogDescription>
+            </DialogHeader>
+            <ParticipantesDialogContent
+              selectedCerimonia={selectedCerimonia}
+              participantes={participantes}
+              loadingParticipantes={loadingParticipantes}
+            />
+          </DialogContent>
+        </Dialog>
+      )}
     </div>
   );
 };
