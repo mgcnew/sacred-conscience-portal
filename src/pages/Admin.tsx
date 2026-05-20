@@ -163,6 +163,8 @@ const Admin: React.FC = () => {
   const [inscricoesSearch, setInscricoesSearch] = useState('');
   const [showCanceladas, setShowCanceladas] = useState(false);
   const [unmarkPaymentDialog, setUnmarkPaymentDialog] = useState<{ open: boolean; inscricaoId: string; nome: string }>({ open: false, inscricaoId: '', nome: '' });
+  const [marcarPresencasMode, setMarcarPresencasMode] = useState(false);
+  const [updatingPresencaId, setUpdatingPresencaId] = useState<string | null>(null);
   
   // State para cancelamento de inscrição
   const [cancelInscricaoDialog, setCancelInscricaoDialog] = useState<{
@@ -353,6 +355,27 @@ const Admin: React.FC = () => {
         description: 'Não foi possível cancelar a inscrição.',
       });
     }
+  });
+
+  // Mutation para marcar/desmarcar presença (admin)
+  const togglePresencaMutation = useMutation({
+    mutationFn: async ({ inscricaoId, presente }: { inscricaoId: string; presente: boolean }) => {
+      setUpdatingPresencaId(inscricaoId);
+      const { error } = await supabase
+        .from('inscricoes')
+        .update({ presenca_confirmada: presente })
+        .eq('id', inscricaoId);
+      if (error) throw error;
+      return presente;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin-inscricoes'] });
+      setUpdatingPresencaId(null);
+    },
+    onError: () => {
+      toast.error('Erro ao atualizar presença');
+      setUpdatingPresencaId(null);
+    },
   });
 
   const handleCancelInscricao = () => {
@@ -1757,14 +1780,16 @@ const Admin: React.FC = () => {
               const ativas = todasInscricoes.filter(i => !i.cancelada);
               const pagas = ativas.filter(i => i.pago);
               const pendentes = ativas.filter(i => !i.pago);
+              const presentes = ativas.filter(i => i.presenca_confirmada);
               const cerimonia = cerimonias?.find(c => c.id === selectedCerimoniaId);
               const vagas = cerimonia?.vagas;
               return (
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
                   {[
                     { label: 'Inscritos', value: ativas.length, icon: Users, color: 'text-primary', bg: 'bg-primary/10', sub: vagas ? `${vagas - ativas.length} vagas livres` : undefined },
-                    { label: 'Confirmados', value: pagas.length, icon: CheckCircle2, color: 'text-green-600', bg: 'bg-green-50 dark:bg-green-950/30', sub: undefined },
+                    { label: 'Pagos', value: pagas.length, icon: CheckCircle2, color: 'text-green-600', bg: 'bg-green-50 dark:bg-green-950/30', sub: undefined },
                     { label: 'Pendentes', value: pendentes.length, icon: AlertTriangle, color: 'text-amber-600', bg: 'bg-amber-50 dark:bg-amber-950/30', sub: undefined },
+                    { label: 'Presentes', value: presentes.length, icon: Calendar, color: 'text-blue-600', bg: 'bg-blue-50 dark:bg-blue-950/30', sub: ativas.length > 0 ? `${Math.round((presentes.length / ativas.length) * 100)}%` : undefined },
                     { label: 'Cancelados', value: todasInscricoes.filter(i => i.cancelada).length, icon: XCircle, color: 'text-destructive', bg: 'bg-destructive/10', sub: undefined },
                   ].map(({ label, value, icon: Icon, color, bg, sub }) => (
                     <Card key={label} className="border-border/50">
@@ -1786,15 +1811,95 @@ const Admin: React.FC = () => {
 
             <Card>
               <CardHeader className="pb-3">
-                <CardTitle className="flex items-center gap-2 text-base">
-                  <FileText className="w-4 h-4 text-primary" />
-                  {selectedCerimoniaId === 'todas' ? 'Todas as Inscrições' : `Inscrições · ${cerimonias?.find(c => c.id === selectedCerimoniaId)?.nome || cerimonias?.find(c => c.id === selectedCerimoniaId)?.medicina_principal}`}
-                </CardTitle>
-                {inscricoesFiltradas.length > 0 && (
-                  <p className="text-xs text-muted-foreground">{inscricoesFiltradas.length} inscrição(ões) encontrada(s)</p>
-                )}
+                <div className="flex items-center justify-between gap-3 flex-wrap">
+                  <div>
+                    <CardTitle className="flex items-center gap-2 text-base">
+                      <FileText className="w-4 h-4 text-primary" />
+                      {selectedCerimoniaId === 'todas' ? 'Todas as Inscrições' : `Inscrições · ${cerimonias?.find(c => c.id === selectedCerimoniaId)?.nome || cerimonias?.find(c => c.id === selectedCerimoniaId)?.medicina_principal}`}
+                    </CardTitle>
+                    {inscricoesFiltradas.length > 0 && (
+                      <p className="text-xs text-muted-foreground mt-0.5">{inscricoesFiltradas.length} inscrição(ões) encontrada(s)</p>
+                    )}
+                  </div>
+                  {selectedCerimoniaId !== 'todas' && (
+                    <Button
+                      variant={marcarPresencasMode ? 'default' : 'outline'}
+                      size="sm"
+                      onClick={() => setMarcarPresencasMode(p => !p)}
+                      className="gap-2 shrink-0"
+                    >
+                      <CheckCircle2 className="w-4 h-4" />
+                      {marcarPresencasMode ? 'Concluir' : 'Marcar Presenças'}
+                    </Button>
+                  )}
+                </div>
               </CardHeader>
-              <CardContent className="p-0 md:p-0">
+
+              {/* Modo de Marcar Presenças — lista otimizada para mobile */}
+              {marcarPresencasMode && selectedCerimoniaId !== 'todas' && (() => {
+                const inscritos = (inscricoes?.filter(i => i.cerimonia_id === selectedCerimoniaId && !i.cancelada) || [])
+                  .sort((a, b) => (a.profiles?.full_name || '').localeCompare(b.profiles?.full_name || '', 'pt'));
+                return (
+                  <CardContent className="p-4 border-t">
+                    <div className="mb-4 p-3 rounded-lg bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800">
+                      <p className="text-sm text-blue-700 dark:text-blue-300 font-medium">Modo de presença ativo</p>
+                      <p className="text-xs text-blue-600 dark:text-blue-400 mt-0.5">Toque no nome para marcar ou desmarcar a presença. Ordenado por nome.</p>
+                    </div>
+                    <div className="space-y-2">
+                      {inscritos.map((inscricao) => {
+                        const presente = inscricao.presenca_confirmada === true;
+                        const loading = updatingPresencaId === inscricao.id;
+                        return (
+                          <button
+                            key={inscricao.id}
+                            onClick={() => togglePresencaMutation.mutate({ inscricaoId: inscricao.id, presente: !presente })}
+                            disabled={loading}
+                            className={cn(
+                              'w-full flex items-center justify-between gap-3 px-4 py-3 rounded-xl border-2 transition-all text-left',
+                              presente
+                                ? 'border-green-400 bg-green-50 dark:bg-green-950/40 dark:border-green-600'
+                                : 'border-border bg-card hover:bg-muted/50',
+                              loading && 'opacity-50 cursor-not-allowed'
+                            )}
+                          >
+                            <div className="flex items-center gap-3 min-w-0">
+                              <Avatar className="w-9 h-9 shrink-0">
+                                <AvatarFallback className={cn('text-sm', presente ? 'bg-green-200 text-green-800 dark:bg-green-800 dark:text-green-100' : 'bg-muted text-muted-foreground')}>
+                                  {inscricao.profiles?.full_name?.charAt(0)?.toUpperCase() || '?'}
+                                </AvatarFallback>
+                              </Avatar>
+                              <div className="min-w-0">
+                                <p className="font-medium text-sm truncate">{inscricao.profiles?.full_name || 'Sem nome'}</p>
+                                <p className="text-xs text-muted-foreground">{inscricao.pago ? 'Pago' : 'Pagamento pendente'}</p>
+                              </div>
+                            </div>
+                            <div className="shrink-0">
+                              {loading ? (
+                                <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
+                              ) : presente ? (
+                                <div className="flex items-center gap-1.5 text-green-600 dark:text-green-400">
+                                  <CheckCircle2 className="w-5 h-5" />
+                                  <span className="text-xs font-medium hidden sm:inline">Presente</span>
+                                </div>
+                              ) : (
+                                <div className="flex items-center gap-1.5 text-muted-foreground">
+                                  <XCircle className="w-5 h-5" />
+                                  <span className="text-xs font-medium hidden sm:inline">Ausente</span>
+                                </div>
+                              )}
+                            </div>
+                          </button>
+                        );
+                      })}
+                    </div>
+                    {inscritos.length === 0 && (
+                      <p className="text-sm text-muted-foreground text-center py-6">Nenhum inscrito ativo nesta cerimônia.</p>
+                    )}
+                  </CardContent>
+                );
+              })()}
+
+              <CardContent className={cn('p-0 md:p-0', marcarPresencasMode && 'hidden')}>
                 {/* Desktop Table */}
                 <div className="hidden md:block">
                   <Table>
@@ -1804,6 +1909,7 @@ const Admin: React.FC = () => {
                         {selectedCerimoniaId === 'todas' && <TableHead>Cerimônia</TableHead>}
                         <TableHead>Data Inscrição</TableHead>
                         <TableHead>Forma Pagamento</TableHead>
+                        {selectedCerimoniaId !== 'todas' && <TableHead className="text-center">Presença</TableHead>}
                         <TableHead className="text-center">Status</TableHead>
                       </TableRow>
                     </TableHeader>
@@ -1835,6 +1941,27 @@ const Admin: React.FC = () => {
                               {inscricao.forma_pagamento || 'Não informado'}
                             </Badge>
                           </TableCell>
+                          {selectedCerimoniaId !== 'todas' && (
+                            <TableCell className="text-center">
+                              {!inscricao.cancelada && (
+                                updatingPresencaId === inscricao.id ? (
+                                  <Loader2 className="w-4 h-4 animate-spin mx-auto text-muted-foreground" />
+                                ) : (
+                                  <button
+                                    onClick={() => togglePresencaMutation.mutate({ inscricaoId: inscricao.id, presente: !inscricao.presenca_confirmada })}
+                                    className={cn(
+                                      'inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium transition-colors',
+                                      inscricao.presenca_confirmada
+                                        ? 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300 hover:bg-green-200'
+                                        : 'bg-muted text-muted-foreground hover:bg-muted/80'
+                                    )}
+                                  >
+                                    {inscricao.presenca_confirmada ? <><CheckCircle2 className="w-3 h-3" /> Presente</> : <><XCircle className="w-3 h-3" /> Ausente</>}
+                                  </button>
+                                )
+                              )}
+                            </TableCell>
+                          )}
                           <TableCell className="text-center">
                             {inscricao.cancelada ? (
                               <Badge variant="destructive" className="text-xs">Cancelado</Badge>
@@ -1908,8 +2035,8 @@ const Admin: React.FC = () => {
                         </MobileCardRow>
                         {!inscricao.cancelada && (
                           <MobileCardActions>
-                            <div className="flex items-center justify-between w-full">
-                              <span className="text-sm text-muted-foreground">
+                            <div className="flex items-center justify-between w-full gap-2">
+                              <span className="text-sm text-muted-foreground shrink-0">
                                 {inscricao.pago ? 'Pago — desmarcar?' : 'Marcar como pago'}
                               </span>
                               {updatingPaymentId === inscricao.id ? (
@@ -1924,6 +2051,26 @@ const Admin: React.FC = () => {
                                 />
                               )}
                             </div>
+                            {selectedCerimoniaId !== 'todas' && (
+                              <div className="flex items-center justify-between w-full gap-2 pt-2 border-t border-border">
+                                <span className="text-sm text-muted-foreground shrink-0">Presença</span>
+                                {updatingPresencaId === inscricao.id ? (
+                                  <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />
+                                ) : (
+                                  <button
+                                    onClick={() => togglePresencaMutation.mutate({ inscricaoId: inscricao.id, presente: !inscricao.presenca_confirmada })}
+                                    className={cn(
+                                      'flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium transition-colors',
+                                      inscricao.presenca_confirmada
+                                        ? 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300'
+                                        : 'bg-muted text-muted-foreground'
+                                    )}
+                                  >
+                                    {inscricao.presenca_confirmada ? <><CheckCircle2 className="w-3.5 h-3.5" /> Presente</> : <><XCircle className="w-3.5 h-3.5" /> Ausente</>}
+                                  </button>
+                                )}
+                              </div>
+                            )}
                           </MobileCardActions>
                         )}
                       </MobileCard>
