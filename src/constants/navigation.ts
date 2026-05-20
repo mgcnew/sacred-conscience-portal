@@ -34,25 +34,29 @@ export interface NavGroup {
 // GRUPOS DE NAVEGAÇÃO (organizados por contexto)
 // ========================================
 
-// 📌 Essencial - ações frequentes do usuário
+// 📌 Principal - ações frequentes do usuário
 export const essentialNavItems: NavItem[] = [
   { icon: Home, label: 'Início', path: ROUTES.HOME },
   { icon: FileText, label: 'Minha Ficha', path: ROUTES.ANAMNESE },
   { icon: Calendar, label: 'Cerimônias', path: ROUTES.CERIMONIAS },
-  { icon: GraduationCap, label: 'Cursos', path: ROUTES.CURSOS },
 ];
 
-// 📚 Conteúdo - exploração e aprendizado
+// 📚 Aprender - conteúdo educativo
 export const contentNavItems: NavItem[] = [
   { icon: Leaf, label: 'Medicinas', path: ROUTES.MEDICINAS },
   { icon: BookOpen, label: 'Estudos', path: ROUTES.ESTUDOS },
+  { icon: GraduationCap, label: 'Cursos', path: ROUTES.CURSOS },
   { icon: Library, label: 'Biblioteca', path: ROUTES.BIBLIOTECA },
+];
+
+// 👥 Comunidade - conexão e memória do grupo
+export const communityNavItems: NavItem[] = [
+  { icon: MessageSquareQuote, label: 'Partilhas', path: ROUTES.PARTILHAS },
   { icon: Image, label: 'Galeria', path: ROUTES.GALERIA },
 ];
 
-// 🛒 Comunidade & Loja
-export const communityNavItems: NavItem[] = [
-  { icon: MessageSquareQuote, label: 'Partilhas', path: ROUTES.PARTILHAS },
+// 🛒 Loja
+export const lojaNavItems: NavItem[] = [
   { icon: ShoppingBag, label: 'Loja', path: ROUTES.LOJA },
 ];
 
@@ -89,6 +93,7 @@ export const mainNavItems = essentialNavItems;
 export const secondaryNavItems = [
   ...contentNavItems,
   ...communityNavItems,
+  ...lojaNavItems,
   ...supportNavItems,
 ];
 
@@ -101,8 +106,9 @@ export const getNavGroups = (isAdmin: boolean, isSuperAdmin = false): NavGroup[]
   ];
   return [
     { label: 'Principal', items: essentialNavItems },
-    { label: 'Conteúdo', items: contentNavItems },
+    { label: 'Aprender', items: contentNavItems },
     { label: 'Comunidade', items: communityNavItems },
+    { label: 'Loja', items: lojaNavItems },
     { label: 'Sistema', items: sistemaItems },
   ];
 };
@@ -113,6 +119,7 @@ export const getAllNavItems = (isAdmin: boolean, isSuperAdmin = false): NavItem[
     ...essentialNavItems,
     ...contentNavItems,
     ...communityNavItems,
+    ...lojaNavItems,
     ...supportNavItems,
     settingsNavItem,
   ];
