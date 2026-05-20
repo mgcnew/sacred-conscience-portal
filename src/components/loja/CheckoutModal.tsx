@@ -253,6 +253,8 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({
 
         const url = response.data.checkout_url || response.data.sandbox_url;
         if (url) {
+          localStorage.setItem('lastPurchasedProductId', produto.id);
+          localStorage.setItem('lastPurchasedProductNome', produto.nome);
           window.location.href = url;
         } else {
           throw new Error('URL de checkout não retornada');
