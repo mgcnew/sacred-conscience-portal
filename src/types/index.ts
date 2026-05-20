@@ -83,9 +83,25 @@ export interface Anamnese {
   updated_at: string;
 }
 
+export interface MedicinaDB {
+  id: string;
+  nome: string;
+  descricao: string | null;
+  ativo: boolean;
+  created_at: string;
+}
+
+export interface TipoConsagracao {
+  id: string;
+  nome: string;
+  descricao: string | null;
+  ativo: boolean;
+}
+
 export interface Cerimonia {
   id: string;
   nome: string | null;
+  tipo_consagracao_id: string | null;
   data: string;
   horario: string;
   local: string;
@@ -95,6 +111,9 @@ export interface Cerimonia {
   valor: number | null;
   observacoes: string | null;
   banner_url: string | null;
+  // Relacionamentos opcionais (quando carregados com join)
+  tipos_consagracao?: TipoConsagracao | null;
+  cerimonias_medicinas?: { medicinas: MedicinaDB }[];
 }
 
 export interface Inscricao {
@@ -144,7 +163,7 @@ export interface UserRole {
   role_id: string;
 }
 
-export interface Medicina {
+export interface MedicinaConteudo {
   id: string;
   nome: string;
   descricao: string;
@@ -154,12 +173,15 @@ export interface Medicina {
   preparacao: string;
 }
 
+/** @deprecated use MedicinaConteudo para conteúdo estático */
+export type Medicina = MedicinaConteudo;
+
 // ============================================
 // Tipos com Relacionamentos
 // ============================================
 
 export interface InscricaoComCerimonia extends Inscricao {
-  cerimonias: Pick<Cerimonia, 'id' | 'nome' | 'data' | 'horario' | 'local' | 'medicina_principal' | 'banner_url'>;
+  cerimonias: Pick<Cerimonia, 'id' | 'nome' | 'data' | 'horario' | 'local' | 'medicina_principal' | 'banner_url' | 'cerimonias_medicinas'>;
 }
 
 export interface InscricaoComRelacionamentos extends Inscricao {

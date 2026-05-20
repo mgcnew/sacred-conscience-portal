@@ -9,14 +9,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Badge } from "@/components/ui/badge";
 import { toast } from 'sonner';
 import { TOAST_MESSAGES } from '@/constants/messages';
-import { Upload, Link, X, Loader2, Plus } from 'lucide-react';
+import { Upload, Link, X, Loader2, Plus, Image } from 'lucide-react';
 import { useIsMobile } from '@/hooks/useIsMobile';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import type { Cerimonia } from '@/types';
+import type { Cerimonia, MedicinaDB, TipoConsagracao } from '@/types';
 
-interface TipoConsagracao { id: string; nome: string; }
 type DialogMode = 'create' | 'edit';
 
 interface CeremonyFormDialogProps {
@@ -28,11 +27,11 @@ interface CeremonyFormDialogProps {
 
 interface CeremonyFormData {
   nome: string;
+  tipo_consagracao_id: string;
   data: string;
   horario: string;
   local: string;
   descricao: string;
-  medicina_principal: string;
   vagas: number;
   valor: number;
   observacoes: string;
@@ -66,24 +65,40 @@ const CeremonyFormDialog: React.FC<CeremonyFormDialogProps> = ({ isOpen, onClose
   const { register, handleSubmit, reset, setValue, formState: { errors } } = useForm<CeremonyFormData>();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const [imageTab, setImageTab] = useState<'url' | 'upload'>('url');
+  const [imageMode, setImageMode] = useState<'url' | 'upload'>('url');
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
+
+  const [selectedTipoId, setSelectedTipoId] = useState<string>('');
   const [showAddTipo, setShowAddTipo] = useState(false);
   const [novoTipo, setNovoTipo] = useState('');
-  const [selectedTipo, setSelectedTipo] = useState<string>('');
-  const [customNome, setCustomNome] = useState('');
+
+  const [selectedMedicinas, setSelectedMedicinas] = useState<MedicinaDB[]>([]);
+  const [showAddMedicina, setShowAddMedicina] = useState(false);
+  const [novaMedicina, setNovaMedicina] = useState('');
+
   const [valorDisplay, setValorDisplay] = useState('');
 
   const isEditMode = mode === 'edit';
 
+  // Tipos de consagração
   const { data: tiposConsagracao, refetch: refetchTipos } = useQuery({
     queryKey: ['tipos-consagracao'],
     queryFn: async () => {
-      const { data, error } = await supabase.from('tipos_consagracao').select('id, nome').eq('ativo', true).order('nome');
+      const { data, error } = await supabase.from('tipos_consagracao').select('id, nome, descricao, ativo').eq('ativo', true).order('nome');
       if (error) throw error;
       return data as TipoConsagracao[];
+    },
+  });
+
+  // Medicinas disponíveis
+  const { data: medicinasDisponiveis, refetch: refetchMedicinas } = useQuery({
+    queryKey: ['medicinas'],
+    queryFn: async () => {
+      const { data, error } = await supabase.from('medicinas').select('id, nome, descricao, ativo, created_at').eq('ativo', true).order('nome');
+      if (error) throw error;
+      return data as MedicinaDB[];
     },
   });
 
@@ -96,8 +111,8 @@ const CeremonyFormDialog: React.FC<CeremonyFormDialogProps> = ({ isOpen, onClose
     onSuccess: (data) => {
       toast.success('Tipo adicionado!');
       refetchTipos();
-      setSelectedTipo(data.nome);
-      setValue('nome', data.nome);
+      setSelectedTipoId(data.id);
+      setValue('tipo_consagracao_id', data.id);
       setNovoTipo('');
       setShowAddTipo(false);
     },
@@ -108,34 +123,62 @@ const CeremonyFormDialog: React.FC<CeremonyFormDialogProps> = ({ isOpen, onClose
     },
   });
 
-  useEffect(() => {
-    if (ceremony && isOpen && isEditMode) {
-      const nomeValue = ceremony.nome || '';
-      setValue('nome', nomeValue);
-      const tipoExiste = tiposConsagracao?.some(t => t.nome === nomeValue);
-      if (tipoExiste) { setSelectedTipo(nomeValue); setCustomNome(''); }
-      else if (nomeValue) { setSelectedTipo('__custom__'); setCustomNome(nomeValue); }
-      else { setSelectedTipo(''); setCustomNome(''); }
-      setValue('data', ceremony.data);
-      setValue('horario', ceremony.horario);
-      setValue('local', ceremony.local);
-      setValue('descricao', ceremony.descricao || '');
-      setValue('medicina_principal', ceremony.medicina_principal || '');
-      setValue('vagas', ceremony.vagas || 0);
-      setValue('observacoes', ceremony.observacoes || '');
-      setValue('banner_url', ceremony.banner_url || '');
-      const valorCentavos = ceremony.valor || 0;
-      setValue('valor', valorCentavos);
-      setValorDisplay(formatCentavosToReal(valorCentavos));
-      if (ceremony.banner_url) setPreviewUrl(ceremony.banner_url);
-    }
-  }, [ceremony, isOpen, isEditMode, setValue, tiposConsagracao]);
+  const addMedicinaMutation = useMutation({
+    mutationFn: async (nome: string) => {
+      const { data, error } = await supabase.from('medicinas').insert({ nome }).select('id, nome, descricao, ativo, created_at').single();
+      if (error) throw error;
+      return data as MedicinaDB;
+    },
+    onSuccess: (data) => {
+      toast.success('Medicina adicionada!');
+      refetchMedicinas();
+      setSelectedMedicinas(prev => [...prev, data]);
+      setNovaMedicina('');
+      setShowAddMedicina(false);
+    },
+    onError: (error: Error) => {
+      toast.error('Erro ao adicionar medicina', {
+        description: error.message.includes('duplicate') ? 'Esta medicina já existe.' : 'Tente novamente.',
+      });
+    },
+  });
 
+  // Preenche formulário no modo edição
+  useEffect(() => {
+    if (!ceremony || !isOpen || !isEditMode) return;
+
+    setValue('nome', ceremony.nome || '');
+    setValue('data', ceremony.data);
+    setValue('horario', ceremony.horario);
+    setValue('local', ceremony.local);
+    setValue('descricao', ceremony.descricao || '');
+    setValue('vagas', ceremony.vagas || 0);
+    setValue('observacoes', ceremony.observacoes || '');
+    setValue('banner_url', ceremony.banner_url || '');
+
+    const valorCentavos = ceremony.valor || 0;
+    setValue('valor', valorCentavos);
+    setValorDisplay(formatCentavosToReal(valorCentavos));
+
+    if (ceremony.banner_url) setPreviewUrl(ceremony.banner_url);
+
+    if (ceremony.tipo_consagracao_id) {
+      setSelectedTipoId(ceremony.tipo_consagracao_id);
+      setValue('tipo_consagracao_id', ceremony.tipo_consagracao_id);
+    }
+
+    if (ceremony.cerimonias_medicinas?.length) {
+      setSelectedMedicinas(ceremony.cerimonias_medicinas.map(cm => cm.medicinas));
+    }
+  }, [ceremony, isOpen, isEditMode, setValue]);
+
+  // Reset ao fechar
   useEffect(() => {
     if (!isOpen) {
-      setSelectedFile(null); setPreviewUrl(null); setImageTab('url');
-      setShowAddTipo(false); setNovoTipo(''); setSelectedTipo('');
-      setCustomNome(''); setValorDisplay('');
+      setSelectedFile(null); setPreviewUrl(null); setImageMode('url');
+      setShowAddTipo(false); setNovoTipo(''); setSelectedTipoId('');
+      setSelectedMedicinas([]); setShowAddMedicina(false); setNovaMedicina('');
+      setValorDisplay('');
     }
   }, [isOpen]);
 
@@ -159,13 +202,12 @@ const CeremonyFormDialog: React.FC<CeremonyFormDialogProps> = ({ isOpen, onClose
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) {
-      if (file.size > 5 * 1024 * 1024) { toast.error('Arquivo muito grande', { description: 'Máximo 5MB.' }); return; }
-      if (!['image/jpeg', 'image/png', 'image/webp', 'image/gif'].includes(file.type)) { toast.error('Tipo de arquivo inválido'); return; }
-      setSelectedFile(file);
-      setPreviewUrl(URL.createObjectURL(file));
-      setValue('banner_url', '');
-    }
+    if (!file) return;
+    if (file.size > 5 * 1024 * 1024) { toast.error('Arquivo muito grande', { description: 'Máximo 5MB.' }); return; }
+    if (!['image/jpeg', 'image/png', 'image/webp', 'image/gif'].includes(file.type)) { toast.error('Tipo de arquivo inválido'); return; }
+    setSelectedFile(file);
+    setPreviewUrl(URL.createObjectURL(file));
+    setValue('banner_url', '');
   };
 
   const handleRemoveImage = () => {
@@ -173,10 +215,32 @@ const CeremonyFormDialog: React.FC<CeremonyFormDialogProps> = ({ isOpen, onClose
     if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
+  const toggleMedicina = (medicina: MedicinaDB) => {
+    setSelectedMedicinas(prev =>
+      prev.some(m => m.id === medicina.id)
+        ? prev.filter(m => m.id !== medicina.id)
+        : [...prev, medicina]
+    );
+  };
+
+  const removeMedicina = (id: string) => {
+    setSelectedMedicinas(prev => prev.filter(m => m.id !== id));
+  };
+
+  const saveMedicinas = async (cerimoniaid: string) => {
+    await supabase.from('cerimonias_medicinas').delete().eq('cerimonia_id', cerimoniaid);
+    if (selectedMedicinas.length > 0) {
+      const rows = selectedMedicinas.map(m => ({ cerimonia_id: cerimoniaid, medicina_id: m.id }));
+      const { error } = await supabase.from('cerimonias_medicinas').insert(rows);
+      if (error) throw error;
+    }
+  };
+
   const createMutation = useMutation({
     mutationFn: async (data: CeremonyFormData) => {
-      const { error } = await supabase.from('cerimonias').insert([data]);
+      const { data: created, error } = await supabase.from('cerimonias').insert([data]).select('id').single();
       if (error) throw error;
+      await saveMedicinas(created.id);
     },
     onSuccess: () => { toast.success(TOAST_MESSAGES.cerimonia.criada.title); invalidateAndClose(); },
     onError: () => { toast.error(TOAST_MESSAGES.cerimonia.erro.title); }
@@ -187,6 +251,7 @@ const CeremonyFormDialog: React.FC<CeremonyFormDialogProps> = ({ isOpen, onClose
       if (!ceremony) throw new Error('Cerimônia não encontrada');
       const { error } = await supabase.from('cerimonias').update(data).eq('id', ceremony.id);
       if (error) throw error;
+      await saveMedicinas(ceremony.id);
     },
     onSuccess: () => { toast.success(TOAST_MESSAGES.cerimonia.atualizada.title); invalidateAndClose(); },
     onError: () => { toast.error(TOAST_MESSAGES.cerimonia.erro.title); }
@@ -214,14 +279,10 @@ const CeremonyFormDialog: React.FC<CeremonyFormDialogProps> = ({ isOpen, onClose
   };
 
   const handleClose = () => {
-    reset(); setSelectedFile(null); setPreviewUrl(null); setImageTab('url');
-    setShowAddTipo(false); setNovoTipo(''); setSelectedTipo('');
-    setCustomNome(''); setValorDisplay(''); onClose();
-  };
-
-  const handleTipoChange = (value: string) => {
-    if (value === '__custom__') { setSelectedTipo('__custom__'); setValue('nome', customNome); }
-    else { setSelectedTipo(value); setCustomNome(''); setValue('nome', value); }
+    reset(); setSelectedFile(null); setPreviewUrl(null); setImageMode('url');
+    setShowAddTipo(false); setNovoTipo(''); setSelectedTipoId('');
+    setSelectedMedicinas([]); setShowAddMedicina(false); setNovaMedicina('');
+    setValorDisplay(''); onClose();
   };
 
   const isPending = isEditMode ? updateMutation.isPending : createMutation.isPending || isUploading;
@@ -232,51 +293,102 @@ const CeremonyFormDialog: React.FC<CeremonyFormDialogProps> = ({ isOpen, onClose
 
   if (!isOpen) return null;
 
+  const medicinasNaoSelecionadas = medicinasDisponiveis?.filter(
+    m => !selectedMedicinas.some(s => s.id === m.id)
+  ) ?? [];
+
   const formContent = (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-3">
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
 
       {/* — Identificação — */}
       <SectionLabel>Identificação</SectionLabel>
 
+      {/* Nome da Cerimônia */}
+      <div className="space-y-1.5">
+        <Label className="text-sm font-medium">Nome da Cerimônia *</Label>
+        <Input
+          placeholder="Ex: Trabalho de Cura — Solstício de Inverno"
+          {...register('nome', { required: 'Informe o nome da cerimônia' })}
+          className={errors.nome ? 'border-destructive' : ''}
+        />
+        <FieldError message={errors.nome?.message} />
+      </div>
+
+      {/* Tipo de Consagração */}
       <div className="space-y-1.5">
         <div className="flex items-center justify-between">
-          <Label className="text-sm font-medium">Consagração *</Label>
+          <Label className="text-sm font-medium">Tipo de Consagração</Label>
           <Button type="button" variant="ghost" size="sm" className="h-6 px-2 text-xs" onClick={() => setShowAddTipo(!showAddTipo)}>
             <Plus className="w-3 h-3 mr-1" />Novo tipo
           </Button>
         </div>
         {showAddTipo && (
           <div className="flex gap-2 p-2 bg-muted/50 rounded-lg">
-            <Input placeholder="Novo tipo..." value={novoTipo} onChange={(e) => setNovoTipo(e.target.value)} className="flex-1 h-8 text-sm" />
+            <Input placeholder="Nome do tipo..." value={novoTipo} onChange={(e) => setNovoTipo(e.target.value)} className="flex-1 h-8 text-sm" />
             <Button type="button" size="sm" onClick={() => novoTipo.trim() && addTipoMutation.mutate(novoTipo.trim())} disabled={addTipoMutation.isPending}>
               {addTipoMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Adicionar'}
             </Button>
           </div>
         )}
-        <Select value={selectedTipo} onValueChange={handleTipoChange}>
-          <SelectTrigger className={errors.nome ? 'border-destructive' : ''}>
+        <Select value={selectedTipoId} onValueChange={(v) => { setSelectedTipoId(v); setValue('tipo_consagracao_id', v); }}>
+          <SelectTrigger>
             <SelectValue placeholder="Selecione o tipo de consagração" />
           </SelectTrigger>
           <SelectContent>
-            {tiposConsagracao?.map((t) => <SelectItem key={t.id} value={t.nome}>{t.nome}</SelectItem>)}
-            <SelectItem value="__custom__">✏️ Outro (personalizado)</SelectItem>
+            {tiposConsagracao?.map((t) => <SelectItem key={t.id} value={t.id}>{t.nome}</SelectItem>)}
           </SelectContent>
         </Select>
-        {selectedTipo === '__custom__' && (
-          <Input placeholder="Nome da consagração..." value={customNome} onChange={(e) => { setCustomNome(e.target.value); setValue('nome', e.target.value); }} />
-        )}
-        <input type="hidden" {...register('nome', { required: 'Selecione o tipo de consagração' })} />
-        <FieldError message={errors.nome?.message} />
+        <input type="hidden" {...register('tipo_consagracao_id')} />
       </div>
 
+      {/* Medicinas (multi-select) */}
       <div className="space-y-1.5">
-        <Label className="text-sm font-medium">Medicina *</Label>
-        <Input
-          placeholder="Ex: Ayahuasca, Hapi, Kambo..."
-          {...register('medicina_principal', { required: 'Informe a medicina principal' })}
-          className={errors.medicina_principal ? 'border-destructive' : ''}
-        />
-        <FieldError message={errors.medicina_principal?.message} />
+        <div className="flex items-center justify-between">
+          <Label className="text-sm font-medium">Medicinas Consagradas</Label>
+          <Button type="button" variant="ghost" size="sm" className="h-6 px-2 text-xs" onClick={() => setShowAddMedicina(!showAddMedicina)}>
+            <Plus className="w-3 h-3 mr-1" />Nova medicina
+          </Button>
+        </div>
+
+        {showAddMedicina && (
+          <div className="flex gap-2 p-2 bg-muted/50 rounded-lg">
+            <Input placeholder="Nome da medicina..." value={novaMedicina} onChange={(e) => setNovaMedicina(e.target.value)} className="flex-1 h-8 text-sm" />
+            <Button type="button" size="sm" onClick={() => novaMedicina.trim() && addMedicinaMutation.mutate(novaMedicina.trim())} disabled={addMedicinaMutation.isPending}>
+              {addMedicinaMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Adicionar'}
+            </Button>
+          </div>
+        )}
+
+        {/* Tags das medicinas selecionadas */}
+        {selectedMedicinas.length > 0 && (
+          <div className="flex flex-wrap gap-1.5 p-2 bg-muted/30 rounded-lg min-h-[36px]">
+            {selectedMedicinas.map(m => (
+              <Badge key={m.id} variant="secondary" className="gap-1 pl-2 pr-1 py-0.5 text-xs">
+                {m.nome}
+                <button type="button" onClick={() => removeMedicina(m.id)} className="ml-0.5 hover:text-destructive transition-colors">
+                  <X className="w-3 h-3" />
+                </button>
+              </Badge>
+            ))}
+          </div>
+        )}
+
+        {/* Dropdown para adicionar medicina */}
+        {medicinasNaoSelecionadas.length > 0 && (
+          <Select onValueChange={(id) => {
+            const m = medicinasDisponiveis?.find(m => m.id === id);
+            if (m) toggleMedicina(m);
+          }} value="">
+            <SelectTrigger className="text-sm">
+              <SelectValue placeholder="+ Adicionar medicina..." />
+            </SelectTrigger>
+            <SelectContent>
+              {medicinasNaoSelecionadas.map(m => (
+                <SelectItem key={m.id} value={m.id}>{m.nome}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        )}
       </div>
 
       {/* — Quando e Onde — */}
@@ -343,32 +455,73 @@ const CeremonyFormDialog: React.FC<CeremonyFormDialogProps> = ({ isOpen, onClose
       {/* — Banner — */}
       <SectionLabel>Banner</SectionLabel>
 
-      <div className="space-y-2">
-        <Tabs value={imageTab} onValueChange={(v) => setImageTab(v as 'url' | 'upload')} className="w-full">
-          <TabsList className="grid w-full grid-cols-2 h-8">
-            <TabsTrigger value="url" className="text-xs gap-1.5"><Link className="w-3 h-3" />URL</TabsTrigger>
-            <TabsTrigger value="upload" className="text-xs gap-1.5"><Upload className="w-3 h-3" />Upload</TabsTrigger>
-          </TabsList>
-          <TabsContent value="url" className="mt-2">
-            <Input
-              placeholder="https://..."
-              {...register('banner_url')}
-              onChange={(e) => { setValue('banner_url', e.target.value); setPreviewUrl(e.target.value || null); setSelectedFile(null); }}
-            />
-          </TabsContent>
-          <TabsContent value="upload" className="mt-2">
+      <div className="space-y-3">
+        {/* Seletor de modo */}
+        <div className="grid grid-cols-2 gap-2">
+          <button
+            type="button"
+            onClick={() => { setImageMode('url'); setSelectedFile(null); }}
+            className={`flex items-center justify-center gap-2 py-2 px-3 rounded-lg border text-sm font-medium transition-colors ${
+              imageMode === 'url'
+                ? 'bg-primary text-primary-foreground border-primary'
+                : 'bg-background text-muted-foreground border-border hover:border-primary/50'
+            }`}
+          >
+            <Link className="w-4 h-4" />
+            URL
+          </button>
+          <button
+            type="button"
+            onClick={() => setImageMode('upload')}
+            className={`flex items-center justify-center gap-2 py-2 px-3 rounded-lg border text-sm font-medium transition-colors ${
+              imageMode === 'upload'
+                ? 'bg-primary text-primary-foreground border-primary'
+                : 'bg-background text-muted-foreground border-border hover:border-primary/50'
+            }`}
+          >
+            <Upload className="w-4 h-4" />
+            Upload
+          </button>
+        </div>
+
+        {/* Conteúdo conforme modo */}
+        {imageMode === 'url' ? (
+          <Input
+            placeholder="https://..."
+            {...register('banner_url')}
+            onChange={(e) => { setValue('banner_url', e.target.value); setPreviewUrl(e.target.value || null); setSelectedFile(null); }}
+          />
+        ) : (
+          <div>
             <input ref={fileInputRef} type="file" accept="image/*" onChange={handleFileSelect} className="hidden" />
-            <Button type="button" variant="outline" className="w-full gap-2" onClick={() => fileInputRef.current?.click()}>
-              <Upload className="w-4 h-4" />
-              {selectedFile ? selectedFile.name : 'Selecionar imagem'}
-            </Button>
-            <p className="text-xs text-muted-foreground mt-1">JPG, PNG, WebP — máx. 5MB</p>
-          </TabsContent>
-        </Tabs>
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              className="w-full flex flex-col items-center justify-center gap-2 py-4 border-2 border-dashed border-border rounded-lg hover:border-primary/50 transition-colors text-muted-foreground hover:text-foreground"
+            >
+              <Image className="w-6 h-6" />
+              <span className="text-sm">{selectedFile ? selectedFile.name : 'Clique para selecionar uma imagem'}</span>
+              <span className="text-xs">JPG, PNG, WebP — máx. 5MB</span>
+            </button>
+          </div>
+        )}
+
+        {/* Preview */}
         {previewUrl && (
           <div className="relative rounded-lg overflow-hidden border">
-            <img src={previewUrl} alt="Preview do banner" className="w-full h-36 object-cover" onError={() => setPreviewUrl(null)} />
-            <Button type="button" variant="destructive" size="icon" className="absolute top-2 right-2 h-7 w-7" onClick={handleRemoveImage}>
+            <img
+              src={previewUrl}
+              alt="Preview do banner"
+              className="w-full h-40 object-cover"
+              onError={() => setPreviewUrl(null)}
+            />
+            <Button
+              type="button"
+              variant="destructive"
+              size="icon"
+              className="absolute top-2 right-2 h-7 w-7"
+              onClick={handleRemoveImage}
+            >
               <X className="w-3.5 h-3.5" />
             </Button>
           </div>
@@ -408,7 +561,6 @@ const CeremonyFormDialog: React.FC<CeremonyFormDialogProps> = ({ isOpen, onClose
     </form>
   );
 
-  // Mobile: Drawer
   if (isMobile) {
     return (
       <Drawer open={isOpen} onOpenChange={(open) => !open && handleClose()}>
@@ -423,7 +575,6 @@ const CeremonyFormDialog: React.FC<CeremonyFormDialogProps> = ({ isOpen, onClose
     );
   }
 
-  // Desktop: Dialog
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
       <DialogContent className="sm:max-w-xl max-h-[90vh] overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
