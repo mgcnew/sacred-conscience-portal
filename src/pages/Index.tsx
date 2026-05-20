@@ -24,6 +24,7 @@ import { APP_CONFIG } from '@/config/app';
 import { UpcomingCeremoniesSection } from '@/components/dashboard/UpcomingCeremoniesSection';
 import { MyInscriptionsSection } from '@/components/dashboard/MyInscriptionsSection';
 import CeremonyReminder from '@/components/dashboard/CeremonyReminder';
+import AdminReminders from '@/components/dashboard/AdminReminders';
 
 // Shared components
 import { SectionErrorBoundary } from '@/components/shared';
@@ -41,7 +42,7 @@ function getGreeting(): string {
 }
 
 const Index: React.FC = () => {
-  const { user } = useAuth();
+  const { user, isAdmin } = useAuth();
   const navigate = useNavigate();
   const [hasAnamnese, setHasAnamnese] = useState<boolean | null>(null);
   const [isAnamneseComplete, setIsAnamneseComplete] = useState<boolean>(true);
@@ -246,6 +247,9 @@ const Index: React.FC = () => {
 
             {/* Ceremony Reminder */}
             <CeremonyReminder />
+
+            {/* Admin Reminders */}
+            {isAdmin && <AdminReminders />}
 
             {/* Upcoming Ceremonies */}
             <section>
