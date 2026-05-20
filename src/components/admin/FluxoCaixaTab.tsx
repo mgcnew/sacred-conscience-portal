@@ -16,7 +16,6 @@ import {
   Plus, Trash2, TrendingUp, TrendingDown, DollarSign, ArrowUpCircle, ArrowDownCircle,
   BarChart3, PieChart, Wallet, Tag, RefreshCw, Download, FileText, Target, AlertTriangle, Settings,
   Paperclip, Upload, Eye, File, CheckCircle, Circle, CheckCheck, CheckCircle2, Calendar as CalendarIcon,
-  TrendingDown as TrendingDownIcon, // Just in case, but TrendingDown is already there
 } from 'lucide-react';
 import { format, startOfMonth, endOfMonth, subMonths } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -500,9 +499,9 @@ export const FluxoCaixaTab: React.FC = () => {
           </span>
         </div>
         <div className="flex gap-2">
-          <Button 
-            size="sm" 
-            className="bg-green-600 hover:bg-green-700 h-11 w-11 p-0 rounded-full shadow-lg shadow-green-500/20 flex items-center justify-center"
+          <Button
+            size="sm"
+            className="bg-primary hover:bg-primary/90 h-11 w-11 p-0 rounded-full shadow-lg shadow-primary/20 flex items-center justify-center"
             onClick={() => handleOpenForm('entrada')}
           >
             <ArrowUpCircle className="w-6 h-6 text-white" />
@@ -533,10 +532,10 @@ export const FluxoCaixaTab: React.FC = () => {
 
       {/* Cards de Resumo */}
       <div className="grid gap-3 grid-cols-2 md:grid-cols-3">
-        <Card className="border-green-200 bg-green-50/50 dark:bg-green-900/10">
+        <Card className="border-border bg-card">
           <CardHeader className="pb-1 pt-4 px-4">
-            <CardTitle className="text-[10px] md:text-sm font-bold uppercase tracking-wider text-green-700 dark:text-green-300 flex items-center gap-1.5">
-              <ArrowUpCircle className="w-3.5 h-3.5" />
+            <CardTitle className="text-[10px] md:text-sm font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
+              <ArrowUpCircle className="w-3.5 h-3.5 text-green-600" />
               Entradas
             </CardTitle>
           </CardHeader>
@@ -552,10 +551,10 @@ export const FluxoCaixaTab: React.FC = () => {
           </CardContent>
         </Card>
 
-        <Card className="border-red-200 bg-red-50/50 dark:bg-red-900/10">
+        <Card className="border-border bg-card">
           <CardHeader className="pb-1 pt-4 px-4">
-            <CardTitle className="text-[10px] md:text-sm font-bold uppercase tracking-wider text-red-700 dark:text-red-300 flex items-center gap-1.5">
-              <ArrowDownCircle className="w-3.5 h-3.5" />
+            <CardTitle className="text-[10px] md:text-sm font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
+              <ArrowDownCircle className="w-3.5 h-3.5 text-red-500" />
               Saídas
             </CardTitle>
           </CardHeader>
@@ -566,7 +565,7 @@ export const FluxoCaixaTab: React.FC = () => {
           </CardContent>
         </Card>
 
-        <Card className={`col-span-2 md:col-span-1 border-2 ${(resumo?.saldo || 0) >= 0 ? 'border-green-500/20 bg-green-50 dark:bg-green-900/20' : 'border-red-500/20 bg-red-50 dark:bg-red-900/20'}`}>
+        <Card className={`col-span-2 md:col-span-1 border-2 ${(resumo?.saldo || 0) >= 0 ? 'border-primary/30 bg-primary/5' : 'border-destructive/30 bg-destructive/5'}`}>
           <CardHeader className="pb-1 pt-4 px-4">
             <CardTitle className="text-[10px] md:text-sm font-bold uppercase tracking-wider flex items-center gap-1.5">
               <Wallet className="w-3.5 h-3.5" />
@@ -587,7 +586,7 @@ export const FluxoCaixaTab: React.FC = () => {
       {/* Ações Rápidas - Desktop Only (Mobile uses FAB/Sticky) */}
       <div className="hidden md:flex flex-col md:flex-row gap-2">
         <div className="flex gap-2">
-          <Button onClick={() => handleOpenForm('entrada')} className="bg-green-600 hover:bg-green-700 flex-1 md:flex-none" size="sm">
+          <Button onClick={() => handleOpenForm('entrada')} className="bg-primary hover:bg-primary/90 flex-1 md:flex-none" size="sm">
             <Plus className="w-4 h-4 mr-1" />
             Nova Entrada
           </Button>
@@ -760,8 +759,8 @@ export const FluxoCaixaTab: React.FC = () => {
           <div className="grid md:grid-cols-2 gap-4">
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-green-700">
-                  <PieChart className="w-5 h-5" />
+                <CardTitle className="flex items-center gap-2">
+                  <PieChart className="w-5 h-5 text-green-600" />
                   Entradas por Origem
                 </CardTitle>
               </CardHeader>
@@ -800,8 +799,8 @@ export const FluxoCaixaTab: React.FC = () => {
 
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-red-700">
-                  <PieChart className="w-5 h-5" />
+                <CardTitle className="flex items-center gap-2">
+                  <PieChart className="w-5 h-5 text-red-500" />
                   Saídas por Categoria
                 </CardTitle>
               </CardHeader>
@@ -844,11 +843,11 @@ export const FluxoCaixaTab: React.FC = () => {
         <TabsContent value="transacoes" className="space-y-4">
           {/* Estatísticas de Reconciliação */}
           {estatisticasReconciliacao && estatisticasReconciliacao.total > 0 && (
-            <Card className="border-blue-200 bg-blue-50/50 dark:bg-blue-900/10">
+            <Card className="border-border bg-muted/30">
               <CardContent className="pt-4">
                 <div className="flex flex-wrap items-center justify-between gap-4">
                   <div className="flex items-center gap-4">
-                    <CheckCheck className="w-5 h-5 text-blue-600" />
+                    <CheckCheck className="w-5 h-5 text-primary" />
                     <div>
                       <p className="text-sm font-medium">Reconciliação do Período</p>
                       <p className="text-xs text-muted-foreground">
@@ -859,11 +858,11 @@ export const FluxoCaixaTab: React.FC = () => {
                   <div className="flex items-center gap-4">
                     <div className="w-32 h-2 bg-muted rounded-full overflow-hidden">
                       <div
-                        className="h-full bg-blue-500 rounded-full transition-all"
+                        className="h-full bg-primary rounded-full transition-all"
                         style={{ width: `${estatisticasReconciliacao.percentual}%` }}
                       />
                     </div>
-                    <span className="text-sm font-medium text-blue-600">
+                    <span className="text-sm font-medium text-primary">
                       {estatisticasReconciliacao.percentual.toFixed(0)}%
                     </span>
                   </div>
@@ -1261,15 +1260,15 @@ export const FluxoCaixaTab: React.FC = () => {
             </CardHeader>
             <CardContent>
               {/* Resumo */}
-              <div className="mb-6 p-4 rounded-lg bg-amber-50 dark:bg-amber-900/20 border border-amber-200">
+              <div className="mb-6 p-4 rounded-lg bg-muted/50 border border-border">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm text-amber-700 dark:text-amber-300">Projeção de Gastos Fixos Mensais</p>
-                    <p className="text-2xl font-bold text-amber-800 dark:text-amber-200">
+                    <p className="text-sm text-muted-foreground">Projeção de Gastos Fixos Mensais</p>
+                    <p className="text-2xl font-bold text-foreground">
                       {formatarValor(totalRecorrenteMemo)}
                     </p>
                   </div>
-                  <FileText className="w-10 h-10 text-amber-500 opacity-50" />
+                  <FileText className="w-10 h-10 text-muted-foreground opacity-40" />
                 </div>
               </div>
 
@@ -1397,8 +1396,8 @@ export const FluxoCaixaTab: React.FC = () => {
           <div className="grid md:grid-cols-2 gap-4">
             <Card>
               <CardHeader>
-                <CardTitle className="text-green-700 flex items-center gap-2">
-                  <ArrowUpCircle className="w-5 h-5" />
+                <CardTitle className="flex items-center gap-2">
+                  <ArrowUpCircle className="w-5 h-5 text-green-600" />
                   Categorias de Entrada
                 </CardTitle>
               </CardHeader>
@@ -1416,8 +1415,8 @@ export const FluxoCaixaTab: React.FC = () => {
 
             <Card>
               <CardHeader>
-                <CardTitle className="text-red-700 flex items-center gap-2">
-                  <ArrowDownCircle className="w-5 h-5" />
+                <CardTitle className="flex items-center gap-2">
+                  <ArrowDownCircle className="w-5 h-5 text-red-500" />
                   Categorias de Saída
                 </CardTitle>
               </CardHeader>
@@ -1584,7 +1583,7 @@ export const FluxoCaixaTab: React.FC = () => {
         <Drawer open={isFormOpen} onOpenChange={setIsFormOpen}>
           <DrawerContent className="h-[85vh] max-h-[85vh]">
             <DrawerHeader>
-              <DrawerTitle className={tipoTransacao === 'entrada' ? 'text-green-700' : 'text-red-700'}>
+              <DrawerTitle className={tipoTransacao === 'entrada' ? 'text-primary' : 'text-destructive'}>
                 {tipoTransacao === 'entrada' ? '➕ Nova Entrada' : '➖ Nova Saída'}
               </DrawerTitle>
             </DrawerHeader>
@@ -1673,7 +1672,7 @@ export const FluxoCaixaTab: React.FC = () => {
                   <Button
                     onClick={handleSubmitTransacao}
                     disabled={createTransacao.isPending}
-                    className={`flex-1 ${tipoTransacao === 'entrada' ? 'bg-green-600 hover:bg-green-700' : 'bg-red-600 hover:bg-red-700'}`}
+                    className={`flex-1 ${tipoTransacao === 'entrada' ? 'bg-primary hover:bg-primary/90' : 'bg-destructive hover:bg-destructive/90'}`}
                   >
                     {createTransacao.isPending ? 'Salvando...' : 'Salvar'}
                   </Button>
@@ -1686,7 +1685,7 @@ export const FluxoCaixaTab: React.FC = () => {
         <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle className={tipoTransacao === 'entrada' ? 'text-green-700' : 'text-red-700'}>
+              <DialogTitle className={tipoTransacao === 'entrada' ? 'text-primary' : 'text-destructive'}>
                 {tipoTransacao === 'entrada' ? '➕ Nova Entrada' : '➖ Nova Saída'}
               </DialogTitle>
             </DialogHeader>
@@ -1776,7 +1775,7 @@ export const FluxoCaixaTab: React.FC = () => {
               <Button
                 onClick={handleSubmitTransacao}
                 disabled={createTransacao.isPending}
-                className={tipoTransacao === 'entrada' ? 'bg-green-600 hover:bg-green-700' : 'bg-red-600 hover:bg-red-700'}
+                className={tipoTransacao === 'entrada' ? 'bg-primary hover:bg-primary/90' : 'bg-destructive hover:bg-destructive/90'}
               >
                 {createTransacao.isPending ? 'Salvando...' : 'Salvar'}
               </Button>
@@ -1900,7 +1899,7 @@ export const FluxoCaixaTab: React.FC = () => {
         <Drawer open={isDespesaFormOpen} onOpenChange={setIsDespesaFormOpen}>
           <DrawerContent className="h-[85vh] max-h-[85vh]">
             <DrawerHeader>
-              <DrawerTitle className="text-amber-700">📅 Nova Despesa Recorrente</DrawerTitle>
+              <DrawerTitle>📅 Nova Despesa Recorrente</DrawerTitle>
             </DrawerHeader>
             <div className="px-4 pb-4 overflow-y-auto flex-1">
               <div className="grid gap-4">
@@ -1970,7 +1969,7 @@ export const FluxoCaixaTab: React.FC = () => {
                   <Button
                     onClick={handleSubmitDespesa}
                     disabled={createDespesaRecorrente.isPending}
-                    className="flex-1 bg-amber-600 hover:bg-amber-700"
+                    className="flex-1"
                   >
                     {createDespesaRecorrente.isPending ? 'Salvando...' : 'Cadastrar'}
                   </Button>
@@ -1983,7 +1982,7 @@ export const FluxoCaixaTab: React.FC = () => {
         <Dialog open={isDespesaFormOpen} onOpenChange={setIsDespesaFormOpen}>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle className="text-amber-700">📅 Nova Despesa Recorrente</DialogTitle>
+              <DialogTitle>📅 Nova Despesa Recorrente</DialogTitle>
             </DialogHeader>
 
             <div className="grid gap-4 py-4">
@@ -2054,7 +2053,7 @@ export const FluxoCaixaTab: React.FC = () => {
               <Button
                 onClick={handleSubmitDespesa}
                 disabled={createDespesaRecorrente.isPending}
-                className="bg-amber-600 hover:bg-amber-700"
+                className=""
               >
                 {createDespesaRecorrente.isPending ? 'Salvando...' : 'Cadastrar'}
               </Button>
@@ -2068,7 +2067,7 @@ export const FluxoCaixaTab: React.FC = () => {
         <Drawer open={isMetaFormOpen} onOpenChange={setIsMetaFormOpen}>
           <DrawerContent className="h-[85vh] max-h-[85vh]">
             <DrawerHeader>
-              <DrawerTitle className="text-blue-700">🎯 Nova Meta Financeira</DrawerTitle>
+              <DrawerTitle className="text-primary">🎯 Nova Meta Financeira</DrawerTitle>
             </DrawerHeader>
             <div className="px-4 pb-4 overflow-y-auto flex-1">
               <div className="grid gap-4">
@@ -2134,7 +2133,7 @@ export const FluxoCaixaTab: React.FC = () => {
                   <Button
                     onClick={handleSubmitMeta}
                     disabled={createMeta.isPending}
-                    className="flex-1 bg-blue-600 hover:bg-blue-700"
+                    className="flex-1"
                   >
                     {createMeta.isPending ? 'Salvando...' : 'Criar Meta'}
                   </Button>
@@ -2147,7 +2146,7 @@ export const FluxoCaixaTab: React.FC = () => {
         <Dialog open={isMetaFormOpen} onOpenChange={setIsMetaFormOpen}>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle className="text-blue-700">🎯 Nova Meta Financeira</DialogTitle>
+              <DialogTitle className="text-primary">🎯 Nova Meta Financeira</DialogTitle>
             </DialogHeader>
 
             <div className="grid gap-4 py-4">
@@ -2215,7 +2214,7 @@ export const FluxoCaixaTab: React.FC = () => {
               <Button
                 onClick={handleSubmitMeta}
                 disabled={createMeta.isPending}
-                className="bg-blue-600 hover:bg-blue-700"
+                className=""
               >
                 {createMeta.isPending ? 'Salvando...' : 'Criar Meta'}
               </Button>
