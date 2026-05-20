@@ -364,7 +364,7 @@ const Biblioteca: React.FC = () => {
                   placeholder="Buscar livro..."
                   value={searchMeus}
                   onChange={e => setSearchMeus(e.target.value)}
-                  className="pl-9 h-9 text-sm"
+                  className="pl-9 pr-8"
                 />
                 {searchMeus && (
                   <button onClick={() => setSearchMeus('')} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
@@ -449,7 +449,7 @@ const Biblioteca: React.FC = () => {
                     placeholder="Buscar upload..."
                     value={searchUploads}
                     onChange={e => setSearchUploads(e.target.value)}
-                    className="pl-9 h-9 text-sm"
+                    className="pl-9 pr-8"
                   />
                   {searchUploads && (
                     <button onClick={() => setSearchUploads('')} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
@@ -574,7 +574,7 @@ const Biblioteca: React.FC = () => {
                   placeholder="Buscar na loja..."
                   value={searchLoja}
                   onChange={e => setSearchLoja(e.target.value)}
-                  className="pl-9 h-9 text-sm"
+                  className="pl-9 pr-8"
                 />
                 {searchLoja && (
                   <button onClick={() => setSearchLoja('')} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
