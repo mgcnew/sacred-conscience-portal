@@ -37,7 +37,7 @@ export const MEDICINAS: Medicina[] = [
     origem: 'Amazônia (Povos Indígenas)',
     icone: Leaf,
     cor: 'text-green-600 dark:text-green-400',
-    imagem: 'https://i.ibb.co/Ld6ZxPrt/ayahuasca.jpg'
+    imagem: '/images/medicinas/ayahuasca.webp'
   },
   {
     id: 'rape',
@@ -64,7 +64,7 @@ export const MEDICINAS: Medicina[] = [
     origem: 'Tribos Indígenas Brasileiras (Acre/Amazônia)',
     icone: Wind,
     cor: 'text-amber-700 dark:text-amber-500',
-    imagem: 'https://i.imgur.com/q8Ur1MG.jpg'
+    imagem: '/images/medicinas/rape.webp'
   },
   {
     id: 'sananga',
@@ -87,7 +87,7 @@ export const MEDICINAS: Medicina[] = [
     origem: 'Povos Kaxinawá e Yawanawá',
     icone: Eye,
     cor: 'text-yellow-600 dark:text-yellow-400',
-    imagem: 'https://i.ibb.co/c4ssn02/sananga.jpg'
+    imagem: '/images/medicinas/sananga.webp'
   },
   {
     id: 'cacau',
@@ -110,7 +110,7 @@ export const MEDICINAS: Medicina[] = [
     origem: 'Povos Maias e Astecas (América Central)',
     icone: Coffee,
     cor: 'text-red-800 dark:text-red-400',
-    imagem: 'https://i.imgur.com/afVOATC.png'
+    imagem: '/images/medicinas/cacau.webp'
   },
   {
     id: 'kambo',
@@ -136,7 +136,7 @@ export const MEDICINAS: Medicina[] = [
     origem: 'Povos Katukina, Yawanawá e Matsés (Amazônia)',
     icone: Droplets,
     cor: 'text-lime-600 dark:text-lime-400',
-    imagem: 'https://i.ibb.co/VpqfDZgL/kambo.jpg'
+    imagem: '/images/medicinas/kambo.webp'
   },
   {
     id: 'defumacao',
@@ -159,6 +159,6 @@ export const MEDICINAS: Medicina[] = [
     origem: 'Universal (Xamanismo, Umbanda, Catolicismo, etc.)',
     icone: Flame,
     cor: 'text-slate-500 dark:text-slate-400',
-    imagem: 'https://i.ibb.co/JwR4F4BW/defumacao.jpg'
+    imagem: '/images/medicinas/defumacao.webp'
   }
 ];
