@@ -9,11 +9,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from 'sonner';
 import { TOAST_MESSAGES } from '@/constants/messages';
 import { Upload, Link, X, Loader2, Plus } from 'lucide-react';
 import { useIsMobile } from '@/hooks/useIsMobile';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type { Cerimonia } from '@/types';
 
 interface TipoConsagracao { id: string; nome: string; }
@@ -50,10 +50,20 @@ const parseRealToCentavos = (valor: string): number => {
   return Math.round(numero * 100);
 };
 
+const SectionLabel = ({ children }: { children: React.ReactNode }) => (
+  <div className="flex items-center gap-2 pt-2">
+    <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">{children}</span>
+    <div className="flex-1 h-px bg-border" />
+  </div>
+);
+
+const FieldError = ({ message }: { message?: string }) =>
+  message ? <p className="text-xs text-destructive mt-0.5">{message}</p> : null;
+
 const CeremonyFormDialog: React.FC<CeremonyFormDialogProps> = ({ isOpen, onClose, mode, ceremony }) => {
   const isMobile = useIsMobile();
   const queryClient = useQueryClient();
-  const { register, handleSubmit, reset, setValue } = useForm<CeremonyFormData>();
+  const { register, handleSubmit, reset, setValue, formState: { errors } } = useForm<CeremonyFormData>();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [imageTab, setImageTab] = useState<'url' | 'upload'>('url');
@@ -92,7 +102,9 @@ const CeremonyFormDialog: React.FC<CeremonyFormDialogProps> = ({ isOpen, onClose
       setShowAddTipo(false);
     },
     onError: (error: Error) => {
-      toast.error('Erro ao adicionar tipo', { description: error.message.includes('duplicate') ? 'Este tipo já existe.' : 'Tente novamente.' });
+      toast.error('Erro ao adicionar tipo', {
+        description: error.message.includes('duplicate') ? 'Este tipo já existe.' : 'Tente novamente.',
+      });
     },
   });
 
@@ -149,7 +161,7 @@ const CeremonyFormDialog: React.FC<CeremonyFormDialogProps> = ({ isOpen, onClose
     const file = e.target.files?.[0];
     if (file) {
       if (file.size > 5 * 1024 * 1024) { toast.error('Arquivo muito grande', { description: 'Máximo 5MB.' }); return; }
-      if (!['image/jpeg', 'image/png', 'image/webp', 'image/gif'].includes(file.type)) { toast.error('Tipo inválido'); return; }
+      if (!['image/jpeg', 'image/png', 'image/webp', 'image/gif'].includes(file.type)) { toast.error('Tipo de arquivo inválido'); return; }
       setSelectedFile(file);
       setPreviewUrl(URL.createObjectURL(file));
       setValue('banner_url', '');
@@ -214,117 +226,183 @@ const CeremonyFormDialog: React.FC<CeremonyFormDialogProps> = ({ isOpen, onClose
 
   const isPending = isEditMode ? updateMutation.isPending : createMutation.isPending || isUploading;
   const config = {
-    create: { title: 'Nova Cerimônia', submitText: 'Criar', pendingText: 'Criando...' },
-    edit: { title: 'Editar Cerimônia', submitText: 'Salvar', pendingText: 'Salvando...' }
+    create: { title: 'Nova Cerimônia', submitText: 'Criar Cerimônia', pendingText: 'Criando...' },
+    edit: { title: 'Editar Cerimônia', submitText: 'Salvar Alterações', pendingText: 'Salvando...' }
   }[mode];
 
   if (!isOpen) return null;
 
   const formContent = (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-      {/* Nome */}
-      <div className="space-y-2">
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-3">
+
+      {/* — Identificação — */}
+      <SectionLabel>Identificação</SectionLabel>
+
+      <div className="space-y-1.5">
         <div className="flex items-center justify-between">
-          <Label>Consagração</Label>
+          <Label className="text-sm font-medium">Consagração *</Label>
           <Button type="button" variant="ghost" size="sm" className="h-6 px-2 text-xs" onClick={() => setShowAddTipo(!showAddTipo)}>
-            <Plus className="w-3 h-3 mr-1" />Novo
+            <Plus className="w-3 h-3 mr-1" />Novo tipo
           </Button>
         </div>
         {showAddTipo && (
           <div className="flex gap-2 p-2 bg-muted/50 rounded-lg">
-            <Input placeholder="Novo tipo..." value={novoTipo} onChange={(e) => setNovoTipo(e.target.value)} className="flex-1 h-8" />
+            <Input placeholder="Novo tipo..." value={novoTipo} onChange={(e) => setNovoTipo(e.target.value)} className="flex-1 h-8 text-sm" />
             <Button type="button" size="sm" onClick={() => novoTipo.trim() && addTipoMutation.mutate(novoTipo.trim())} disabled={addTipoMutation.isPending}>
-              {addTipoMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Add'}
+              {addTipoMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Adicionar'}
             </Button>
           </div>
         )}
         <Select value={selectedTipo} onValueChange={handleTipoChange}>
-          <SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger>
+          <SelectTrigger className={errors.nome ? 'border-destructive' : ''}>
+            <SelectValue placeholder="Selecione o tipo de consagração" />
+          </SelectTrigger>
           <SelectContent>
             {tiposConsagracao?.map((t) => <SelectItem key={t.id} value={t.nome}>{t.nome}</SelectItem>)}
-            <SelectItem value="__custom__">✏️ Outro...</SelectItem>
+            <SelectItem value="__custom__">✏️ Outro (personalizado)</SelectItem>
           </SelectContent>
         </Select>
-        {selectedTipo === '__custom__' && <Input placeholder="Nome..." value={customNome} onChange={(e) => { setCustomNome(e.target.value); setValue('nome', e.target.value); }} />}
-        <input type="hidden" {...register('nome', { required: true })} />
+        {selectedTipo === '__custom__' && (
+          <Input placeholder="Nome da consagração..." value={customNome} onChange={(e) => { setCustomNome(e.target.value); setValue('nome', e.target.value); }} />
+        )}
+        <input type="hidden" {...register('nome', { required: 'Selecione o tipo de consagração' })} />
+        <FieldError message={errors.nome?.message} />
       </div>
 
-      {/* Data/Hora */}
+      <div className="space-y-1.5">
+        <Label className="text-sm font-medium">Medicina *</Label>
+        <Input
+          placeholder="Ex: Ayahuasca, Hapi, Kambo..."
+          {...register('medicina_principal', { required: 'Informe a medicina principal' })}
+          className={errors.medicina_principal ? 'border-destructive' : ''}
+        />
+        <FieldError message={errors.medicina_principal?.message} />
+      </div>
+
+      {/* — Quando e Onde — */}
+      <SectionLabel>Quando e Onde</SectionLabel>
+
       <div className="grid grid-cols-2 gap-3">
-        <div className="space-y-1">
-          <Label className="text-xs">Data</Label>
-          <Input type="date" {...register('data', { required: true })} />
+        <div className="space-y-1.5">
+          <Label className="text-sm font-medium">Data *</Label>
+          <Input
+            type="date"
+            {...register('data', { required: 'Informe a data' })}
+            className={errors.data ? 'border-destructive' : ''}
+          />
+          <FieldError message={errors.data?.message} />
         </div>
-        <div className="space-y-1">
-          <Label className="text-xs">Horário</Label>
-          <Input type="time" {...register('horario', { required: true })} />
+        <div className="space-y-1.5">
+          <Label className="text-sm font-medium">Horário *</Label>
+          <Input
+            type="time"
+            {...register('horario', { required: 'Informe o horário' })}
+            className={errors.horario ? 'border-destructive' : ''}
+          />
+          <FieldError message={errors.horario?.message} />
         </div>
       </div>
 
-      {/* Local */}
-      <div className="space-y-1">
-        <Label className="text-xs">Local</Label>
-        <Input placeholder="Ex: Templo Principal" {...register('local', { required: true })} />
+      <div className="space-y-1.5">
+        <Label className="text-sm font-medium">Local *</Label>
+        <Input
+          placeholder="Ex: Templo Principal, Sítio..."
+          {...register('local', { required: 'Informe o local' })}
+          className={errors.local ? 'border-destructive' : ''}
+        />
+        <FieldError message={errors.local?.message} />
       </div>
 
-      {/* Medicina */}
-      <div className="space-y-1">
-        <Label className="text-xs">Medicina</Label>
-        <Input placeholder="Ex: Ayahuasca" {...register('medicina_principal', { required: true })} />
-      </div>
+      {/* — Logística — */}
+      <SectionLabel>Logística</SectionLabel>
 
-      {/* Vagas/Valor */}
       <div className="grid grid-cols-2 gap-3">
-        <div className="space-y-1">
-          <Label className="text-xs">Vagas</Label>
-          <Input type="number" placeholder="20" {...register('vagas', { required: true, min: 1 })} />
+        <div className="space-y-1.5">
+          <Label className="text-sm font-medium">Vagas *</Label>
+          <Input
+            type="number"
+            placeholder="20"
+            {...register('vagas', { required: 'Informe as vagas', min: { value: 1, message: 'Mínimo 1 vaga' } })}
+            className={errors.vagas ? 'border-destructive' : ''}
+          />
+          <FieldError message={errors.vagas?.message} />
         </div>
-        <div className="space-y-1">
-          <Label className="text-xs">Valor (R$)</Label>
-          <Input type="text" inputMode="decimal" placeholder="150,00" value={valorDisplay} onChange={handleValorChange} />
+        <div className="space-y-1.5">
+          <Label className="text-sm font-medium">Valor (R$)</Label>
+          <Input
+            type="text"
+            inputMode="decimal"
+            placeholder="0,00"
+            value={valorDisplay}
+            onChange={handleValorChange}
+          />
           <input type="hidden" {...register('valor')} />
         </div>
       </div>
 
-      {/* Imagem */}
+      {/* — Banner — */}
+      <SectionLabel>Banner</SectionLabel>
+
       <div className="space-y-2">
-        <Label className="text-xs">Banner (opcional)</Label>
         <Tabs value={imageTab} onValueChange={(v) => setImageTab(v as 'url' | 'upload')} className="w-full">
           <TabsList className="grid w-full grid-cols-2 h-8">
-            <TabsTrigger value="url" className="text-xs gap-1"><Link className="w-3 h-3" />URL</TabsTrigger>
-            <TabsTrigger value="upload" className="text-xs gap-1"><Upload className="w-3 h-3" />Upload</TabsTrigger>
+            <TabsTrigger value="url" className="text-xs gap-1.5"><Link className="w-3 h-3" />URL</TabsTrigger>
+            <TabsTrigger value="upload" className="text-xs gap-1.5"><Upload className="w-3 h-3" />Upload</TabsTrigger>
           </TabsList>
           <TabsContent value="url" className="mt-2">
-            <Input placeholder="https://..." {...register('banner_url')} onChange={(e) => { setValue('banner_url', e.target.value); setPreviewUrl(e.target.value || null); setSelectedFile(null); }} />
+            <Input
+              placeholder="https://..."
+              {...register('banner_url')}
+              onChange={(e) => { setValue('banner_url', e.target.value); setPreviewUrl(e.target.value || null); setSelectedFile(null); }}
+            />
           </TabsContent>
           <TabsContent value="upload" className="mt-2">
             <input ref={fileInputRef} type="file" accept="image/*" onChange={handleFileSelect} className="hidden" />
-            <Button type="button" variant="outline" size="sm" className="w-full" onClick={() => fileInputRef.current?.click()}>
-              <Upload className="w-4 h-4 mr-2" />Selecionar
+            <Button type="button" variant="outline" className="w-full gap-2" onClick={() => fileInputRef.current?.click()}>
+              <Upload className="w-4 h-4" />
+              {selectedFile ? selectedFile.name : 'Selecionar imagem'}
             </Button>
+            <p className="text-xs text-muted-foreground mt-1">JPG, PNG, WebP — máx. 5MB</p>
           </TabsContent>
         </Tabs>
         {previewUrl && (
           <div className="relative rounded-lg overflow-hidden border">
-            <img src={previewUrl} alt="Preview" className="w-full h-24 object-cover" onError={() => setPreviewUrl(null)} />
-            <Button type="button" variant="destructive" size="icon" className="absolute top-1 right-1 h-6 w-6" onClick={handleRemoveImage}>
-              <X className="w-3 h-3" />
+            <img src={previewUrl} alt="Preview do banner" className="w-full h-36 object-cover" onError={() => setPreviewUrl(null)} />
+            <Button type="button" variant="destructive" size="icon" className="absolute top-2 right-2 h-7 w-7" onClick={handleRemoveImage}>
+              <X className="w-3.5 h-3.5" />
             </Button>
           </div>
         )}
       </div>
 
-      {/* Descrição */}
-      <div className="space-y-1">
-        <Label className="text-xs">Descrição</Label>
-        <Textarea placeholder="Detalhes..." {...register('descricao')} className="min-h-[60px]" />
+      {/* — Conteúdo — */}
+      <SectionLabel>Conteúdo</SectionLabel>
+
+      <div className="space-y-1.5">
+        <Label className="text-sm font-medium">Descrição</Label>
+        <Textarea
+          placeholder="Detalhes sobre a cerimônia, preparação, intenção..."
+          {...register('descricao')}
+          className="min-h-[72px] resize-none"
+        />
+      </div>
+
+      <div className="space-y-1.5">
+        <Label className="text-sm font-medium">Observações internas</Label>
+        <Textarea
+          placeholder="Notas para a equipe (não visível aos participantes)..."
+          {...register('observacoes')}
+          className="min-h-[60px] resize-none"
+        />
       </div>
 
       {/* Botões */}
-      <div className="flex gap-2 pt-2">
+      <div className="flex gap-2 pt-2 pb-1">
         <Button type="button" variant="outline" onClick={handleClose} className="flex-1">Cancelar</Button>
         <Button type="submit" disabled={isPending} className="flex-1">
-          {isUploading ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Enviando...</> : isPending ? config.pendingText : config.submitText}
+          {isUploading
+            ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Enviando imagem...</>
+            : isPending ? config.pendingText : config.submitText}
         </Button>
       </div>
     </form>
@@ -334,12 +412,12 @@ const CeremonyFormDialog: React.FC<CeremonyFormDialogProps> = ({ isOpen, onClose
   if (isMobile) {
     return (
       <Drawer open={isOpen} onOpenChange={(open) => !open && handleClose()}>
-        <DrawerContent className="max-h-[92vh]">
-          <DrawerHeader>
+        <DrawerContent className="max-h-[92vh] flex flex-col">
+          <DrawerHeader className="shrink-0 pb-2">
             <DrawerTitle className="font-display text-lg text-primary">{config.title}</DrawerTitle>
             <DrawerDescription className="sr-only">Formulário de cerimônia</DrawerDescription>
           </DrawerHeader>
-          <div className="px-4 pb-4 overflow-y-auto">{formContent}</div>
+          <div className="flex-1 overflow-y-auto px-4 pb-6">{formContent}</div>
         </DrawerContent>
       </Drawer>
     );
@@ -348,7 +426,7 @@ const CeremonyFormDialog: React.FC<CeremonyFormDialogProps> = ({ isOpen, onClose
   // Desktop: Dialog
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+      <DialogContent className="sm:max-w-xl max-h-[90vh] overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
         <DialogHeader>
           <DialogTitle className="font-display text-xl text-primary">{config.title}</DialogTitle>
           <DialogDescription className="sr-only">Formulário de cerimônia</DialogDescription>
