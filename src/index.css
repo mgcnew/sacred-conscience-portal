@@ -12,118 +12,115 @@
   }
 
   :root {
-    /* --- MODERN SPIRITUAL PALETTE (Light Mode) --- */
+    /* --- FLORESTA SAGRADA PALETTE (Light Mode) --- */
 
-    /* Background: Warm off-white for softer feel */
-    --background: 40 20% 98%;
-    --foreground: 222 47% 11%;
+    /* Background: Warm parchment — pergaminho quente */
+    --background: 40 25% 97%;
+    --foreground: 160 30% 10%;
 
-    /* Card: White with subtle warmth for hierarchy */
+    /* Card: White with green warmth */
     --card: 0 0% 100%;
-    --card-foreground: 222 47% 11%;
+    --card-foreground: 160 30% 10%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 222 47% 11%;
+    --popover-foreground: 160 30% 10%;
 
-    /* Primary: Deep Mystic Violet - Solid & Royal */
-    --primary: 267 75% 31%;
+    /* Primary: Deep Forest Green — verde floresta profundo */
+    --primary: 148 55% 24%;
     --primary-foreground: 0 0% 100%;
 
-    /* Secondary: Soft violet tint for subtle elements */
-    --secondary: 267 30% 95%;
-    --secondary-foreground: 267 75% 31%;
+    /* Secondary: Soft sage tint */
+    --secondary: 148 20% 93%;
+    --secondary-foreground: 148 55% 22%;
 
-    /* Muted: Warm grey for subtle areas */
-    --muted: 40 10% 94%;
-    --muted-foreground: 220 10% 40%;
+    /* Muted: Warm earth grey */
+    --muted: 40 12% 93%;
+    --muted-foreground: 160 10% 40%;
 
-    /* Accent: Vibrant Amber/Gold - Enlightenment */
-    --accent: 38 92% 50%;
-    --accent-foreground: 222 47% 11%;
+    /* Accent: Sacred Amber/Gold — fogo e iluminação */
+    --accent: 38 90% 48%;
+    --accent-foreground: 160 30% 10%;
 
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
 
-    /* Borders more visible for hierarchy */
-    --border: 220 13% 85%;
+    /* Borders */
+    --border: 148 10% 84%;
     --input: 0 0% 100%;
-    --input-foreground: 222 47% 11%;
-    --ring: 267 75% 31%;
+    --input-foreground: 160 30% 10%;
+    --ring: 148 55% 24%;
 
     --radius: 0.75rem;
 
     /* Custom Sacred Colors */
-    --sacred-gold: 38 92% 50%;
+    --sacred-gold: 38 90% 48%;
     --sacred-gold-light: 48 96% 89%;
-    --forest: 175 84% 32%;
-    --forest-light: 166 76% 97%;
+    --forest: 148 55% 24%;
+    --forest-light: 148 30% 94%;
 
-    /* Sidebar - Subtle distinction */
-    --sidebar-background: 40 15% 97%;
-    --sidebar-foreground: 222 47% 11%;
-    --sidebar-primary: 267 75% 31%;
+    /* Sidebar */
+    --sidebar-background: 40 20% 95%;
+    --sidebar-foreground: 160 30% 10%;
+    --sidebar-primary: 148 55% 24%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 267 30% 95%;
-    --sidebar-accent-foreground: 267 75% 31%;
-    --sidebar-border: 220 13% 88%;
-    --sidebar-ring: 267 75% 31%;
+    --sidebar-accent: 148 20% 93%;
+    --sidebar-accent-foreground: 148 55% 22%;
+    --sidebar-border: 148 10% 87%;
+    --sidebar-ring: 148 55% 24%;
   }
 
   .dark {
-    /* --- MINIMALIST DARK MODE --- */
+    /* --- NOITE NA FLORESTA (Dark Mode) --- */
 
-    /* Background: Pure dark neutral */
-    --background: 0 0% 7%;
-    /* #121212 - True dark */
-    --foreground: 0 0% 95%;
+    /* Background: Forest night — noite na mata */
+    --background: 160 22% 7%;
+    --foreground: 120 10% 93%;
 
-    /* Card: Slightly lighter for hierarchy */
-    --card: 0 0% 11%;
-    /* #1C1C1C */
-    --card-foreground: 0 0% 95%;
+    /* Card: Deep forest dark */
+    --card: 160 18% 11%;
+    --card-foreground: 120 10% 93%;
 
-    --popover: 0 0% 11%;
-    --popover-foreground: 0 0% 95%;
+    --popover: 160 18% 11%;
+    --popover-foreground: 120 10% 93%;
 
-    /* Primary: Violet - Only for buttons and CTAs */
-    --primary: 267 83% 60%;
-    /* #8B5CF6 */
+    /* Primary: Glowing forest green */
+    --primary: 148 58% 46%;
     --primary-foreground: 0 0% 100%;
 
-    /* Secondary: Neutral grey - Not teal */
-    --secondary: 0 0% 20%;
-    --secondary-foreground: 0 0% 95%;
+    /* Secondary: Forest shadow */
+    --secondary: 160 15% 18%;
+    --secondary-foreground: 120 10% 90%;
 
-    /* Muted: Dark grey for subtle areas */
-    --muted: 0 0% 15%;
-    --muted-foreground: 0 0% 60%;
+    /* Muted: Deep forest shadow */
+    --muted: 160 14% 14%;
+    --muted-foreground: 120 8% 58%;
 
-    /* Accent: Soft violet for hover states */
-    --accent: 0 0% 18%;
-    --accent-foreground: 0 0% 95%;
+    /* Accent: Ember glow — brasa da fogueira */
+    --accent: 160 12% 17%;
+    --accent-foreground: 120 10% 93%;
 
     --destructive: 0 62.8% 45%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 0 0% 20%;
-    --input: 0 0% 15%;
-    --input-foreground: 0 0% 95%;
-    --ring: 267 83% 60%;
+    --border: 160 12% 19%;
+    --input: 160 14% 14%;
+    --input-foreground: 120 10% 93%;
+    --ring: 148 58% 46%;
 
-    --sacred-gold: 38 92% 50%;
-    --sacred-gold-light: 48 96% 20%;
-    --forest: 175 70% 41%;
-    --forest-light: 166 50% 15%;
+    --sacred-gold: 38 90% 55%;
+    --sacred-gold-light: 48 80% 18%;
+    --forest: 148 55% 40%;
+    --forest-light: 148 30% 14%;
 
-    /* Sidebar Dark - Neutral */
-    --sidebar-background: 0 0% 7%;
-    --sidebar-foreground: 0 0% 95%;
-    --sidebar-primary: 267 83% 60%;
+    /* Sidebar Dark */
+    --sidebar-background: 160 22% 7%;
+    --sidebar-foreground: 120 10% 93%;
+    --sidebar-primary: 148 58% 46%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 0 0% 15%;
-    --sidebar-accent-foreground: 0 0% 95%;
-    --sidebar-border: 0 0% 18%;
-    --sidebar-ring: 267 83% 60%;
+    --sidebar-accent: 160 14% 14%;
+    --sidebar-accent-foreground: 120 10% 93%;
+    --sidebar-border: 160 12% 17%;
+    --sidebar-ring: 148 58% 46%;
   }
 }
 
@@ -189,10 +186,10 @@
   .dark select:-webkit-autofill:hover,
   .dark select:-webkit-autofill:focus,
   .dark select:-webkit-autofill:active {
-    -webkit-box-shadow: 0 0 0 1000px hsl(217 33% 17%) inset !important;
-    -webkit-text-fill-color: hsl(210 40% 98%) !important;
-    box-shadow: 0 0 0 1000px hsl(217 33% 17%) inset !important;
-    caret-color: hsl(210 40% 98%) !important;
+    -webkit-box-shadow: 0 0 0 1000px hsl(160 18% 11%) inset !important;
+    -webkit-text-fill-color: hsl(120 10% 93%) !important;
+    box-shadow: 0 0 0 1000px hsl(160 18% 11%) inset !important;
+    caret-color: hsl(120 10% 93%) !important;
   }
 }
 
@@ -263,7 +260,7 @@
 :root input:focus,
 :root textarea:focus,
 :root select:focus {
-  box-shadow: 0 0 0 2px hsl(267 75% 31% / 0.15);
+  box-shadow: 0 0 0 2px hsl(148 55% 24% / 0.15);
 }
 
 /* Buttons with subtle shadows */
