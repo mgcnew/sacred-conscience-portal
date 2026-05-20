@@ -26,47 +26,47 @@
     --popover-foreground: 160 30% 10%;
 
     /* Primary: Deep Forest Green — verde floresta profundo */
-    --primary: 148 55% 24%;
+    --primary: 148 68% 27%;
     --primary-foreground: 0 0% 100%;
 
     /* Secondary: Soft sage tint */
-    --secondary: 148 20% 93%;
-    --secondary-foreground: 148 55% 22%;
+    --secondary: 148 35% 91%;
+    --secondary-foreground: 148 68% 22%;
 
     /* Muted: Warm earth grey */
     --muted: 40 12% 93%;
     --muted-foreground: 160 10% 40%;
 
     /* Accent: Sacred Amber/Gold — fogo e iluminação */
-    --accent: 38 90% 48%;
+    --accent: 38 95% 46%;
     --accent-foreground: 160 30% 10%;
 
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
 
     /* Borders */
-    --border: 148 10% 84%;
+    --border: 148 18% 82%;
     --input: 0 0% 100%;
     --input-foreground: 160 30% 10%;
-    --ring: 148 55% 24%;
+    --ring: 148 68% 27%;
 
     --radius: 0.75rem;
 
     /* Custom Sacred Colors */
-    --sacred-gold: 38 90% 48%;
+    --sacred-gold: 38 95% 46%;
     --sacred-gold-light: 48 96% 89%;
-    --forest: 148 55% 24%;
-    --forest-light: 148 30% 94%;
+    --forest: 148 68% 27%;
+    --forest-light: 148 35% 93%;
 
     /* Sidebar */
     --sidebar-background: 40 20% 95%;
     --sidebar-foreground: 160 30% 10%;
-    --sidebar-primary: 148 55% 24%;
+    --sidebar-primary: 148 68% 27%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 148 20% 93%;
-    --sidebar-accent-foreground: 148 55% 22%;
-    --sidebar-border: 148 10% 87%;
-    --sidebar-ring: 148 55% 24%;
+    --sidebar-accent: 148 35% 91%;
+    --sidebar-accent-foreground: 148 68% 22%;
+    --sidebar-border: 148 18% 85%;
+    --sidebar-ring: 148 68% 27%;
   }
 
   .dark {
@@ -84,11 +84,11 @@
     --popover-foreground: 120 10% 93%;
 
     /* Primary: Glowing forest green */
-    --primary: 148 58% 46%;
+    --primary: 148 70% 48%;
     --primary-foreground: 0 0% 100%;
 
     /* Secondary: Forest shadow */
-    --secondary: 160 15% 18%;
+    --secondary: 160 18% 20%;
     --secondary-foreground: 120 10% 90%;
 
     /* Muted: Deep forest shadow */
@@ -96,31 +96,31 @@
     --muted-foreground: 120 8% 58%;
 
     /* Accent: Ember glow — brasa da fogueira */
-    --accent: 160 12% 17%;
+    --accent: 160 14% 19%;
     --accent-foreground: 120 10% 93%;
 
     --destructive: 0 62.8% 45%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 160 12% 19%;
+    --border: 160 16% 22%;
     --input: 160 14% 14%;
     --input-foreground: 120 10% 93%;
-    --ring: 148 58% 46%;
+    --ring: 148 70% 48%;
 
-    --sacred-gold: 38 90% 55%;
+    --sacred-gold: 38 95% 58%;
     --sacred-gold-light: 48 80% 18%;
-    --forest: 148 55% 40%;
-    --forest-light: 148 30% 14%;
+    --forest: 148 70% 48%;
+    --forest-light: 148 35% 16%;
 
     /* Sidebar Dark */
     --sidebar-background: 160 22% 7%;
     --sidebar-foreground: 120 10% 93%;
-    --sidebar-primary: 148 58% 46%;
+    --sidebar-primary: 148 70% 48%;
     --sidebar-primary-foreground: 0 0% 100%;
     --sidebar-accent: 160 14% 14%;
     --sidebar-accent-foreground: 120 10% 93%;
-    --sidebar-border: 160 12% 17%;
-    --sidebar-ring: 148 58% 46%;
+    --sidebar-border: 160 16% 20%;
+    --sidebar-ring: 148 70% 48%;
   }
 }
 
