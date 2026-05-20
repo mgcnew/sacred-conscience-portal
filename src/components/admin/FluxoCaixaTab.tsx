@@ -15,7 +15,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { PaginationControls } from '@/components/ui/pagination-controls';
 import {
   Plus, Trash2, TrendingUp, TrendingDown, DollarSign, ArrowUpCircle, ArrowDownCircle,
-  BarChart3, PieChart, Wallet, Tag, RefreshCw, Download, FileText, Target, AlertTriangle, Settings,
+  BarChart3, PieChart, Wallet, Tag, RefreshCw, Download, FileText, AlertTriangle, Settings,
   Paperclip, Upload, Eye, File, CheckCircle, Circle, CheckCheck, CheckCircle2, Calendar as CalendarIcon,
 } from 'lucide-react';
 import { format, startOfMonth, endOfMonth, subMonths } from 'date-fns';
@@ -33,16 +33,12 @@ import {
   useDespesasRecorrentes,
   useCreateDespesaRecorrente,
   useDeleteDespesaRecorrente,
-  useProgressoMetas,
-  useCreateMetaFinanceira,
-  useDeleteMetaFinanceira,
   useConfigAlertas,
   useUpdateConfigAlerta,
   useAnexosTransacao,
   useUploadAnexo,
   useDeleteAnexo,
   useReconciliarTransacao,
-  useReconciliarLote,
   useEstatisticasReconciliacao,
 } from '@/hooks/queries/useFluxoCaixa';
 import type { TipoTransacao } from '@/types';
@@ -52,7 +48,7 @@ const MESES = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'O
 export const FluxoCaixaTab: React.FC = () => {
   const { user } = useAuth();
   const isMobile = useIsMobile();
-  const [activeTab, setActiveTab] = useState<'resumo' | 'transacoes' | 'categorias'>('resumo');
+  const [activeTab, setActiveTab] = useState<'resumo' | 'transacoes' | 'recorrentes' | 'categorias'>('resumo');
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [isCategoriaFormOpen, setIsCategoriaFormOpen] = useState(false);
   const [tipoTransacao, setTipoTransacao] = useState<TipoTransacao>('entrada');
@@ -88,22 +84,11 @@ export const FluxoCaixaTab: React.FC = () => {
     observacoes: '',
   });
 
-  // Metas financeiras
-  const [isMetaFormOpen, setIsMetaFormOpen] = useState(false);
-  const [metaForm, setMetaForm] = useState({
-    nome: '',
-    tipo: 'receita' as 'receita' | 'economia' | 'reducao_despesa',
-    valor_meta: '',
-    descricao: '',
-  });
-
   // Anexos
   const [selectedTransacaoId, setSelectedTransacaoId] = useState<string | null>(null);
   const [isAnexosDialogOpen, setIsAnexosDialogOpen] = useState(false);
   const [uploadingAnexo, setUploadingAnexo] = useState(false);
 
-  // Reconciliação
-  const [transacoesSelecionadas, setTransacoesSelecionadas] = useState<Set<string>>(new Set());
   const [mostrarApenasNaoReconciliadas, setMostrarApenasNaoReconciliadas] = useState(false);
 
   // Paginação do extrato
@@ -130,11 +115,8 @@ export const FluxoCaixaTab: React.FC = () => {
   // Despesas recorrentes
   const { data: despesasRecorrentes } = useDespesasRecorrentes();
 
-  // Metas e alertas
-  const { metas: metasComProgresso } = useProgressoMetas();
+  // Alertas
   const { data: configAlertas } = useConfigAlertas();
-  const createMeta = useCreateMetaFinanceira();
-  const deleteMeta = useDeleteMetaFinanceira();
   const updateAlerta = useUpdateConfigAlerta();
 
   // Anexos
@@ -144,7 +126,6 @@ export const FluxoCaixaTab: React.FC = () => {
 
   // Reconciliação
   const reconciliarTransacao = useReconciliarTransacao();
-  const reconciliarLote = useReconciliarLote();
   const { data: estatisticasReconciliacao } = useEstatisticasReconciliacao(filtroDataInicio, filtroDataFim);
 
   // Verificar alerta de saldo baixo (memoizado)
@@ -296,38 +277,6 @@ export const FluxoCaixaTab: React.FC = () => {
     });
   };
 
-  const handleSubmitMeta = () => {
-    if (!metaForm.nome || !metaForm.valor_meta) {
-      toast.error('Preencha os campos obrigatórios');
-      return;
-    }
-
-    createMeta.mutate({
-      nome: metaForm.nome,
-      tipo: metaForm.tipo,
-      valor_meta: Math.round(parseFloat(metaForm.valor_meta) * 100),
-      mes: hoje.getMonth() + 1,
-      ano: hoje.getFullYear(),
-      categoria_id: null,
-      descricao: metaForm.descricao || null,
-      ativo: true,
-    }, {
-      onSuccess: () => {
-        toast.success('Meta criada!');
-        setIsMetaFormOpen(false);
-        setMetaForm({ nome: '', tipo: 'receita', valor_meta: '', descricao: '' });
-      },
-      onError: () => toast.error('Erro ao criar meta'),
-    });
-  };
-
-  const handleDeleteMeta = (id: string) => {
-    deleteMeta.mutate(id, {
-      onSuccess: () => toast.success('Meta removida'),
-      onError: () => toast.error('Erro ao remover'),
-    });
-  };
-
   const handleOpenAnexos = (transacaoId: string) => {
     setSelectedTransacaoId(transacaoId);
     setIsAnexosDialogOpen(true);
@@ -396,42 +345,6 @@ export const FluxoCaixaTab: React.FC = () => {
       {
         onSuccess: () => toast.success(reconciliada ? 'Reconciliação removida' : 'Transação reconciliada'),
         onError: () => toast.error('Erro ao atualizar'),
-      }
-    );
-  };
-
-  const handleToggleSelecao = (transacaoId: string) => {
-    setTransacoesSelecionadas(prev => {
-      const newSet = new Set(prev);
-      if (newSet.has(transacaoId)) {
-        newSet.delete(transacaoId);
-      } else {
-        newSet.add(transacaoId);
-      }
-      return newSet;
-    });
-  };
-
-  const handleSelecionarTodas = () => {
-    const transacoesManuais = transacoes?.filter(t => t.referencia_tipo === 'manual' && !t.id.startsWith('mp-')) || [];
-    if (transacoesSelecionadas.size === transacoesManuais.length) {
-      setTransacoesSelecionadas(new Set());
-    } else {
-      setTransacoesSelecionadas(new Set(transacoesManuais.map(t => t.id)));
-    }
-  };
-
-  const handleReconciliarSelecionadas = (reconciliada: boolean) => {
-    if (!user?.id || transacoesSelecionadas.size === 0) return;
-    
-    reconciliarLote.mutate(
-      { ids: Array.from(transacoesSelecionadas), reconciliada, userId: user.id },
-      {
-        onSuccess: () => {
-          toast.success(`${transacoesSelecionadas.size} transações ${reconciliada ? 'reconciliadas' : 'desmarcadas'}`);
-          setTransacoesSelecionadas(new Set());
-        },
-        onError: () => toast.error('Erro ao atualizar transações'),
       }
     );
   };
@@ -632,7 +545,6 @@ export const FluxoCaixaTab: React.FC = () => {
               { value: 'transacoes', icon: <DollarSign className="w-4 h-4 shrink-0" />, label: 'Extrato' },
               { value: 'recorrentes', icon: <RefreshCw className="w-4 h-4 shrink-0" />, label: 'Fixos' },
               { value: 'categorias', icon: <Tag className="w-4 h-4 shrink-0" />, label: 'Tags' },
-              { value: 'metas', icon: <Target className="w-4 h-4 shrink-0" />, label: 'Metas' },
             ].map(tab => (
               <TabsTrigger
                 key={tab.value}
@@ -832,6 +744,48 @@ export const FluxoCaixaTab: React.FC = () => {
               </CardContent>
             </Card>
           </div>
+
+          {/* Configuração de Alertas */}
+          {alertaSaldoBaixo && (
+            <Card>
+              <CardHeader className="pb-3">
+                <CardTitle className="flex items-center gap-2 text-base">
+                  <AlertTriangle className="w-4 h-4 text-primary" />
+                  Alertas de Saldo
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="flex flex-wrap items-center justify-between gap-4 p-3 rounded-lg border bg-muted/30">
+                  <div>
+                    <p className="text-sm font-medium">Alerta de Saldo Baixo</p>
+                    <p className="text-xs text-muted-foreground mt-0.5">
+                      Notifica quando o saldo ficar abaixo do limite
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Label className="text-xs text-muted-foreground">Limite (R$)</Label>
+                    <Input
+                      type="number"
+                      step="0.01"
+                      className="w-32"
+                      defaultValue={((alertaSaldoBaixo.valor_limite || 0) / 100).toFixed(2)}
+                      onBlur={(e) => {
+                        const valor = Math.round(parseFloat(e.target.value) * 100);
+                        updateAlerta.mutate({
+                          id: alertaSaldoBaixo.id,
+                          ativo: alertaSaldoBaixo.ativo ?? true,
+                          valor_limite: valor,
+                        }, {
+                          onSuccess: () => toast.success('Alerta atualizado'),
+                          onError: () => toast.error('Erro ao atualizar alerta'),
+                        });
+                      }}
+                    />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
         </TabsContent>
 
         {/* Tab Transações */}
@@ -915,25 +869,6 @@ export const FluxoCaixaTab: React.FC = () => {
             </CardContent>
           </Card>
 
-          {/* Ações em lote */}
-          {transacoesSelecionadas.size > 0 && (
-            <div className="flex flex-wrap items-center gap-2 p-3 rounded-lg bg-muted">
-              <span className="text-sm font-medium">{transacoesSelecionadas.size} selecionadas</span>
-              <div className="flex-1" />
-              <Button size="sm" variant="outline" onClick={() => handleReconciliarSelecionadas(true)}>
-                <CheckCircle className="w-4 h-4 mr-1" />
-                Reconciliar
-              </Button>
-              <Button size="sm" variant="outline" onClick={() => handleReconciliarSelecionadas(false)}>
-                <Circle className="w-4 h-4 mr-1" />
-                Desmarcar
-              </Button>
-              <Button size="sm" variant="ghost" onClick={() => setTransacoesSelecionadas(new Set())}>
-                Limpar
-              </Button>
-            </div>
-          )}
-
           {/* Lista de Transações */}
           <Card>
             <CardContent className="pt-4">
@@ -951,21 +886,6 @@ export const FluxoCaixaTab: React.FC = () => {
                     <Table>
                       <TableHeader>
                         <TableRow>
-                          <TableHead className="w-10">
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="h-6 w-6"
-                              onClick={handleSelecionarTodas}
-                              title="Selecionar todas"
-                            >
-                              {transacoesSelecionadas.size > 0 ? (
-                                <CheckCircle className="w-4 h-4 text-primary" />
-                              ) : (
-                                <Circle className="w-4 h-4" />
-                              )}
-                            </Button>
-                          </TableHead>
                           <TableHead>Data</TableHead>
                           <TableHead>Descrição</TableHead>
                           <TableHead>Categoria</TableHead>
@@ -976,25 +896,7 @@ export const FluxoCaixaTab: React.FC = () => {
                       </TableHeader>
                       <TableBody>
                         {transacoesPage.map((t) => (
-                          <TableRow key={t.id} className={t.reconciliada ? 'bg-green-50/50 dark:bg-green-900/10' : ''}>
-                            <TableCell>
-                              {t.referencia_tipo === 'manual' && !t.id.startsWith('mp-') ? (
-                                <Button
-                                  variant="ghost"
-                                  size="icon"
-                                  className="h-6 w-6"
-                                  onClick={() => handleToggleSelecao(t.id)}
-                                >
-                                  {transacoesSelecionadas.has(t.id) ? (
-                                    <CheckCircle className="w-4 h-4 text-primary" />
-                                  ) : (
-                                    <Circle className="w-4 h-4" />
-                                  )}
-                                </Button>
-                              ) : (
-                                <span className="w-6" />
-                              )}
-                            </TableCell>
+                          <TableRow key={t.id} className={t.reconciliada ? 'bg-primary/5' : ''}>
                             <TableCell className="text-sm">
                               {format(new Date(t.data), 'dd/MM/yy', { locale: ptBR })}
                             </TableCell>
@@ -1084,30 +986,13 @@ export const FluxoCaixaTab: React.FC = () => {
                   </div>
 
                   {/* Versão Mobile - Cards Modernos */}
-                  <div className="md:hidden space-y-4">
-                    {/* Botão selecionar todas no mobile */}
-                    <div className="flex items-center justify-between px-1">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={handleSelecionarTodas}
-                        className="text-[10px] uppercase font-bold tracking-widest text-muted-foreground"
-                      >
-                        {transacoesSelecionadas.size > 0 ? (
-                          <CheckCircle className="w-3 h-3 mr-1.5 text-primary" />
-                        ) : (
-                          <Circle className="w-3 h-3 mr-1.5" />
-                        )}
-                        {transacoesSelecionadas.size > 0 ? `${transacoesSelecionadas.size} selecionadas` : 'Selecionar todas'}
-                      </Button>
-                    </div>
-
+                  <div className="md:hidden space-y-3">
                     {transacoesPage.map((t) => (
                       <div
                         key={t.id}
                         className={`relative overflow-hidden rounded-2xl border shadow-sm transition-all active:scale-[0.98] ${
-                          t.reconciliada 
-                            ? 'bg-green-50/30 dark:bg-green-900/5 border-green-200/50' 
+                          t.reconciliada
+                            ? 'bg-primary/5 border-primary/20'
                             : 'bg-card border-border/50'
                         }`}
                       >
@@ -1158,25 +1043,7 @@ export const FluxoCaixaTab: React.FC = () => {
                             </div>
 
                             {/* Ações Rápidas Mobile */}
-                            <div className="flex items-center justify-between pt-3 border-t border-dashed">
-                              <div className="flex gap-1">
-                                {t.referencia_tipo === 'manual' && !t.id.startsWith('mp-') && (
-                                  <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    onClick={() => handleToggleSelecao(t.id)}
-                                    className={`h-8 px-2 text-[10px] font-bold ${transacoesSelecionadas.has(t.id) ? 'text-primary' : 'text-muted-foreground'}`}
-                                  >
-                                    {transacoesSelecionadas.has(t.id) ? (
-                                      <CheckCircle className="w-3.5 h-3.5 mr-1" />
-                                    ) : (
-                                      <Circle className="w-3.5 h-3.5 mr-1" />
-                                    )}
-                                    FOCO
-                                  </Button>
-                                )}
-                              </div>
-                              
+                            <div className="flex items-center justify-end pt-3 border-t border-dashed">
                               <div className="flex items-center gap-1">
                                 {t.referencia_tipo === 'manual' && !t.id.startsWith('mp-') && (
                                   <>
@@ -1438,148 +1305,6 @@ export const FluxoCaixaTab: React.FC = () => {
           </div>
         </TabsContent>
 
-        {/* Tab Metas */}
-        <TabsContent value="metas" className="space-y-4">
-          <Card>
-            <CardHeader className="flex flex-col md:flex-row md:items-center justify-between gap-3">
-              <div>
-                <CardTitle className="flex items-center gap-2 text-base md:text-lg">
-                  <Target className="w-5 h-5" />
-                  Metas - {MESES[hoje.getMonth()]} {hoje.getFullYear()}
-                </CardTitle>
-                <CardDescription className="text-xs md:text-sm">
-                  Defina objetivos e acompanhe o progresso
-                </CardDescription>
-              </div>
-              <Button onClick={() => setIsMetaFormOpen(true)} size="sm" className="w-full md:w-auto">
-                <Plus className="w-4 h-4 mr-2" />
-                Nova Meta
-              </Button>
-            </CardHeader>
-            <CardContent>
-              {!metasComProgresso?.length ? (
-                <div className="text-center py-8 text-muted-foreground">
-                  <Target className="w-12 h-12 mx-auto mb-2 opacity-30" />
-                  <p>Nenhuma meta definida para este mês</p>
-                  <p className="text-sm">Crie metas para acompanhar seus objetivos financeiros</p>
-                </div>
-              ) : (
-                <div className="space-y-4">
-                  {metasComProgresso.map((meta) => (
-                    <div key={meta.id} className="p-4 rounded-lg border bg-card">
-                      <div className="flex items-start justify-between mb-2">
-                        <div>
-                          <h4 className="font-medium flex items-center gap-2">
-                            {meta.nome}
-                            {meta.atingida && (
-                              <span className="text-green-600 text-sm">✅ Atingida!</span>
-                            )}
-                          </h4>
-                          <p className="text-sm text-muted-foreground">
-                            {meta.tipo === 'receita' && '📈 Meta de Receita'}
-                            {meta.tipo === 'economia' && '💰 Meta de Economia'}
-                            {meta.tipo === 'reducao_despesa' && '📉 Redução de Despesa'}
-                          </p>
-                        </div>
-                        <AlertDialog>
-                          <AlertDialogTrigger asChild>
-                            <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive">
-                              <Trash2 className="w-4 h-4" />
-                            </Button>
-                          </AlertDialogTrigger>
-                          <AlertDialogContent>
-                            <AlertDialogHeader>
-                              <AlertDialogTitle>Remover meta?</AlertDialogTitle>
-                              <AlertDialogDescription>Esta ação não pode ser desfeita.</AlertDialogDescription>
-                            </AlertDialogHeader>
-                            <AlertDialogFooter>
-                              <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                              <AlertDialogAction onClick={() => handleDeleteMeta(meta.id)} className="bg-destructive">
-                                Remover
-                              </AlertDialogAction>
-                            </AlertDialogFooter>
-                          </AlertDialogContent>
-                        </AlertDialog>
-                      </div>
-                      
-                      {/* Barra de progresso */}
-                      <div className="space-y-2">
-                        <div className="flex justify-between text-sm">
-                          <span>Progresso: {meta.percentual.toFixed(1)}%</span>
-                          <span>
-                            {formatarValor(meta.valor_atual)} / {formatarValor(meta.valor_meta)}
-                          </span>
-                        </div>
-                        <div className="h-3 bg-muted rounded-full overflow-hidden">
-                          <div
-                            className={`h-full rounded-full transition-all ${
-                              meta.percentual >= 100 ? 'bg-green-500' :
-                              meta.percentual >= 75 ? 'bg-blue-500' :
-                              meta.percentual >= 50 ? 'bg-yellow-500' :
-                              'bg-red-500'
-                            }`}
-                            style={{ width: `${Math.min(100, meta.percentual)}%` }}
-                          />
-                        </div>
-                      </div>
-
-                      {meta.descricao && (
-                        <p className="text-sm text-muted-foreground mt-2">{meta.descricao}</p>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              )}
-            </CardContent>
-          </Card>
-
-          {/* Configuração de Alertas */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Settings className="w-5 h-5" />
-                Configuração de Alertas
-              </CardTitle>
-              <CardDescription>
-                Configure alertas automáticos para monitorar a saúde financeira
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {alertaSaldoBaixo && (
-                  <div className="flex items-center justify-between p-4 rounded-lg border">
-                    <div>
-                      <h4 className="font-medium flex items-center gap-2">
-                        <AlertTriangle className="w-4 h-4 text-amber-500" />
-                        Alerta de Saldo Baixo
-                      </h4>
-                      <p className="text-sm text-muted-foreground">
-                        Notifica quando o saldo ficar abaixo de {formatarValor(alertaSaldoBaixo.valor_limite || 0)}
-                      </p>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Input
-                        type="number"
-                        step="0.01"
-                        className="w-32"
-                        defaultValue={((alertaSaldoBaixo.valor_limite || 0) / 100).toFixed(2)}
-                        onBlur={(e) => {
-                          const novoValor = Math.round(parseFloat(e.target.value || '0') * 100);
-                          if (novoValor !== alertaSaldoBaixo.valor_limite) {
-                            updateAlerta.mutate({
-                              id: alertaSaldoBaixo.id,
-                              valor_limite: novoValor,
-                            });
-                          }
-                        }}
-                      />
-                    </div>
-                  </div>
-                )}
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
       </Tabs>
 
       {/* Modal/Drawer Nova Transação */}
@@ -2060,167 +1785,6 @@ export const FluxoCaixaTab: React.FC = () => {
                 className=""
               >
                 {createDespesaRecorrente.isPending ? 'Salvando...' : 'Cadastrar'}
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
-      )}
-
-      {/* Modal/Drawer Nova Meta Financeira */}
-      {isMobile ? (
-        <Drawer open={isMetaFormOpen} onOpenChange={setIsMetaFormOpen}>
-          <DrawerContent className="h-[85vh] max-h-[85vh]">
-            <DrawerHeader>
-              <DrawerTitle className="text-primary">🎯 Nova Meta Financeira</DrawerTitle>
-            </DrawerHeader>
-            <div className="px-4 pb-4 overflow-y-auto flex-1">
-              <div className="grid gap-4">
-                <div className="grid gap-2">
-                  <Label>Nome da Meta *</Label>
-                  <Input
-                    value={metaForm.nome}
-                    onChange={(e) => setMetaForm({ ...metaForm, nome: e.target.value })}
-                    placeholder="Ex: Arrecadar R$ 5.000 em cerimônias"
-                  />
-                </div>
-
-                <div className="grid gap-2">
-                  <Label>Tipo de Meta</Label>
-                  <Select
-                    value={metaForm.tipo}
-                    onValueChange={(v: 'receita' | 'economia' | 'reducao_despesa') => setMetaForm({ ...metaForm, tipo: v })}
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="receita">📈 Meta de Receita</SelectItem>
-                      <SelectItem value="economia">💰 Meta de Economia</SelectItem>
-                      <SelectItem value="reducao_despesa">📉 Redução de Despesa</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className="grid gap-2">
-                  <Label>Valor da Meta (R$) *</Label>
-                  <Input
-                    type="number"
-                    step="0.01"
-                    min="0"
-                    value={metaForm.valor_meta}
-                    onChange={(e) => setMetaForm({ ...metaForm, valor_meta: e.target.value })}
-                    placeholder="0,00"
-                  />
-                </div>
-
-                <div className="grid gap-2">
-                  <Label>Descrição (opcional)</Label>
-                  <Textarea
-                    value={metaForm.descricao}
-                    onChange={(e) => setMetaForm({ ...metaForm, descricao: e.target.value })}
-                    placeholder="Detalhes sobre a meta..."
-                    rows={2}
-                  />
-                </div>
-
-                <div className="p-3 rounded-lg bg-muted text-sm">
-                  <p className="font-medium mb-1">ℹ️ Tipos de Meta:</p>
-                  <ul className="space-y-1 text-muted-foreground">
-                    <li><strong>Receita:</strong> Total de entradas no mês</li>
-                    <li><strong>Economia:</strong> Diferença entre entradas e saídas</li>
-                    <li><strong>Redução:</strong> Manter saídas abaixo do valor</li>
-                  </ul>
-                </div>
-
-                <div className="flex gap-2 pt-2">
-                  <Button variant="outline" onClick={() => setIsMetaFormOpen(false)} className="flex-1">Cancelar</Button>
-                  <Button
-                    onClick={handleSubmitMeta}
-                    disabled={createMeta.isPending}
-                    className="flex-1"
-                  >
-                    {createMeta.isPending ? 'Salvando...' : 'Criar Meta'}
-                  </Button>
-                </div>
-              </div>
-            </div>
-          </DrawerContent>
-        </Drawer>
-      ) : (
-        <Dialog open={isMetaFormOpen} onOpenChange={setIsMetaFormOpen}>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle className="text-primary">🎯 Nova Meta Financeira</DialogTitle>
-            </DialogHeader>
-
-            <div className="grid gap-4 py-4">
-              <div className="grid gap-2">
-                <Label>Nome da Meta *</Label>
-                <Input
-                  value={metaForm.nome}
-                  onChange={(e) => setMetaForm({ ...metaForm, nome: e.target.value })}
-                  placeholder="Ex: Arrecadar R$ 5.000 em cerimônias"
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div className="grid gap-2">
-                  <Label>Tipo de Meta</Label>
-                  <Select
-                    value={metaForm.tipo}
-                    onValueChange={(v: 'receita' | 'economia' | 'reducao_despesa') => setMetaForm({ ...metaForm, tipo: v })}
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="receita">📈 Meta de Receita</SelectItem>
-                      <SelectItem value="economia">💰 Meta de Economia</SelectItem>
-                      <SelectItem value="reducao_despesa">📉 Redução de Despesa</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="grid gap-2">
-                  <Label>Valor da Meta (R$) *</Label>
-                  <Input
-                    type="number"
-                    step="0.01"
-                    min="0"
-                    value={metaForm.valor_meta}
-                    onChange={(e) => setMetaForm({ ...metaForm, valor_meta: e.target.value })}
-                    placeholder="0,00"
-                  />
-                </div>
-              </div>
-
-              <div className="grid gap-2">
-                <Label>Descrição (opcional)</Label>
-                <Textarea
-                  value={metaForm.descricao}
-                  onChange={(e) => setMetaForm({ ...metaForm, descricao: e.target.value })}
-                  placeholder="Detalhes sobre a meta..."
-                  rows={2}
-                />
-              </div>
-
-              <div className="p-3 rounded-lg bg-muted text-sm">
-                <p className="font-medium mb-1">ℹ️ Tipos de Meta:</p>
-                <ul className="space-y-1 text-muted-foreground">
-                  <li><strong>Receita:</strong> Total de entradas no mês</li>
-                  <li><strong>Economia:</strong> Diferença entre entradas e saídas</li>
-                  <li><strong>Redução:</strong> Manter saídas abaixo do valor</li>
-                </ul>
-              </div>
-            </div>
-
-            <DialogFooter>
-              <Button variant="outline" onClick={() => setIsMetaFormOpen(false)}>Cancelar</Button>
-              <Button
-                onClick={handleSubmitMeta}
-                disabled={createMeta.isPending}
-                className=""
-              >
-                {createMeta.isPending ? 'Salvando...' : 'Criar Meta'}
               </Button>
             </DialogFooter>
           </DialogContent>
