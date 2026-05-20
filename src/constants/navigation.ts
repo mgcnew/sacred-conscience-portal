@@ -3,13 +3,11 @@ import {
   FileText,
   Calendar,
   Leaf,
-  HelpCircle,
   Settings,
   Heart,
   Shield,
   MessageSquareQuote,
   Image,
-  Info,
   ShoppingBag,
   Library,
   GraduationCap,
@@ -59,8 +57,6 @@ export const communityNavItems: NavItem[] = [
 
 // ℹ️ Informações & Suporte
 export const supportNavItems: NavItem[] = [
-  { icon: Info, label: 'Sobre Nós', path: ROUTES.SOBRE_NOS },
-  { icon: HelpCircle, label: 'FAQ', path: ROUTES.FAQ },
   { icon: Heart, label: 'Emergência', path: ROUTES.EMERGENCIA, highlight: true },
 ];
 

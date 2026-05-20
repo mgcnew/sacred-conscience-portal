@@ -353,8 +353,17 @@ const MainLayout: React.FC = () => {
         "border-t border-border py-8 bg-muted/30 transition-all duration-300",
         sidebarCollapsed ? "lg:pl-16" : "lg:pl-56"
       )}>
-        <div className="container text-center">
-          <p className="text-sm text-muted-foreground">
+        <div className="container flex flex-col items-center gap-3">
+          <div className="flex items-center gap-4 text-sm text-muted-foreground">
+            <button onClick={() => navigate(ROUTES.SOBRE_NOS)} className="hover:text-foreground transition-colors">
+              Sobre Nós
+            </button>
+            <span className="text-border">·</span>
+            <button onClick={() => navigate(ROUTES.FAQ)} className="hover:text-foreground transition-colors">
+              FAQ
+            </button>
+          </div>
+          <p className="text-xs text-muted-foreground/70">
             © 2024 Consciência Divinal. Com amor e respeito pelas medicinas ancestrais.
           </p>
         </div>
