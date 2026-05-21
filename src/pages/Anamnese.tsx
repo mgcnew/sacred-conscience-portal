@@ -50,6 +50,7 @@ import {
 } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
 import { z } from 'zod';
+import { cn } from '@/lib/utils';
 import { APP_CONFIG } from '@/config/app';
 import SignatureCanvas from 'react-signature-canvas';
 
