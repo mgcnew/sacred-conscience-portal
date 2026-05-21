@@ -378,6 +378,38 @@
   box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.3);
 }
 
+/* ========================================
+   GLOW DE FOGUEIRA — dark mode only
+   Halo âmbar em elementos de destaque,
+   como brasas iluminando na noite da mata
+   ======================================== */
+
+/* Botão primário — brasa suave */
+.dark button[class*="bg-primary"],
+.dark [class*="bg-primary"][role="button"] {
+  box-shadow:
+    0 0 18px -4px hsl(38 95% 46% / 0.35),
+    0 4px 12px -2px hsl(38 95% 46% / 0.2);
+}
+
+/* Cards de cerimônia / destaque — brilho perimetral */
+.dark [data-slot="card"].ring-primary,
+.dark .card-glow {
+  box-shadow:
+    0 0 0 1px hsl(148 70% 48% / 0.15),
+    0 4px 24px -6px hsl(38 95% 46% / 0.25);
+}
+
+/* Badge "Confirmada" e similares em verde */
+.dark [data-slot="badge"][class*="bg-primary"] {
+  box-shadow: 0 0 8px -2px hsl(148 70% 48% / 0.5);
+}
+
+/* Bottom nav ativa — ponto luminoso */
+.dark nav [class*="bg-primary"] {
+  box-shadow: 0 0 10px -2px hsl(148 70% 48% / 0.6);
+}
+
 @keyframes fadeIn {
   from {
     opacity: 0;
