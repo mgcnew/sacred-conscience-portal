@@ -103,9 +103,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 </span>
               </div>
             ) : (
-              <div className="flex flex-col items-center leading-tight">
-                <span className="font-display text-base font-bold text-primary">C</span>
-                <span className="font-display text-[9px] font-medium text-muted-foreground">D</span>
+              <div className="w-9 h-9 rounded-xl bg-primary/15 border border-primary/20 flex items-center justify-center shrink-0">
+                <span className="font-display text-sm font-bold text-primary tracking-tight">CD</span>
               </div>
             )}
           </div>
