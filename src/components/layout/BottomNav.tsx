@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Home, Calendar, Image, Grid2x2, LogOut, Leaf } from 'lucide-react';
+import { Home, Calendar, Image, Grid2x2, LogOut, Leaf, Heart } from 'lucide-react';
 import {
   Drawer,
   DrawerContent,
   DrawerHeader,
   DrawerTitle,
 } from '@/components/ui/drawer';
+import { ModeToggle } from '@/components/mode-toggle';
 import { cn } from '@/lib/utils';
 import { ROUTES } from '@/constants';
 import { getAllNavItems } from '@/constants/navigation';
@@ -42,6 +43,11 @@ const BottomNav: React.FC<BottomNavProps> = ({ isAdmin, isSuperAdmin, onSignOut 
   const handleSignOut = () => {
     setMoreOpen(false);
     onSignOut();
+  };
+
+  const handleEmergency = () => {
+    navigate(ROUTES.EMERGENCIA);
+    setMoreOpen(false);
   };
 
   return (
@@ -137,7 +143,8 @@ const BottomNav: React.FC<BottomNavProps> = ({ isAdmin, isSuperAdmin, onSignOut 
             </DrawerTitle>
           </DrawerHeader>
 
-          <div className="px-4 pb-6" style={{ paddingBottom: 'calc(env(safe-area-inset-bottom) + 1.5rem)' }}>
+          <div className="px-4" style={{ paddingBottom: 'calc(env(safe-area-inset-bottom) + 1.5rem)' }}>
+            {/* Nav grid */}
             <div className="grid grid-cols-3 gap-3 mb-5">
               {moreItems.map((item) => {
                 const isActive = location.pathname === item.path;
@@ -164,15 +171,33 @@ const BottomNav: React.FC<BottomNavProps> = ({ isAdmin, isSuperAdmin, onSignOut 
               })}
             </div>
 
-            <div className="h-px bg-border/60 mb-4" />
+            <div className="h-px bg-border/60 mb-3" />
 
-            <button
-              onClick={handleSignOut}
-              className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-destructive hover:bg-destructive/8 active:bg-destructive/12 transition-colors"
-            >
-              <LogOut className="w-5 h-5" />
-              <span className="font-medium text-sm">Sair da conta</span>
-            </button>
+            {/* Actions row */}
+            <div className="flex items-center gap-2">
+              {/* Emergency */}
+              <button
+                onClick={handleEmergency}
+                className="flex-1 flex items-center justify-center gap-2 px-3 py-3 rounded-xl bg-red-500/10 text-red-600 dark:text-red-400 active:bg-red-500/20 transition-colors"
+              >
+                <Heart className="w-5 h-5 fill-current" />
+                <span className="font-medium text-sm">Emergência</span>
+              </button>
+
+              {/* Theme toggle */}
+              <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-muted/50">
+                <ModeToggle />
+              </div>
+
+              {/* Sign out */}
+              <button
+                onClick={handleSignOut}
+                className="flex-1 flex items-center justify-center gap-2 px-3 py-3 rounded-xl text-destructive bg-destructive/8 active:bg-destructive/15 transition-colors"
+              >
+                <LogOut className="w-5 h-5" />
+                <span className="font-medium text-sm">Sair</span>
+              </button>
+            </div>
           </div>
         </DrawerContent>
       </Drawer>

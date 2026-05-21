@@ -2,11 +2,9 @@ import React from 'react';
 import { Outlet, useNavigate, useLocation, Navigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
-import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { User, Loader2, Heart } from 'lucide-react';
+import { User, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { ModeToggle } from '@/components/mode-toggle';
 import { ROUTES } from '@/constants';
 import NotificationBell from '@/components/layout/NotificationBell';
 import Sidebar from '@/components/layout/Sidebar';
@@ -18,6 +16,13 @@ import { useOnboarding } from '@/hooks/useOnboarding';
 import { useCheckPermissao } from '@/components/auth/PermissionGate';
 
 const SIDEBAR_COLLAPSED_KEY = 'sidebar-collapsed';
+
+function getGreeting() {
+  const h = new Date().getHours();
+  if (h < 12) return 'Bom dia';
+  if (h < 18) return 'Boa tarde';
+  return 'Boa noite';
+}
 
 const MainLayout: React.FC = () => {
   const { user, isAdmin, signOut } = useAuth();
@@ -177,42 +182,30 @@ const MainLayout: React.FC = () => {
       </div>
 
       {/* Mobile Header */}
-      <div className="lg:hidden fixed top-0 left-0 right-0 z-50 px-2 pt-2">
-        <header className="mx-auto rounded-2xl border border-border/50 bg-background/95 backdrop-blur-md supports-[backdrop-filter]:bg-background/80 shadow-lg shadow-black/5">
-          <div className="flex h-14 items-center justify-between px-4">
-            <div
-              className="flex items-center gap-2.5 cursor-pointer hover:opacity-80 transition-opacity"
-              onClick={() => navigate(ROUTES.HOME)}
-            >
-              <Avatar className="w-9 h-9 border-2 border-primary/20">
-                <AvatarImage src={userAvatar || undefined} alt={userName} />
-                <AvatarFallback className="bg-primary/10 text-primary text-sm">
-                  {userName?.charAt(0)?.toUpperCase() || <User className="w-4 h-4" />}
-                </AvatarFallback>
-              </Avatar>
-              <div className="flex flex-col gap-0">
-                <span className="text-[10px] text-muted-foreground font-medium">Bem-vindo</span>
-                <span className="text-sm font-semibold text-foreground truncate max-w-[120px]">
-                  {userName?.split(' ')[0] || 'Usuário'}
-                </span>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-1">
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => navigate(ROUTES.EMERGENCIA)}
-                className="relative w-10 h-10 text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30"
-                aria-label="Emergência"
-              >
-                <Heart className="w-5 h-5 fill-current" />
-              </Button>
-              <NotificationBell />
-              <ModeToggle />
+      <div className="lg:hidden fixed top-0 left-0 right-0 z-50 px-4 pt-3">
+        <div className="flex h-14 items-center justify-between">
+          <div
+            className="flex items-center gap-2.5 cursor-pointer active:opacity-70 transition-opacity"
+            onClick={() => navigate(ROUTES.HOME)}
+          >
+            <Avatar className="w-10 h-10 border-2 border-primary/25 shadow-sm">
+              <AvatarImage src={userAvatar || undefined} alt={userName} />
+              <AvatarFallback className="bg-primary/10 text-primary text-sm font-semibold">
+                {userName?.charAt(0)?.toUpperCase() || <User className="w-4 h-4" />}
+              </AvatarFallback>
+            </Avatar>
+            <div className="flex flex-col gap-0">
+              <span className="text-[10px] text-muted-foreground font-medium leading-none mb-0.5">
+                {getGreeting()}
+              </span>
+              <span className="text-sm font-semibold text-foreground truncate max-w-[140px] leading-none">
+                {userName?.split(' ')[0] || 'Bem-vindo'}
+              </span>
             </div>
           </div>
-        </header>
+
+          <NotificationBell />
+        </div>
       </div>
 
       {/* Mobile Bottom Nav */}
