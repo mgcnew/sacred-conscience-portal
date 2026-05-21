@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Home, Calendar, Image, Grid2x2, LogOut, Leaf, Heart } from 'lucide-react';
+import { Home, Calendar, Image, Grid2x2, LogOut, Leaf, Heart, Sun, Moon } from 'lucide-react';
 import {
   Drawer,
   DrawerContent,
   DrawerHeader,
   DrawerTitle,
 } from '@/components/ui/drawer';
-import { ModeToggle } from '@/components/mode-toggle';
+import { useTheme } from '@/components/theme-provider';
 import { cn } from '@/lib/utils';
 import { ROUTES } from '@/constants';
 import { getAllNavItems } from '@/constants/navigation';
@@ -30,6 +30,9 @@ const BottomNav: React.FC<BottomNavProps> = ({ isAdmin, isSuperAdmin, onSignOut 
   const navigate = useNavigate();
   const location = useLocation();
   const [moreOpen, setMoreOpen] = useState(false);
+
+  const { theme, setTheme } = useTheme();
+  const isDark = theme === 'dark';
 
   const allNavItems = getAllNavItems(isAdmin, isSuperAdmin);
   const moreItems = allNavItems.filter((item) => !MAIN_TAB_PATHS.has(item.path));
@@ -185,9 +188,13 @@ const BottomNav: React.FC<BottomNavProps> = ({ isAdmin, isSuperAdmin, onSignOut 
               </button>
 
               {/* Theme toggle */}
-              <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-muted/50">
-                <ModeToggle />
-              </div>
+              <button
+                onClick={() => setTheme(isDark ? 'light' : 'dark')}
+                className="flex items-center justify-center w-12 h-12 rounded-xl bg-muted/50 text-muted-foreground active:bg-muted transition-colors"
+                aria-label="Alternar tema"
+              >
+                {isDark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+              </button>
 
               {/* Sign out */}
               <button
