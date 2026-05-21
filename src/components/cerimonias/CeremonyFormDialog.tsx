@@ -36,6 +36,7 @@ interface CeremonyFormData {
   vagas: number;
   valor: number;
   observacoes: string;
+  itens_levar: string;
   banner_url: string;
 }
 
@@ -198,6 +199,7 @@ const CeremonyFormDialog: React.FC<CeremonyFormDialogProps> = ({ isOpen, onClose
     setValue('descricao', ceremony.descricao || '');
     setValue('vagas', ceremony.vagas || 0);
     setValue('observacoes', ceremony.observacoes || '');
+    setValue('itens_levar', ceremony.itens_levar || '');
     setValue('banner_url', ceremony.banner_url || '');
     const valorCentavos = ceremony.valor || 0;
     setValue('valor', valorCentavos);
@@ -505,6 +507,15 @@ const CeremonyFormDialog: React.FC<CeremonyFormDialogProps> = ({ isOpen, onClose
       <div className="space-y-1.5">
         <Label className="text-sm font-medium">Descrição</Label>
         <Textarea placeholder="Detalhes sobre a cerimônia, preparação, intenção..." {...register('descricao')} className="min-h-[100px] resize-none" />
+      </div>
+      <div className="space-y-1.5">
+        <Label className="text-sm font-medium">O que trazer</Label>
+        <p className="text-xs text-muted-foreground">Um item por linha. Aparece no modal de confirmação do participante.</p>
+        <Textarea
+          placeholder={`2 rolos de papel higiênico\nAlimentos para partilha\nUma vela branca\nRoupa branca`}
+          {...register('itens_levar')}
+          className="min-h-[110px] resize-none font-mono text-sm"
+        />
       </div>
       <div className="space-y-1.5">
         <Label className="text-sm font-medium">Observações internas</Label>

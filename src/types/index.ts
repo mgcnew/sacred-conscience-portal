@@ -110,6 +110,7 @@ export interface Cerimonia {
   vagas: number | null;
   valor: number | null;
   observacoes: string | null;
+  itens_levar: string | null;
   banner_url: string | null;
   // Relacionamentos opcionais (quando carregados com join)
   tipos_consagracao?: TipoConsagracao | null;

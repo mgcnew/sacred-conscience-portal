@@ -119,6 +119,7 @@ const Cerimonias: React.FC = () => {
   const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
   const [isInfoModalOpen, setIsInfoModalOpen] = useState(false);
   const [confirmedCeremonyName, setConfirmedCeremonyName] = useState('');
+  const [confirmedItensLevar, setConfirmedItensLevar] = useState<string | null>(null);
   const [ceremonyToEdit, setCeremonyToEdit] = useState<Cerimonia | null>(null);
   const [ceremonyToView, setCeremonyToView] = useState<Cerimonia | null>(null);
   const [loadingCerimoniaId, setLoadingCerimoniaId] = useState<string | null>(null);
@@ -216,8 +217,9 @@ const Cerimonias: React.FC = () => {
       queryClient.invalidateQueries({ queryKey: ['historico-inscricoes'] });
       const ceremonyName = selectedCeremony?.nome || selectedCeremony?.medicina_principal || 'Cerimônia';
       setIsPaymentModalOpen(false);
-      setSelectedCeremony(null);
       setConfirmedCeremonyName(ceremonyName);
+      setConfirmedItensLevar(selectedCeremony?.itens_levar ?? null);
+      setSelectedCeremony(null);
       setIsSuccessModalOpen(true);
     },
     onError: (error) => {
@@ -517,6 +519,7 @@ const Cerimonias: React.FC = () => {
         isOpen={isSuccessModalOpen}
         onComplete={() => { setIsSuccessModalOpen(false); navigate(ROUTES.FAQ, { state: { fromInscription: true } }); }}
         ceremonyName={confirmedCeremonyName}
+        itensLevar={confirmedItensLevar}
       />
 
       <CerimoniaInfoModal
