@@ -33,12 +33,6 @@ import ConvitePartilhaModal from '@/components/shared/ConvitePartilhaModal';
 import { useUpcomingCeremonies } from '@/hooks/queries/useUpcomingCeremonies';
 import { useMyInscriptions } from '@/hooks/queries/useMyInscriptions';
 
-function getGreeting(): string {
-  const hour = new Date().getHours();
-  if (hour < 12) return 'Bom dia';
-  if (hour < 18) return 'Boa tarde';
-  return 'Boa noite';
-}
 
 const Index: React.FC = () => {
   const { user, isAdmin } = useAuth();
@@ -46,12 +40,6 @@ const Index: React.FC = () => {
   const [hasAnamnese, setHasAnamnese] = useState<boolean | null>(null);
   const [isAnamneseComplete, setIsAnamneseComplete] = useState<boolean>(true);
 
-  const firstName = user?.user_metadata?.full_name?.split(' ')[0]
-    || user?.user_metadata?.name?.split(' ')[0]
-    || user?.email?.split('@')[0]
-    || '';
-
-  const firstInitial = firstName.charAt(0).toUpperCase();
 
   const {
     data: ceremonies = [],
@@ -151,40 +139,6 @@ const Index: React.FC = () => {
     <div className="min-h-screen overflow-x-hidden pb-24 md:pb-8">
       <ConvitePartilhaModal />
 
-      {/* Sticky Header */}
-      <header className="sticky top-0 z-40 bg-background/90 backdrop-blur-md border-b border-border/40">
-        <div className="container max-w-6xl mx-auto px-4 h-14 flex items-center justify-between gap-3">
-          {/* Left: Avatar + Greeting */}
-          <div className="flex items-center gap-2.5 min-w-0">
-            <div className="w-9 h-9 rounded-full bg-primary/15 border border-primary/20 flex items-center justify-center text-primary font-bold text-sm shrink-0">
-              {firstInitial || '?'}
-            </div>
-            <div className="hidden sm:block min-w-0">
-              <p className="text-[11px] text-muted-foreground leading-none">{getGreeting()}</p>
-              <p className="text-sm font-semibold leading-tight truncate">{firstName || 'Bem-vindo'}</p>
-            </div>
-          </div>
-
-          {/* Center: Logo */}
-          <div className="flex items-center gap-1.5 shrink-0">
-            <Leaf className="w-4 h-4 text-primary" />
-            <span className="font-display text-sm font-bold text-primary whitespace-nowrap">Consciência Divinal</span>
-          </div>
-
-          {/* Right: Alert */}
-          <div className="flex items-center gap-1 shrink-0">
-            {anamnesePending && (
-              <button
-                onClick={() => navigate(ROUTES.ANAMNESE)}
-                className="w-8 h-8 rounded-full bg-amber-500/15 text-amber-600 flex items-center justify-center hover:bg-amber-500/25 transition-colors"
-                title="Cadastro pendente"
-              >
-                <span className="text-xs font-bold">!</span>
-              </button>
-            )}
-          </div>
-        </div>
-      </header>
 
       {/* Main Content */}
       <div className="container max-w-6xl mx-auto px-4 py-5">
