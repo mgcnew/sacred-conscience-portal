@@ -1,30 +1,43 @@
+import { useEffect, useState } from 'react';
 import { useRegisterSW } from 'virtual:pwa-register/react';
 import { RefreshCw, Leaf } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
-const CHECK_INTERVAL_MS = 60 * 1000; // verifica nova versão a cada 1 minuto
+const CHECK_INTERVAL_MS = 60 * 1000;
 
 const PWAUpdatePrompt: React.FC = () => {
-  const {
-    needRefresh: [needRefresh],
-    updateServiceWorker,
-  } = useRegisterSW({
+  const [showBanner, setShowBanner] = useState(false);
+
+  // Polling para verificar novas versões do SW
+  useRegisterSW({
     onRegisteredSW(swUrl, registration) {
       if (!registration) return;
-      setInterval(async () => {
-        if (!registration.installing) {
-          try {
-            const res = await fetch(swUrl, { cache: 'no-store' });
-            if (res.status === 200) await registration.update();
-          } catch {
-            // sem conexão — ignora
-          }
+      setInterval(() => {
+        if (!registration.installing && !document.hidden) {
+          registration.update().catch(() => {});
         }
       }, CHECK_INTERVAL_MS);
     },
   });
 
-  if (!needRefresh) return null;
+  // Detecta quando o novo SW assume o controle (só dispara em update real, nunca em loop)
+  useEffect(() => {
+    if (!('serviceWorker' in navigator)) return;
+
+    // Só mostra banner se já havia um SW ativo antes (ou seja, é update, não primeiro install)
+    const hadController = !!navigator.serviceWorker.controller;
+
+    const handleControllerChange = () => {
+      if (hadController) setShowBanner(true);
+    };
+
+    navigator.serviceWorker.addEventListener('controllerchange', handleControllerChange);
+    return () => {
+      navigator.serviceWorker.removeEventListener('controllerchange', handleControllerChange);
+    };
+  }, []);
+
+  if (!showBanner) return null;
 
   return (
     <div className="fixed bottom-20 left-3 right-3 z-[60] lg:bottom-4 lg:left-auto lg:right-4 lg:w-80 animate-in slide-in-from-bottom-4 duration-300">
@@ -37,7 +50,7 @@ const PWAUpdatePrompt: React.FC = () => {
           size="sm"
           variant="secondary"
           className="shrink-0 h-8 text-xs font-semibold gap-1.5 rounded-xl"
-          onClick={() => updateServiceWorker(true)}
+          onClick={() => window.location.reload()}
         >
           <RefreshCw className="w-3.5 h-3.5" />
           Atualizar
