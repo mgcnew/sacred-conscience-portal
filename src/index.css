@@ -15,14 +15,14 @@
     /* --- FLORESTA SAGRADA PALETTE (Light Mode) --- */
 
     /* Background: Warm parchment — pergaminho quente */
-    --background: 40 25% 97%;
+    --background: 38 45% 92%;
     --foreground: 160 30% 10%;
 
-    /* Card: White with green warmth */
-    --card: 0 0% 100%;
+    /* Card: Soft cream — creme suave */
+    --card: 40 30% 96%;
     --card-foreground: 160 30% 10%;
 
-    --popover: 0 0% 100%;
+    --popover: 40 30% 96%;
     --popover-foreground: 160 30% 10%;
 
     /* Primary: Deep Forest Green — verde floresta profundo */
@@ -34,7 +34,7 @@
     --secondary-foreground: 148 68% 22%;
 
     /* Muted: Warm earth grey */
-    --muted: 40 12% 93%;
+    --muted: 38 25% 86%;
     --muted-foreground: 160 10% 40%;
 
     /* Accent: Sacred Amber/Gold — fogo e iluminação */
@@ -46,7 +46,7 @@
 
     /* Borders */
     --border: 148 18% 82%;
-    --input: 0 0% 100%;
+    --input: 40 30% 96%;
     --input-foreground: 160 30% 10%;
     --ring: 148 68% 27%;
 
@@ -59,7 +59,7 @@
     --forest-light: 148 35% 93%;
 
     /* Sidebar */
-    --sidebar-background: 40 20% 95%;
+    --sidebar-background: 38 40% 89%;
     --sidebar-foreground: 160 30% 10%;
     --sidebar-primary: 148 68% 27%;
     --sidebar-primary-foreground: 0 0% 100%;
@@ -167,9 +167,9 @@
   select:-webkit-autofill:hover,
   select:-webkit-autofill:focus,
   select:-webkit-autofill:active {
-    -webkit-box-shadow: 0 0 0 1000px white inset !important;
-    -webkit-text-fill-color: hsl(222 47% 11%) !important;
-    box-shadow: 0 0 0 1000px white inset !important;
+    -webkit-box-shadow: 0 0 0 1000px hsl(40 30% 96%) inset !important;
+    -webkit-text-fill-color: hsl(160 30% 10%) !important;
+    box-shadow: 0 0 0 1000px hsl(40 30% 96%) inset !important;
     caret-color: hsl(222 47% 11%) !important;
   }
 
