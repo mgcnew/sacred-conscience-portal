@@ -311,11 +311,28 @@
   @apply shadow-sm;
 }
 
-/* Section headers */
+/* Section headers — borda decorativa gradiente verde→âmbar à esquerda */
 :root .section-title,
 :root h2.font-display {
   @apply text-foreground;
   letter-spacing: 0.025em;
+  padding-left: 0.75rem;
+  position: relative;
+}
+:root .section-title::before,
+:root h2.font-display::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 10%;
+  height: 80%;
+  width: 3px;
+  border-radius: 9999px;
+  background: linear-gradient(
+    to bottom,
+    hsl(var(--primary)),
+    hsl(var(--sacred-gold))
+  );
 }
 
 /* Organic dividers — hr com ornamento de folha central */
