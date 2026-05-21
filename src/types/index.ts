@@ -403,3 +403,22 @@ export interface Material {
 export interface MaterialComAutor extends Material {
   autor?: Pick<Profile, 'full_name' | 'avatar_url'> | null;
 }
+
+// ============================================
+// Diário / Insights pessoais
+// ============================================
+
+export type HumorType = 'ótimo' | 'bem' | 'neutro' | 'difícil' | 'intenso';
+
+export interface DiarioEntrada {
+  id: string;
+  user_id: string;
+  cerimonia_id: string | null;
+  conteudo: string;
+  humor: HumorType | null;
+  data: string;
+  created_at: string;
+  updated_at: string;
+  // Relacionamento opcional
+  cerimonias?: Pick<Cerimonia, 'id' | 'nome' | 'data' | 'medicina_principal'> | null;
+}

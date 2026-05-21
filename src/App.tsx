@@ -35,6 +35,7 @@ const Emergencia = lazy(() => import("./pages/Emergencia"));
 const Admin = lazy(() => import("./pages/Admin"));
 const Financeiro = lazy(() => import("./pages/Financeiro"));
 const Settings = lazy(() => import("./pages/Settings"));
+const Insights = lazy(() => import("./pages/Insights"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 // Loading fallback minimalista
@@ -92,6 +93,7 @@ const App = () => (
               <Route path={ROUTES.FAQ} element={<Suspense fallback={<PageLoader />}><FAQ /></Suspense>} />
               <Route path={ROUTES.EMERGENCIA} element={<Suspense fallback={<PageLoader />}><Emergencia /></Suspense>} />
               <Route path={ROUTES.CONFIGURACOES} element={<Suspense fallback={<PageLoader />}><Settings /></Suspense>} />
+              <Route path={ROUTES.INSIGHTS} element={<Suspense fallback={<PageLoader />}><Insights /></Suspense>} />
               <Route
                 path={ROUTES.ADMIN}
                 element={

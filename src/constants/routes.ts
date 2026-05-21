@@ -36,7 +36,10 @@ export const ROUTES = {
 
   // Cursos e Eventos
   CURSOS: '/cursos',
-  
+
+  // Insights / Jornada pessoal
+  INSIGHTS: '/insights',
+
 } as const;
 
 /**

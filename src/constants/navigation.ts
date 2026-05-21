@@ -12,6 +12,7 @@ import {
   GraduationCap,
   BookOpen,
   Wallet,
+  Sparkles,
   LucideIcon,
 } from 'lucide-react';
 import { ROUTES, AppRoute } from '@/constants/routes';
@@ -39,6 +40,7 @@ export const essentialNavItems: NavItem[] = [
   { icon: Home, label: 'Início', path: ROUTES.HOME },
   { icon: FileText, label: 'Minha Ficha', path: ROUTES.ANAMNESE },
   { icon: Calendar, label: 'Cerimônias', path: ROUTES.CERIMONIAS },
+  { icon: Sparkles, label: 'Insights', path: ROUTES.INSIGHTS },
 ];
 
 // 📚 Aprender - conteúdo educativo
