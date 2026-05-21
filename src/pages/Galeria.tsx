@@ -628,34 +628,19 @@ const Galeria: React.FC = () => {
       {/* Barra de filtro + agrupamento */}
       {!isLoading && galeria && galeria.length > 0 && (
         <div className="flex flex-wrap items-center gap-3 mb-6">
-          {/* Chips de cerimônia */}
-          <div className="flex items-center gap-1.5 flex-wrap flex-1 min-w-0">
-            <button
-              onClick={() => setFiltroCerimonia('todas')}
-              className={cn(
-                'px-3 py-1 rounded-full text-xs font-medium transition-colors whitespace-nowrap',
-                filtroCerimonia === 'todas'
-                  ? 'bg-primary text-primary-foreground'
-                  : 'bg-muted text-muted-foreground hover:text-foreground'
-              )}
-            >
-              Todas
-            </button>
-            {ceremoniasNaGaleria.map(c => (
-              <button
-                key={c.id}
-                onClick={() => setFiltroCerimonia(filtroCerimonia === c.id ? 'todas' : c.id)}
-                className={cn(
-                  'px-3 py-1 rounded-full text-xs font-medium transition-colors whitespace-nowrap',
-                  filtroCerimonia === c.id
-                    ? 'bg-primary text-primary-foreground'
-                    : 'bg-muted text-muted-foreground hover:text-foreground'
-                )}
-              >
-                {c.label}
-              </button>
-            ))}
-          </div>
+          {/* Dropdown de cerimônia */}
+          <Select value={filtroCerimonia} onValueChange={setFiltroCerimonia}>
+            <SelectTrigger className="w-full sm:w-64 shrink-0">
+              <SelectValue placeholder="Filtrar por cerimônia" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="todas">Todas as cerimônias</SelectItem>
+              {ceremoniasNaGaleria.map(c => (
+                <SelectItem key={c.id} value={c.id}>{c.label}</SelectItem>
+              ))}
+              <SelectItem value="__sem__">Sem cerimônia</SelectItem>
+            </SelectContent>
+          </Select>
 
           {/* Toggle de agrupamento */}
           <div className="flex items-center gap-0.5 bg-muted rounded-lg p-1 shrink-0">
