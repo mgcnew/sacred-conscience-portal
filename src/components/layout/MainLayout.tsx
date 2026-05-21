@@ -5,6 +5,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { User, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { ModeToggle } from '@/components/mode-toggle';
 import { ROUTES } from '@/constants';
 import NotificationBell from '@/components/layout/NotificationBell';
 import Sidebar from '@/components/layout/Sidebar';
