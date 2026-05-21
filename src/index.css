@@ -302,8 +302,25 @@
   letter-spacing: 0.025em;
 }
 
-/* Subtle dividers */
-:root hr,
+/* Organic dividers — hr com ornamento de folha central */
+:root hr {
+  border: none;
+  position: relative;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  margin: 1rem 0;
+}
+:root hr::before,
+:root hr::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(to right, transparent, hsl(var(--border) / 0.7), hsl(var(--border) / 0.4));
+}
+:root hr::after {
+  background: linear-gradient(to left, transparent, hsl(var(--border) / 0.7), hsl(var(--border) / 0.4));
+}
 :root .divider {
   @apply border-border/70;
 }
