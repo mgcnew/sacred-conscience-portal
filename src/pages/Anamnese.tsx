@@ -12,18 +12,19 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Progress } from '@/components/ui/progress';
 import { toast } from 'sonner';
-import { 
-  FileText, 
-  User, 
+import {
+  FileText,
+  User,
   Users,
-  Heart, 
-  Pill, 
-  Sparkles, 
+  Heart,
+  Pill,
+  Sparkles,
   CheckCircle2,
   AlertTriangle,
   Loader2,
   ChevronRight,
   ChevronLeft,
+  ChevronDown,
   Check,
   X,
   Camera,
@@ -37,6 +38,7 @@ import {
   RotateCcw,
   Upload,
   IdCard,
+  Pencil,
 } from 'lucide-react';
 import {
   Dialog,
@@ -126,6 +128,17 @@ const Anamnese: React.FC = () => {
   const [isIncomplete, setIsIncomplete] = useState(false);
   const [isFullScreenSignature, setIsFullScreenSignature] = useState(false);
   const [stepDirection, setStepDirection] = useState<'forward' | 'backward'>('forward');
+  const [openSections, setOpenSections] = useState<Set<string>>(
+    new Set(['dados', 'saude', 'substancias', 'experiencia', 'termos'])
+  );
+  const toggleSection = (id: string) => {
+    setOpenSections(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
 
   // Estados para upload de documentos
   const [documentoFrenteUrl, setDocumentoFrenteUrl] = useState<string | null>(null);
@@ -851,180 +864,156 @@ const Anamnese: React.FC = () => {
 
   // Tela de visualização da ficha preenchida
   if (viewMode === 'view' && existingAnamnese) {
+    const AccordionSection = ({
+      id, icon: Icon, title, iconBg, iconColor, children,
+    }: {
+      id: string; icon: React.ElementType; title: string;
+      iconBg: string; iconColor: string; children: React.ReactNode;
+    }) => {
+      const isOpen = openSections.has(id);
+      return (
+        <Card className="overflow-hidden border-border/60">
+          <button
+            type="button"
+            onClick={() => toggleSection(id)}
+            className="w-full flex items-center gap-3 p-4 text-left hover:bg-muted/30 transition-colors"
+          >
+            <div className={cn('w-9 h-9 rounded-xl flex items-center justify-center shrink-0', iconBg)}>
+              <Icon className={cn('w-5 h-5', iconColor)} />
+            </div>
+            <span className="font-display text-base font-semibold flex-1">{title}</span>
+            <ChevronDown className={cn('w-4 h-4 text-muted-foreground transition-transform duration-200', isOpen && 'rotate-180')} />
+          </button>
+          {isOpen && (
+            <div className="px-4 pb-4 border-t border-border/40">
+              {children}
+            </div>
+          )}
+        </Card>
+      );
+    };
+
     return (
       <>
         {renderContraindicacaoModal()}
-      <div className="min-h-screen py-4 md:py-6">
-        <div className="container max-w-2xl mx-auto">
-          {/* Header */}
-          <div className="text-center mb-8 animate-fade-in">
-            <div className="w-16 h-16 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center mx-auto mb-4">
-              <CheckCircle2 className="w-8 h-8 text-green-600 dark:text-green-400" />
-            </div>
-            <h1 className="font-display text-3xl font-medium text-foreground mb-2">
-              Ficha de Anamnese
-            </h1>
-            <Badge variant="outline" className="bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 border-green-200 dark:border-green-800">
-              <Check className="w-3 h-3 mr-1" />
-              Preenchida
-            </Badge>
-          </div>
+        <div className="min-h-screen py-4 md:py-6">
+          <div className="container max-w-2xl mx-auto space-y-4">
 
-          {/* Alerta de Ficha Incompleta */}
-          {isIncomplete && (
-            <div className="mb-6 p-4 rounded-xl bg-destructive/10 border border-destructive/30 animate-pulse-slow">
-              <div className="flex items-start gap-3">
-                <AlertTriangle className="w-6 h-6 text-destructive flex-shrink-0 mt-0.5" />
-                <div className="space-y-1">
-                  <h3 className="font-semibold text-destructive">
-                    Atualização Necessária
-                  </h3>
-                  <p className="text-sm text-destructive/80 leading-relaxed">
-                    Sua ficha está desatualizada. Por segurança, adicionamos os campos de 
-                    <strong> Documento (RG/CPF)</strong> e <strong>Assinatura Digital</strong>. 
-                    Por favor, atualize sua ficha agora.
-                  </p>
-                  <Button 
-                    variant="destructive" 
-                    size="sm" 
-                    className="mt-2"
-                    onClick={() => setViewMode('edit')}
-                  >
-                    Atualizar Agora
-                  </Button>
+            {/* Alerta de Ficha Incompleta */}
+            {isIncomplete && (
+              <div className="p-4 rounded-xl bg-destructive/10 border border-destructive/30">
+                <div className="flex items-start gap-3">
+                  <AlertTriangle className="w-5 h-5 text-destructive flex-shrink-0 mt-0.5" />
+                  <div>
+                    <h3 className="font-semibold text-destructive text-sm">Atualização Necessária</h3>
+                    <p className="text-xs text-destructive/80 mt-1 leading-relaxed">
+                      Adicionamos os campos de <strong>Documento</strong> e <strong>Assinatura Digital</strong>. Por favor, atualize sua ficha.
+                    </p>
+                    <Button variant="destructive" size="sm" className="mt-2 h-7 text-xs" onClick={() => setViewMode('edit')}>
+                      Atualizar Agora
+                    </Button>
+                  </div>
                 </div>
               </div>
-            </div>
-          )}
+            )}
 
-          {/* Info de última atualização */}
-          {updatedAt && (
-            <div className="flex justify-center mb-4">
-              <span className="text-xs text-muted-foreground flex items-center gap-1">
-                <Clock className="w-3 h-3" />
-                Última atualização: {new Date(updatedAt).toLocaleDateString('pt-BR', { 
-                  day: '2-digit', 
-                  month: 'long', 
-                  year: 'numeric',
-                  hour: '2-digit',
-                  minute: '2-digit'
-                })}
-              </span>
-            </div>
-          )}
+            {/* Hero card */}
+            <Card className="overflow-hidden border-primary/20">
+              <div className="h-1.5 bg-gradient-to-r from-primary/40 via-primary to-primary/40" />
+              <CardContent className="p-5">
+                <div className="flex items-center gap-4">
+                  <div className="relative shrink-0">
+                    <Avatar className="w-16 h-16 border-4 border-primary/20 shadow-md">
+                      <AvatarImage src={avatarUrl || undefined} alt={formData.nome_completo} />
+                      <AvatarFallback className="bg-primary/10 text-primary text-xl font-semibold">
+                        {formData.nome_completo?.charAt(0)?.toUpperCase() || <User className="w-6 h-6" />}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-green-500 rounded-full border-2 border-background flex items-center justify-center">
+                      <Check className="w-2.5 h-2.5 text-white" />
+                    </div>
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <h2 className="font-display text-lg font-semibold text-foreground leading-tight truncate">
+                      {formData.nome_completo || 'Participante'}
+                    </h2>
+                    <div className="flex items-center gap-1.5 flex-wrap mt-1">
+                      <Badge variant="outline" className="h-5 text-[10px] bg-green-50 text-green-700 dark:bg-green-950/40 dark:text-green-400 border-green-200 dark:border-green-700">
+                        <CheckCircle2 className="w-3 h-3 mr-1" />
+                        Ficha completa
+                      </Badge>
+                      {hasContraindicacoes && (
+                        <Badge variant="outline" className="h-5 text-[10px] bg-amber-50 text-amber-700 dark:bg-amber-950/40 dark:text-amber-400 border-amber-200">
+                          <AlertTriangle className="w-3 h-3 mr-1" />
+                          Atenção
+                        </Badge>
+                      )}
+                    </div>
+                    {updatedAt && (
+                      <p className="text-[11px] text-muted-foreground mt-1.5 flex items-center gap-1">
+                        <Clock className="w-3 h-3" />
+                        Atualizado {new Date(updatedAt).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' })}
+                      </p>
+                    )}
+                  </div>
+                  <div className="flex flex-col gap-2 shrink-0">
+                    <Button variant="outline" size="sm" onClick={() => setViewMode('edit')} className="gap-1.5 h-8 text-xs">
+                      <Pencil className="w-3.5 h-3.5" />
+                      Editar
+                    </Button>
+                    <Button variant="ghost" size="sm" onClick={() => window.print()} className="gap-1.5 h-8 text-xs text-muted-foreground">
+                      <Download className="w-3.5 h-3.5" />
+                      Imprimir
+                    </Button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
 
-          {/* Botões de ação */}
-          <div className="flex justify-center gap-3 mb-6">
-            <Button
-              variant="outline"
-              onClick={() => setViewMode('edit')}
-              className="gap-2"
-            >
-              <Camera className="w-4 h-4" />
-              Editar Ficha
-            </Button>
-            <Button
-              variant="ghost"
-              onClick={() => window.print()}
-              className="gap-2"
-            >
-              <Download className="w-4 h-4" />
-              Imprimir
-            </Button>
-          </div>
-
-          {/* Resumo Visual Rápido */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
-            {/* Status de Saúde */}
-            <div className={`p-3 rounded-xl border ${
-              hasContraindicacoes 
-                ? 'bg-amber-50 dark:bg-amber-950/30 border-amber-200 dark:border-amber-800' 
-                : 'bg-green-50 dark:bg-green-950/30 border-green-200 dark:border-green-800'
-            }`}>
-              <Heart className={`w-5 h-5 mb-1 ${hasContraindicacoes ? 'text-amber-600' : 'text-green-600'}`} />
-              <p className="text-xs text-muted-foreground">Saúde</p>
-              <p className={`text-sm font-medium ${hasContraindicacoes ? 'text-amber-700 dark:text-amber-400' : 'text-green-700 dark:text-green-400'}`}>
-                {hasContraindicacoes ? 'Atenção' : 'OK'}
-              </p>
-            </div>
-
-            {/* Substâncias */}
-            <div className={`p-3 rounded-xl border ${
-              formData.sem_vicios 
-                ? 'bg-green-50 dark:bg-green-950/30 border-green-200 dark:border-green-800' 
-                : 'bg-blue-50 dark:bg-blue-950/30 border-blue-200 dark:border-blue-800'
-            }`}>
-              <Pill className={`w-5 h-5 mb-1 ${formData.sem_vicios ? 'text-green-600' : 'text-blue-600'}`} />
-              <p className="text-xs text-muted-foreground">Substâncias</p>
-              <p className={`text-sm font-medium ${formData.sem_vicios ? 'text-green-700 dark:text-green-400' : 'text-blue-700 dark:text-blue-400'}`}>
-                {formData.sem_vicios ? 'Nenhuma' : 'Declarado'}
-              </p>
-            </div>
-
-            {/* Experiência */}
-            <div className={`p-3 rounded-xl border ${
-              formData.ja_consagrou 
-                ? 'bg-purple-50 dark:bg-purple-950/30 border-purple-200 dark:border-purple-800' 
-                : 'bg-slate-50 dark:bg-slate-950/30 border-slate-200 dark:border-slate-800'
-            }`}>
-              <Sparkles className={`w-5 h-5 mb-1 ${formData.ja_consagrou ? 'text-purple-600' : 'text-slate-600'}`} />
-              <p className="text-xs text-muted-foreground">Experiência</p>
-              <p className={`text-sm font-medium ${formData.ja_consagrou ? 'text-purple-700 dark:text-purple-400' : 'text-slate-700 dark:text-slate-400'}`}>
-                {formData.ja_consagrou ? 'Experiente' : 'Primeira vez'}
-              </p>
-            </div>
-
-            {/* Permanência */}
-            <div className={`p-3 rounded-xl border ${
-              formData.aceite_permanencia 
-                ? 'bg-green-50 dark:bg-green-950/30 border-green-200 dark:border-green-800' 
-                : 'bg-red-50 dark:bg-red-950/30 border-red-200 dark:border-red-800'
-            }`}>
-              <Clock className={`w-5 h-5 mb-1 ${formData.aceite_permanencia ? 'text-green-600' : 'text-red-600'}`} />
-              <p className="text-xs text-muted-foreground">Permanência</p>
-              <p className={`text-sm font-medium ${formData.aceite_permanencia ? 'text-green-700 dark:text-green-400' : 'text-red-700 dark:text-red-400'}`}>
-                {formData.aceite_permanencia ? 'Aceita' : 'Não aceita'}
-              </p>
+            {/* Resumo visual */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+              <div className={cn('p-3 rounded-xl border', hasContraindicacoes ? 'bg-amber-50 dark:bg-amber-950/30 border-amber-200 dark:border-amber-800' : 'bg-green-50 dark:bg-green-950/30 border-green-200 dark:border-green-800')}>
+                <Heart className={cn('w-4 h-4 mb-1.5', hasContraindicacoes ? 'text-amber-500' : 'text-green-500')} />
+                <p className="text-[10px] text-muted-foreground leading-none mb-0.5">Saúde</p>
+                <p className={cn('text-sm font-semibold', hasContraindicacoes ? 'text-amber-700 dark:text-amber-400' : 'text-green-700 dark:text-green-400')}>
+                  {hasContraindicacoes ? 'Atenção' : 'OK'}
+                </p>
+              </div>
+              <div className={cn('p-3 rounded-xl border', formData.sem_vicios ? 'bg-green-50 dark:bg-green-950/30 border-green-200 dark:border-green-800' : 'bg-blue-50 dark:bg-blue-950/30 border-blue-200 dark:border-blue-800')}>
+                <Pill className={cn('w-4 h-4 mb-1.5', formData.sem_vicios ? 'text-green-500' : 'text-blue-500')} />
+                <p className="text-[10px] text-muted-foreground leading-none mb-0.5">Substâncias</p>
+                <p className={cn('text-sm font-semibold', formData.sem_vicios ? 'text-green-700 dark:text-green-400' : 'text-blue-700 dark:text-blue-400')}>
+                  {formData.sem_vicios ? 'Nenhuma' : 'Declarado'}
+                </p>
+              </div>
+              <div className={cn('p-3 rounded-xl border', formData.ja_consagrou ? 'bg-purple-50 dark:bg-purple-950/30 border-purple-200 dark:border-purple-800' : 'bg-muted/50 border-border')}>
+                <Sparkles className={cn('w-4 h-4 mb-1.5', formData.ja_consagrou ? 'text-purple-500' : 'text-muted-foreground')} />
+                <p className="text-[10px] text-muted-foreground leading-none mb-0.5">Experiência</p>
+                <p className={cn('text-sm font-semibold', formData.ja_consagrou ? 'text-purple-700 dark:text-purple-400' : 'text-muted-foreground')}>
+                  {formData.ja_consagrou ? 'Experiente' : '1ª vez'}
+                </p>
+              </div>
+              <div className={cn('p-3 rounded-xl border', formData.aceite_permanencia ? 'bg-green-50 dark:bg-green-950/30 border-green-200 dark:border-green-800' : 'bg-red-50 dark:bg-red-950/30 border-red-200 dark:border-red-800')}>
+                <FileText className={cn('w-4 h-4 mb-1.5', formData.aceite_permanencia ? 'text-green-500' : 'text-red-500')} />
+                <p className="text-[10px] text-muted-foreground leading-none mb-0.5">Termos</p>
+                <p className={cn('text-sm font-semibold', formData.aceite_permanencia ? 'text-green-700 dark:text-green-400' : 'text-red-700 dark:text-red-400')}>
+                  {formData.aceite_permanencia ? 'Aceitos' : 'Pendente'}
+                </p>
+              </div>
             </div>
 
-            {/* Uso de Imagem */}
-            <div className={`p-3 rounded-xl border ${
-              formData.aceite_uso_imagem 
-                ? 'bg-green-50 dark:bg-green-950/30 border-green-200 dark:border-green-800' 
-                : 'bg-slate-50 dark:bg-slate-950/30 border-slate-200 dark:border-slate-800'
-            }`}>
-              <Camera className={`w-5 h-5 mb-1 ${formData.aceite_uso_imagem ? 'text-green-600' : 'text-slate-600'}`} />
-              <p className="text-xs text-muted-foreground">Imagem</p>
-              <p className={`text-sm font-medium ${formData.aceite_uso_imagem ? 'text-green-700 dark:text-green-400' : 'text-slate-700 dark:text-slate-400'}`}>
-                {formData.aceite_uso_imagem ? 'Autorizada' : 'Não autorizada'}
-              </p>
-            </div>
-          </div>
-
-          {/* Cards de visualização */}
-          <div className="space-y-4">
-            {/* Dados Pessoais */}
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="font-display text-lg flex items-center gap-2">
-                  <User className="w-5 h-5 text-primary" />
-                  Dados Pessoais
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
+            {/* Seções accordion */}
+            <AccordionSection id="dados" icon={User} title="Dados Pessoais" iconBg="bg-blue-100 dark:bg-blue-950/40" iconColor="text-blue-600 dark:text-blue-400">
+              <div className="pt-3">
                 <InfoItem label="Nome Completo" value={formData.nome_completo} icon={User} />
                 <InfoItem label="Data de Nascimento" value={formatDate(formData.data_nascimento)} icon={Calendar} />
-                <InfoItem 
-                  label={formData.documento_tipo?.toUpperCase() || 'Documento'} 
-                  value={formData.documento_valor} 
-                  icon={Shield} 
-                />
+                <InfoItem label={formData.documento_tipo?.toUpperCase() || 'Documento'} value={formData.documento_valor} icon={Shield} />
                 <InfoItem label="Telefone" value={formData.telefone} icon={Phone} />
                 <InfoItem label="Contato de Emergência" value={formData.nome_contato_emergencia} icon={User} />
                 <InfoItem label="Telefone de Emergência" value={formData.contato_emergencia} icon={Phone} />
                 <InfoItem label="Parentesco" value={formData.parentesco_contato} icon={Shield} />
-                <InfoItem 
-                  label="Como conheceu o Templo" 
+                <InfoItem
+                  label="Como conheceu"
                   value={
                     formData.como_conheceu === 'indicacao' ? `Indicação${formData.indicado_por ? ` de ${formData.indicado_por}` : ''}` :
                     formData.como_conheceu === 'instagram' ? 'Instagram' :
@@ -1033,85 +1022,44 @@ const Anamnese: React.FC = () => {
                     formData.como_conheceu === 'youtube' ? 'YouTube' :
                     formData.como_conheceu === 'evento' ? 'Evento/Palestra' :
                     formData.como_conheceu || '-'
-                  } 
-                  icon={Users} 
+                  }
+                  icon={Users}
                 />
-                {/* Botão para editar indicação se não preencheu */}
-                {(!formData.como_conheceu || (formData.como_conheceu === 'indicacao' && !formData.indicado_por)) && (
-                  <div className="pt-2 mt-2 border-t border-border">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => {
-                        setViewMode('edit');
-                        setStep(1);
-                      }}
-                      className="gap-2 text-primary"
-                    >
-                      <Users className="w-4 h-4" />
-                      {!formData.como_conheceu ? 'Informar como conheceu' : 'Informar quem indicou'}
-                    </Button>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
+              </div>
+            </AccordionSection>
 
-            {/* Fotos do Documento */}
             {(documentoFrenteUrl || documentoVersoUrl) && (
-              <Card>
-                <CardHeader className="pb-2">
-                  <CardTitle className="font-display text-lg flex items-center gap-2">
-                    <IdCard className="w-5 h-5 text-primary" />
-                    Fotos do Documento
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-2 gap-3">
-                    {documentoFrenteUrl && (
-                      <div className="space-y-1">
-                        <p className="text-xs text-muted-foreground font-medium">Frente</p>
-                        <div className="rounded-lg overflow-hidden border border-border bg-muted aspect-[3/2]">
-                          <img
-                            src={documentoFrenteUrl}
-                            alt="Documento frente"
-                            className="w-full h-full object-cover"
-                          />
-                        </div>
+              <AccordionSection id="documento" icon={IdCard} title="Fotos do Documento" iconBg="bg-slate-100 dark:bg-slate-800/60" iconColor="text-slate-600 dark:text-slate-400">
+                <div className="pt-3 grid grid-cols-2 gap-3">
+                  {documentoFrenteUrl && (
+                    <div className="space-y-1">
+                      <p className="text-xs text-muted-foreground font-medium">Frente</p>
+                      <div className="rounded-lg overflow-hidden border bg-muted aspect-[3/2]">
+                        <img src={documentoFrenteUrl} alt="Frente" className="w-full h-full object-cover" />
                       </div>
-                    )}
-                    {documentoVersoUrl && (
-                      <div className="space-y-1">
-                        <p className="text-xs text-muted-foreground font-medium">Verso</p>
-                        <div className="rounded-lg overflow-hidden border border-border bg-muted aspect-[3/2]">
-                          <img
-                            src={documentoVersoUrl}
-                            alt="Documento verso"
-                            className="w-full h-full object-cover"
-                          />
-                        </div>
+                    </div>
+                  )}
+                  {documentoVersoUrl && (
+                    <div className="space-y-1">
+                      <p className="text-xs text-muted-foreground font-medium">Verso</p>
+                      <div className="rounded-lg overflow-hidden border bg-muted aspect-[3/2]">
+                        <img src={documentoVersoUrl} alt="Verso" className="w-full h-full object-cover" />
                       </div>
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
+                    </div>
+                  )}
+                </div>
+              </AccordionSection>
             )}
 
-            {/* Saúde */}
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="font-display text-lg flex items-center gap-2">
-                  <Heart className="w-5 h-5 text-primary" />
-                  Histórico de Saúde
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
+            <AccordionSection id="saude" icon={Heart} title="Histórico de Saúde" iconBg="bg-red-100 dark:bg-red-950/40" iconColor="text-red-600 dark:text-red-400">
+              <div className="pt-3">
                 {formData.sem_doencas ? (
-                  <p className="text-green-600 dark:text-green-400 font-medium py-2">
-                    <Check className="w-4 h-4 inline mr-2" />
+                  <p className="text-green-600 dark:text-green-400 font-medium text-sm py-1 flex items-center gap-2">
+                    <CheckCircle2 className="w-4 h-4" />
                     Não possui doenças ou condições de saúde
                   </p>
                 ) : (
-                  <>
+                  <div>
                     {formData.pressao_alta && <InfoItem label="Pressão Alta" value={true} />}
                     {formData.problemas_cardiacos && <InfoItem label="Problemas Cardíacos" value={true} />}
                     {formData.historico_convulsivo && <InfoItem label="Histórico de Convulsões" value={true} />}
@@ -1122,48 +1070,34 @@ const Anamnese: React.FC = () => {
                     {formData.transtorno_psiquiatrico && <InfoItem label="Transtorno Psiquiátrico" value={formData.transtorno_psiquiatrico_qual || 'Sim'} />}
                     {formData.gestante_lactante && <InfoItem label="Gestante ou Lactante" value={true} />}
                     {formData.uso_antidepressivos && <InfoItem label="Uso de Antidepressivos" value={formData.tipo_antidepressivo || 'Sim'} />}
-                  </>
+                  </div>
                 )}
-                <InfoItem label="Medicamentos em uso" value={formData.uso_medicamentos} />
+                <InfoItem label="Outros medicamentos" value={formData.uso_medicamentos} />
                 <InfoItem label="Alergias" value={formData.alergias} />
                 <InfoItem label="Cirurgias recentes" value={formData.cirurgias_recentes} />
-              </CardContent>
-            </Card>
+              </div>
+            </AccordionSection>
 
-            {/* Substâncias */}
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="font-display text-lg flex items-center gap-2">
-                  <Pill className="w-5 h-5 text-primary" />
-                  Uso de Substâncias
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
+            <AccordionSection id="substancias" icon={Pill} title="Uso de Substâncias" iconBg="bg-orange-100 dark:bg-orange-950/40" iconColor="text-orange-600 dark:text-orange-400">
+              <div className="pt-3">
                 {formData.sem_vicios ? (
-                  <p className="text-green-600 dark:text-green-400 font-medium py-2">
-                    <Check className="w-4 h-4 inline mr-2" />
+                  <p className="text-green-600 dark:text-green-400 font-medium text-sm py-1 flex items-center gap-2">
+                    <CheckCircle2 className="w-4 h-4" />
                     Não faz uso de substâncias
                   </p>
                 ) : (
-                  <>
+                  <div>
                     {formData.tabaco && <InfoItem label="Tabaco" value={formData.tabaco_frequencia || 'Sim'} />}
                     {formData.alcool && <InfoItem label="Álcool" value={formData.alcool_frequencia || 'Sim'} />}
                     {formData.cannabis && <InfoItem label="Cannabis" value={true} />}
-                    {formData.outras_substancias && <InfoItem label="Outras substâncias" value={formData.outras_substancias} />}
-                  </>
+                    {formData.outras_substancias && <InfoItem label="Outras" value={formData.outras_substancias} />}
+                  </div>
                 )}
-              </CardContent>
-            </Card>
+              </div>
+            </AccordionSection>
 
-            {/* Experiência */}
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="font-display text-lg flex items-center gap-2">
-                  <Sparkles className="w-5 h-5 text-primary" />
-                  Experiência Espiritual
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
+            <AccordionSection id="experiencia" icon={Sparkles} title="Experiência Espiritual" iconBg="bg-purple-100 dark:bg-purple-950/40" iconColor="text-purple-600 dark:text-purple-400">
+              <div className="pt-3">
                 <InfoItem label="Já participou de cerimônias" value={formData.ja_consagrou} />
                 {formData.ja_consagrou && (
                   <>
@@ -1173,63 +1107,42 @@ const Anamnese: React.FC = () => {
                 )}
                 <InfoItem label="Intenção" value={formData.intencao} />
                 <InfoItem label="Restrições alimentares" value={formData.restricao_alimentar} />
-              </CardContent>
-            </Card>
+              </div>
+            </AccordionSection>
 
-            {/* Consentimentos */}
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="font-display text-lg flex items-center gap-2">
-                  <CheckCircle2 className="w-5 h-5 text-primary" />
-                  Termos de Consentimento
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="space-y-2">
-                  <div className="flex items-center gap-2 text-green-600 dark:text-green-400">
-                    <Check className="w-4 h-4" />
-                    <span>Contraindicações aceitas</span>
+            <AccordionSection id="termos" icon={CheckCircle2} title="Termos e Assinatura" iconBg="bg-green-100 dark:bg-green-950/40" iconColor="text-green-600 dark:text-green-400">
+              <div className="pt-3 space-y-2">
+                {[
+                  { key: 'aceite_contraindicacoes', label: 'Contraindicações aceitas', value: formData.aceite_contraindicacoes },
+                  { key: 'aceite_livre_vontade', label: 'Livre vontade confirmada', value: formData.aceite_livre_vontade },
+                  { key: 'aceite_termo_responsabilidade', label: 'Termo de responsabilidade aceito', value: formData.aceite_termo_responsabilidade },
+                  { key: 'aceite_permanencia', label: 'Permanência no templo aceita', value: formData.aceite_permanencia },
+                ].map(item => (
+                  <div key={item.key} className={cn('flex items-center gap-2 text-sm', item.value ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400')}>
+                    {item.value ? <CheckCircle2 className="w-4 h-4 shrink-0" /> : <X className="w-4 h-4 shrink-0" />}
+                    <span>{item.label}</span>
                   </div>
-                  <div className="flex items-center gap-2 text-green-600 dark:text-green-400">
-                    <Check className="w-4 h-4" />
-                    <span>Livre vontade confirmada</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-green-600 dark:text-green-400">
-                    <Check className="w-4 h-4" />
-                    <span>Termo de responsabilidade aceito</span>
-                  </div>
-                  <div className={`flex items-center gap-2 ${formData.aceite_permanencia ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
-                    {formData.aceite_permanencia ? <Check className="w-4 h-4" /> : <X className="w-4 h-4" />}
-                    <span>Permanência no templo {formData.aceite_permanencia ? 'aceita' : 'não aceita'}</span>
-                  </div>
-                  <div className={`flex items-center gap-2 ${formData.aceite_uso_imagem ? 'text-green-600 dark:text-green-400' : 'text-amber-600 dark:text-amber-400'}`}>
-                    {formData.aceite_uso_imagem ? <Check className="w-4 h-4" /> : <X className="w-4 h-4" />}
-                    <span>Uso de imagem {formData.aceite_uso_imagem ? 'autorizado' : 'não autorizado'}</span>
-                  </div>
+                ))}
+                <div className={cn('flex items-center gap-2 text-sm', formData.aceite_uso_imagem ? 'text-amber-600 dark:text-amber-400' : 'text-muted-foreground')}>
+                  <Camera className="w-4 h-4 shrink-0" />
+                  <span>Uso de imagem {formData.aceite_uso_imagem ? 'autorizado' : 'não autorizado'}</span>
                 </div>
-
                 {formData.assinatura && (
-                  <div className="pt-6 border-t border-border">
-                    <p className="text-xs text-muted-foreground mb-2">Assinado digitalmente em:</p>
-                    <div className="bg-white rounded-lg border p-4 flex flex-col items-center">
-                      <img 
-                        src={formData.assinatura} 
-                        alt="Assinatura" 
-                        className="max-h-24 object-contain"
-                      />
-                      <div className="mt-2 w-full border-t border-slate-200 pt-2 text-center">
-                        <p className="text-[10px] text-slate-500 font-mono uppercase">
-                          ID: {user?.id.substring(0, 8)} | Hash: {formData.assinatura.substring(formData.assinatura.length - 12)}
-                        </p>
-                      </div>
+                  <div className="pt-4 border-t border-border mt-2">
+                    <p className="text-xs text-muted-foreground mb-2">Assinado digitalmente:</p>
+                    <div className="bg-white rounded-lg border p-3 flex flex-col items-center">
+                      <img src={formData.assinatura} alt="Assinatura" className="max-h-20 object-contain" />
+                      <p className="text-[10px] text-slate-400 font-mono uppercase mt-2 border-t border-slate-100 pt-2 w-full text-center">
+                        ID: {user?.id.substring(0, 8)} | {new Date().toLocaleDateString('pt-BR')}
+                      </p>
                     </div>
                   </div>
                 )}
-              </CardContent>
-            </Card>
+              </div>
+            </AccordionSection>
+
           </div>
         </div>
-      </div>
       </>
     );
   }
@@ -1361,14 +1274,30 @@ const Anamnese: React.FC = () => {
           </div>
         )}
 
+        {/* Progress bar */}
+        <div className="mb-5">
+          <div className="flex items-center justify-between mb-1.5">
+            <span className="text-xs text-muted-foreground">Progresso</span>
+            <span className="text-xs font-semibold text-primary">{calculateProgress()}%</span>
+          </div>
+          <div className="h-1.5 bg-muted rounded-full overflow-hidden">
+            <div
+              className="h-full bg-gradient-to-r from-primary/70 to-primary rounded-full transition-all duration-500"
+              style={{ width: `${calculateProgress()}%` }}
+            />
+          </div>
+        </div>
+
         {/* Form Card */}
         <Card key={step} className={stepDirection === 'forward' ? 'animate-slide-in-right' : 'animate-slide-in-left'}>
           {/* Step 1: Dados Pessoais */}
           {step === 1 && (
             <>
               <CardHeader>
-                <CardTitle className="font-display text-xl flex items-center gap-2">
-                  <User className="w-5 h-5 text-primary" />
+                <CardTitle className="font-display text-xl flex items-center gap-3">
+                  <div className="w-9 h-9 rounded-xl bg-blue-100 dark:bg-blue-950/40 flex items-center justify-center shrink-0">
+                    <User className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                  </div>
                   Dados Pessoais
                 </CardTitle>
                 <CardDescription className="text-xs leading-relaxed pt-1">
@@ -1721,8 +1650,10 @@ const Anamnese: React.FC = () => {
           {step === 2 && (
             <>
               <CardHeader>
-                <CardTitle className="font-display text-xl flex items-center gap-2">
-                  <Heart className="w-5 h-5 text-primary" />
+                <CardTitle className="font-display text-xl flex items-center gap-3">
+                  <div className="w-9 h-9 rounded-xl bg-red-100 dark:bg-red-950/40 flex items-center justify-center shrink-0">
+                    <Heart className="w-5 h-5 text-red-600 dark:text-red-400" />
+                  </div>
                   Histórico de Saúde
                 </CardTitle>
                 <CardDescription className="text-xs leading-relaxed pt-1">
@@ -1783,18 +1714,18 @@ const Anamnese: React.FC = () => {
                   <p className="text-xs text-muted-foreground font-medium uppercase tracking-wide">
                     {formData.sem_doencas ? 'Nenhuma condição selecionada' : 'Selecione as condições que se aplicam a você:'}
                   </p>
-                  <div className={`grid grid-cols-1 gap-2 transition-opacity ${formData.sem_doencas ? 'opacity-40 pointer-events-none' : ''}`}>
+                  <div className={`grid grid-cols-2 gap-2 transition-opacity ${formData.sem_doencas ? 'opacity-40 pointer-events-none' : ''}`}>
                     {[
                       { id: 'pressao_alta', label: 'Pressão Alta', sub: 'Hipertensão', warning: true },
                       { id: 'problemas_cardiacos', label: 'Prob. Cardíacos', sub: null, warning: true },
-                      { id: 'historico_convulsivo', label: 'Histórico de Convulsões', sub: null, warning: true },
+                      { id: 'historico_convulsivo', label: 'Convulsões', sub: 'Histórico', warning: true },
                       { id: 'diabetes', label: 'Diabetes', sub: null, warning: false },
                       { id: 'problemas_respiratorios', label: 'Prob. Respiratórios', sub: 'Asma, etc.', warning: false },
                       { id: 'problemas_renais', label: 'Prob. Renais', sub: null, warning: false },
                       { id: 'problemas_hepaticos', label: 'Prob. Hepáticos', sub: 'Fígado', warning: false },
-                      { id: 'transtorno_psiquiatrico', label: 'Transtorno Psiquiátrico', sub: null, warning: true },
-                      { id: 'gestante_lactante', label: 'Gestante ou Lactante', sub: null, warning: true },
-                      { id: 'uso_antidepressivos', label: 'Uso de Antidepressivos', sub: null, warning: true },
+                      { id: 'transtorno_psiquiatrico', label: 'Transtorno Psiq.', sub: null, warning: true },
+                      { id: 'gestante_lactante', label: 'Gestante/Lactante', sub: null, warning: true },
+                      { id: 'uso_antidepressivos', label: 'Antidepressivos', sub: 'Em uso', warning: true },
                     ].map((item) => {
                       const isChecked = formData[item.id as keyof AnamneseFormData] as boolean;
                       return (
@@ -1805,7 +1736,7 @@ const Anamnese: React.FC = () => {
                             updateField(item.id as keyof AnamneseFormData, !isChecked);
                             if (!isChecked) updateField('sem_doencas', false);
                           }}
-                          className={`flex items-center gap-3 p-3 rounded-xl border-2 text-left transition-all ${
+                          className={`flex items-start gap-2 p-2.5 rounded-xl border-2 text-left transition-all ${
                             isChecked
                               ? item.warning
                                 ? 'bg-destructive/10 border-destructive'
@@ -1813,26 +1744,20 @@ const Anamnese: React.FC = () => {
                               : 'bg-background border-border hover:border-primary/30'
                           }`}
                         >
-                          <div className={`w-5 h-5 rounded-full border-2 flex-shrink-0 flex items-center justify-center transition-all ${
+                          <div className={`w-4 h-4 rounded-full border-2 flex-shrink-0 flex items-center justify-center mt-0.5 transition-all ${
                             isChecked
                               ? item.warning ? 'bg-destructive border-destructive' : 'bg-primary border-primary'
                               : 'border-muted-foreground/40'
                           }`}>
-                            {isChecked && <Check className="w-3 h-3 text-white" />}
+                            {isChecked && <Check className="w-2.5 h-2.5 text-white" />}
                           </div>
                           <div className="flex-1 min-w-0">
-                            <span className={`text-sm font-medium ${isChecked && item.warning ? 'text-destructive' : isChecked ? 'text-primary' : 'text-foreground'}`}>
+                            <span className={`text-xs font-medium leading-tight block ${isChecked && item.warning ? 'text-destructive' : isChecked ? 'text-primary' : 'text-foreground'}`}>
                               {item.label}
                             </span>
-                            {item.sub && <span className="text-xs text-muted-foreground ml-1">({item.sub})</span>}
+                            {item.sub && <span className="text-[10px] text-muted-foreground">{item.sub}</span>}
+                            {item.warning && <span className={`text-[9px] font-medium block mt-0.5 ${isChecked ? 'text-destructive/80' : 'text-muted-foreground/50'}`}>⚠ atenção</span>}
                           </div>
-                          {item.warning && (
-                            <span className={`text-[10px] font-medium px-1.5 py-0.5 rounded-full flex-shrink-0 ${
-                              isChecked ? 'bg-destructive/20 text-destructive' : 'bg-muted text-muted-foreground'
-                            }`}>
-                              ⚠ contraindicação
-                            </span>
-                          )}
                         </button>
                       );
                     })}
@@ -1900,8 +1825,10 @@ const Anamnese: React.FC = () => {
           {step === 3 && (
             <>
               <CardHeader>
-                <CardTitle className="font-display text-xl flex items-center gap-2">
-                  <Pill className="w-5 h-5 text-primary" />
+                <CardTitle className="font-display text-xl flex items-center gap-3">
+                  <div className="w-9 h-9 rounded-xl bg-orange-100 dark:bg-orange-950/40 flex items-center justify-center shrink-0">
+                    <Pill className="w-5 h-5 text-orange-600 dark:text-orange-400" />
+                  </div>
                   Uso de Substâncias
                 </CardTitle>
                 <CardDescription className="text-xs leading-relaxed pt-1">
@@ -1945,9 +1872,9 @@ const Anamnese: React.FC = () => {
                   <p className="text-xs text-muted-foreground font-medium uppercase tracking-wide">
                     {formData.sem_vicios ? 'Nenhuma substância selecionada' : 'Selecione as que se aplicam:'}
                   </p>
-                  <div className={`grid grid-cols-1 gap-2 transition-opacity ${formData.sem_vicios ? 'opacity-40 pointer-events-none' : ''}`}>
+                  <div className={`grid grid-cols-2 gap-2 transition-opacity ${formData.sem_vicios ? 'opacity-40 pointer-events-none' : ''}`}>
                     {[
-                      { id: 'tabaco', label: 'Tabaco', sub: 'cigarro, charuto, etc.' },
+                      { id: 'tabaco', label: 'Tabaco', sub: 'cigarro, charuto...' },
                       { id: 'alcool', label: 'Bebidas Alcoólicas', sub: null },
                       { id: 'cannabis', label: 'Cannabis', sub: 'maconha' },
                     ].map((item) => {
@@ -1962,22 +1889,22 @@ const Anamnese: React.FC = () => {
                             if (isChecked && item.id === 'tabaco') updateField('tabaco_frequencia', '');
                             if (isChecked && item.id === 'alcool') updateField('alcool_frequencia', '');
                           }}
-                          className={`flex items-center gap-3 p-3 rounded-xl border-2 text-left transition-all ${
+                          className={`flex items-start gap-2 p-2.5 rounded-xl border-2 text-left transition-all ${
                             isChecked
                               ? 'bg-primary/10 border-primary'
                               : 'bg-background border-border hover:border-primary/30'
                           }`}
                         >
-                          <div className={`w-5 h-5 rounded-full border-2 flex-shrink-0 flex items-center justify-center transition-all ${
+                          <div className={`w-4 h-4 rounded-full border-2 flex-shrink-0 flex items-center justify-center mt-0.5 transition-all ${
                             isChecked ? 'bg-primary border-primary' : 'border-muted-foreground/40'
                           }`}>
-                            {isChecked && <Check className="w-3 h-3 text-white" />}
+                            {isChecked && <Check className="w-2.5 h-2.5 text-white" />}
                           </div>
-                          <div className="flex-1">
-                            <span className={`text-sm font-medium ${isChecked ? 'text-primary' : 'text-foreground'}`}>
+                          <div className="flex-1 min-w-0">
+                            <span className={`text-xs font-medium leading-tight block ${isChecked ? 'text-primary' : 'text-foreground'}`}>
                               {item.label}
                             </span>
-                            {item.sub && <span className="text-xs text-muted-foreground ml-1">({item.sub})</span>}
+                            {item.sub && <span className="text-[10px] text-muted-foreground">{item.sub}</span>}
                           </div>
                         </button>
                       );
@@ -2025,32 +1952,46 @@ const Anamnese: React.FC = () => {
           {step === 4 && (
             <>
               <CardHeader>
-                <CardTitle className="font-display text-xl flex items-center gap-2">
-                  <Sparkles className="w-5 h-5 text-primary" />
+                <CardTitle className="font-display text-xl flex items-center gap-3">
+                  <div className="w-9 h-9 rounded-xl bg-purple-100 dark:bg-purple-950/40 flex items-center justify-center shrink-0">
+                    <Sparkles className="w-5 h-5 text-purple-600 dark:text-purple-400" />
+                  </div>
                   Experiência Espiritual
                 </CardTitle>
                 <CardDescription className="text-xs leading-relaxed pt-1">Conhecer sua jornada nos ajuda a oferecer o suporte certo antes, durante e após a cerimônia.</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="flex items-center space-x-3">
-                  <Checkbox
-                    id="ja_consagrou"
-                    checked={formData.ja_consagrou}
-                    onCheckedChange={(checked) => {
-                      updateField('ja_consagrou', checked as boolean);
-                      if (!checked) {
-                        updateField('quantas_vezes_consagrou', '');
-                        updateField('como_foi_experiencia', '');
-                      }
-                    }}
-                  />
-                  <Label htmlFor="ja_consagrou" className="cursor-pointer">
-                    Já participei de cerimônias com Ayahuasca ou outras medicinas sagradas
-                  </Label>
-                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const newVal = !formData.ja_consagrou;
+                    updateField('ja_consagrou', newVal);
+                    if (!newVal) {
+                      updateField('quantas_vezes_consagrou', '');
+                      updateField('como_foi_experiencia', '');
+                    }
+                  }}
+                  className={`w-full flex items-center gap-3 p-4 rounded-xl border-2 text-left transition-all ${
+                    formData.ja_consagrou
+                      ? 'bg-purple-50 dark:bg-purple-950/30 border-purple-500'
+                      : 'bg-background border-border hover:border-purple-300 text-muted-foreground'
+                  }`}
+                >
+                  <div className={`w-5 h-5 rounded-full border-2 flex-shrink-0 flex items-center justify-center transition-all ${
+                    formData.ja_consagrou ? 'bg-purple-500 border-purple-500' : 'border-muted-foreground'
+                  }`}>
+                    {formData.ja_consagrou && <Check className="w-3 h-3 text-white" />}
+                  </div>
+                  <div>
+                    <p className={`font-medium text-sm ${formData.ja_consagrou ? 'text-purple-700 dark:text-purple-300' : ''}`}>
+                      Já participei de cerimônias
+                    </p>
+                    <p className="text-xs text-muted-foreground">Ayahuasca ou outras medicinas sagradas</p>
+                  </div>
+                </button>
 
                 {formData.ja_consagrou && (
-                  <div className="space-y-4 ml-7 animate-fade-in">
+                  <div className="space-y-4 border-l-2 border-purple-200 dark:border-purple-800 pl-4 ml-2 animate-fade-in">
                     <div className="space-y-2">
                       <Label htmlFor="quantas_vezes">Quantas vezes aproximadamente?</Label>
                       <Input
@@ -2109,8 +2050,10 @@ const Anamnese: React.FC = () => {
           {step === 5 && (
             <>
               <CardHeader>
-                <CardTitle className="font-display text-xl flex items-center gap-2">
-                  <CheckCircle2 className="w-5 h-5 text-primary" />
+                <CardTitle className="font-display text-xl flex items-center gap-3">
+                  <div className="w-9 h-9 rounded-xl bg-green-100 dark:bg-green-950/40 flex items-center justify-center shrink-0">
+                    <CheckCircle2 className="w-5 h-5 text-green-600 dark:text-green-400" />
+                  </div>
                   Termos e Consentimento
                 </CardTitle>
                 <CardDescription className="text-xs leading-relaxed pt-1">
@@ -2177,19 +2120,19 @@ const Anamnese: React.FC = () => {
                         onClick={() => updateField(term.field, !isChecked)}
                         className={`w-full flex items-start gap-3 p-4 rounded-xl border-2 text-left transition-all ${
                           isChecked
-                            ? 'bg-primary/8 border-primary'
+                            ? 'bg-green-50/80 dark:bg-green-950/20 border-green-500'
                             : term.error
                             ? 'border-destructive bg-destructive/5'
-                            : 'border-border hover:border-primary/40 bg-background'
+                            : 'border-border hover:border-green-300 bg-background'
                         }`}
                       >
                         <div className={`mt-0.5 w-5 h-5 rounded-full border-2 flex-shrink-0 flex items-center justify-center transition-all ${
-                          isChecked ? 'bg-primary border-primary' : term.error ? 'border-destructive' : 'border-muted-foreground/40'
+                          isChecked ? 'bg-green-500 border-green-500' : term.error ? 'border-destructive' : 'border-muted-foreground/40'
                         }`}>
                           {isChecked && <Check className="w-3 h-3 text-white" />}
                         </div>
                         <div className="flex-1 min-w-0">
-                          <p className={`text-sm font-semibold mb-0.5 flex items-center gap-1.5 ${isChecked ? 'text-primary' : 'text-foreground'}`}>
+                          <p className={`text-sm font-semibold mb-0.5 flex items-center gap-1.5 ${isChecked ? 'text-green-700 dark:text-green-400' : 'text-foreground'}`}>
                             <Icon className="w-3.5 h-3.5 flex-shrink-0" />
                             {term.title}
                           </p>
@@ -2235,8 +2178,10 @@ const Anamnese: React.FC = () => {
           {step === 6 && (
             <>
               <CardHeader>
-                <CardTitle className="font-display text-xl flex items-center gap-2">
-                  <CheckCircle2 className="w-5 h-5 text-primary" />
+                <CardTitle className="font-display text-xl flex items-center gap-3">
+                  <div className="w-9 h-9 rounded-xl bg-emerald-100 dark:bg-emerald-950/40 flex items-center justify-center shrink-0">
+                    <CheckCircle2 className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+                  </div>
                   Confirmação e Assinatura
                 </CardTitle>
                 <CardDescription className="text-xs leading-relaxed pt-1">
