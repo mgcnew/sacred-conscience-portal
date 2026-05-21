@@ -189,11 +189,7 @@ const Index: React.FC = () => {
       {/* Main Content */}
       <div className="container max-w-6xl mx-auto px-4 py-5">
 
-        {/* Mobile greeting */}
-        <div className="sm:hidden mb-5">
-          <p className="text-xs text-muted-foreground">{getGreeting()},</p>
-          <h1 className="text-xl font-bold">{firstName ? `${firstName} 👋` : 'Bem-vindo 👋'}</h1>
-        </div>
+
 
         {/* Mobile Quick Actions */}
         <div className="lg:hidden mb-6">
