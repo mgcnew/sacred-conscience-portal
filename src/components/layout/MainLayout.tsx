@@ -4,15 +4,15 @@ import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { LogOut, User, Loader2, Heart } from 'lucide-react';
+import { User, Loader2, Heart } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { ModeToggle } from '@/components/mode-toggle';
 import { ROUTES } from '@/constants';
 import NotificationBell from '@/components/layout/NotificationBell';
 import Sidebar from '@/components/layout/Sidebar';
+import BottomNav from '@/components/layout/BottomNav';
 import { WelcomeModal, InstallPWAPrompt, OnboardingTutorial } from '@/components/shared';
 import { ScrollToTop } from '@/components/ui/scroll-to-top';
-import { getAllNavItems } from '@/constants/navigation';
 import { useUserAnamnese } from '@/hooks/queries/useProfiles';
 import { useOnboarding } from '@/hooks/useOnboarding';
 import { useCheckPermissao } from '@/components/auth/PermissionGate';
@@ -24,7 +24,6 @@ const MainLayout: React.FC = () => {
   const { isSuperAdmin } = useCheckPermissao();
   const navigate = useNavigate();
   const location = useLocation();
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false);
   const [userName, setUserName] = React.useState<string>('');
   const [userAvatar, setUserAvatar] = React.useState<string | null>(null);
   const [sidebarCollapsed, setSidebarCollapsed] = React.useState(() => {
@@ -129,11 +128,6 @@ const MainLayout: React.FC = () => {
     fetchAndUpdateProfile();
   }, [user?.id]);
 
-  // Fechar menu ao mudar de rota
-  React.useEffect(() => {
-    setIsMobileMenuOpen(false);
-  }, [location.pathname]);
-
   const handleSignOut = async () => {
     await signOut();
     navigate(ROUTES.AUTH);
@@ -146,8 +140,6 @@ const MainLayout: React.FC = () => {
       return newValue;
     });
   };
-
-  const allNavItems = getAllNavItems(isAdmin, isSuperAdmin());
 
   // Se está carregando a verificação de anamnese, mostrar loading
   if (isLoadingAnamnese && !isAnamnesePage) {
@@ -206,7 +198,7 @@ const MainLayout: React.FC = () => {
               </div>
             </div>
 
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1">
               <Button
                 variant="ghost"
                 size="icon"
@@ -218,104 +210,17 @@ const MainLayout: React.FC = () => {
               </Button>
               <NotificationBell />
               <ModeToggle />
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                className="relative w-10 h-10 p-2"
-                aria-label={isMobileMenuOpen ? "Fechar menu" : "Abrir menu"}
-                aria-expanded={isMobileMenuOpen}
-              >
-                <span className="sr-only">{isMobileMenuOpen ? "Fechar menu" : "Abrir menu"}</span>
-                <div className="relative w-5 h-5">
-                  <span
-                    className={cn(
-                      "absolute left-0 w-5 h-0.5 bg-current transition-transform duration-200",
-                      isMobileMenuOpen ? "top-[9px] rotate-45" : "top-1 rotate-0"
-                    )}
-                  />
-                  <span
-                    className={cn(
-                      "absolute left-0 top-[9px] w-5 h-0.5 bg-current transition-opacity duration-150",
-                      isMobileMenuOpen ? "opacity-0" : "opacity-100"
-                    )}
-                  />
-                  <span
-                    className={cn(
-                      "absolute left-0 w-5 h-0.5 bg-current transition-transform duration-200",
-                      isMobileMenuOpen ? "top-[9px] -rotate-45" : "top-[17px] rotate-0"
-                    )}
-                  />
-                </div>
-              </Button>
             </div>
           </div>
-
-          {/* Mobile Navigation Overlay - sem backdrop-blur para melhor performance */}
-          <div
-            className={cn(
-              "fixed inset-0 top-20 bg-black/30 transition-opacity duration-200 z-40",
-              isMobileMenuOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
-            )}
-            onClick={() => setIsMobileMenuOpen(false)}
-            aria-hidden="true"
-          />
-
-          {/* Mobile Navigation Menu - animação simplificada */}
-          <nav
-            className={cn(
-              "absolute top-full left-0 right-0 mt-2 mx-0 rounded-xl bg-background border border-border/50 shadow-lg",
-              "transition-[transform,opacity] duration-200 ease-out will-change-transform",
-              isMobileMenuOpen 
-                ? "translate-y-0 opacity-100" 
-                : "-translate-y-2 opacity-0 pointer-events-none"
-            )}
-            role="navigation"
-            aria-label="Menu principal mobile"
-          >
-            <div className="py-3 px-4 flex flex-col gap-1 max-h-[calc(100vh-8rem)] overflow-y-auto scrollbar-none">
-              {allNavItems.map((item) => {
-                const isActive = location.pathname === item.path;
-                const isHighlight = item.highlight;
-                return (
-                  <Button
-                    key={item.path}
-                    variant="ghost"
-                    className={cn(
-                      "justify-start gap-3 h-12 text-base",
-                      isActive 
-                        ? "bg-primary/10 text-primary font-medium" 
-                        : isHighlight
-                          ? "text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/30"
-                          : "text-muted-foreground hover:text-foreground hover:bg-accent"
-                    )}
-                    onClick={() => {
-                      navigate(item.path);
-                      setIsMobileMenuOpen(false);
-                    }}
-                  >
-                    <item.icon className={cn(
-                      "w-5 h-5", 
-                      isActive && "text-primary",
-                      isHighlight && !isActive && "text-red-500"
-                    )} />
-                    {item.label}
-                  </Button>
-                );
-              })}
-              <div className="h-px bg-border my-2" />
-              <Button
-                variant="ghost"
-                className="justify-start gap-3 h-12 text-base text-muted-foreground hover:text-destructive hover:bg-destructive/10"
-                onClick={handleSignOut}
-              >
-                <LogOut className="w-5 h-5" />
-                Sair
-              </Button>
-            </div>
-          </nav>
         </header>
       </div>
+
+      {/* Mobile Bottom Nav */}
+      <BottomNav
+        isAdmin={isAdmin}
+        isSuperAdmin={isSuperAdmin()}
+        onSignOut={handleSignOut}
+      />
 
       {/* Desktop Topbar (minimal) */}
       <div className={cn(
@@ -351,6 +256,7 @@ const MainLayout: React.FC = () => {
       <main className={cn(
         "min-h-screen transition-all duration-300",
         "pt-20 lg:pt-14",
+        "pb-24 lg:pb-0",
         sidebarCollapsed ? "lg:pl-16" : "lg:pl-56"
       )}>
         <Outlet />
