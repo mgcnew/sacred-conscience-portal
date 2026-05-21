@@ -255,7 +255,9 @@ const MainLayout: React.FC = () => {
         "pb-24 lg:pb-0",
         sidebarCollapsed ? "lg:pl-16" : "lg:pl-56"
       )}>
-        <Outlet />
+        <div key={location.pathname} className="page-transition">
+          <Outlet />
+        </div>
       </main>
 
       {/* Scroll to Top */}
