@@ -181,7 +181,7 @@ const SobreNos: React.FC = () => {
                 </h2>
                 <p className="text-sm text-primary font-medium mb-2">Mestre de Cerimônia · Guia Espiritual</p>
                 <p className="text-xs text-muted-foreground leading-relaxed max-w-xs">
-                  Quase 50 anos de caminhada espiritual, guardião das tradições ancestrais e dedicado servidor da luz divina.
+                  Quase 50 anos de caminhada espiritual — não em busca de reconhecimento, mas de servir com amor e responsabilidade a cada alma que chega ao templo.
                 </p>
               </div>
             </div>
@@ -206,32 +206,52 @@ const SobreNos: React.FC = () => {
             </div>
           </FadeIn>
 
-          {/* Bio */}
+          {/* Bio — tranquilizador */}
           <FadeIn delay={120}>
             <div className="space-y-4 text-sm md:text-base text-foreground/90 leading-relaxed">
               <p>
-                Com quase <strong>50 anos de caminhada espiritual</strong>, Txai Raimundo é um guardião das tradições ancestrais e um dedicado servidor da luz divina. Sua jornada é marcada pela busca incessante pelo conhecimento sagrado e pelo compromisso de guiar almas em seus processos de cura e transformação.
+                Quando você se sentar em cerimônia com Txai Raimundo, estará ao lado de alguém que já acompanhou centenas de jornadas — as mais tranquilas e as mais intensas. Sua quase <strong>meia século de caminhada espiritual</strong> não é um título, é experiência vivida: noites passadas em vigília, processos que pedem paciência, e um olhar treinado para perceber o que cada pessoa precisa, mesmo quando ela mesma ainda não sabe.
               </p>
               <p>
-                Formado pela <strong>Casa AUYA</strong>, uma das mais respeitadas instituições formadoras de mestres de cerimônia no Brasil, Txai Raimundo traz consigo a sabedoria e os ensinamentos transmitidos por grandes mestres da tradição ayahuasqueira.
+                Formado pela <strong>Casa AUYA</strong>, uma das mais respeitadas escolas de formação de mestres de cerimônia no Brasil, Txai Raimundo aprendeu não apenas os rituais, mas a responsabilidade que cada um deles carrega. Sua condução é pautada por protocolos sérios de segurança e por um profundo respeito pelas tradições que guardam essas medicinas há séculos.
               </p>
               <p>
-                Além de sua formação xamânica, possui <strong>bacharelados em Teologia</strong>, o que lhe confere uma visão ampla e universalista da espiritualidade — acolhendo pessoas de diferentes crenças e tradições, sempre respeitando a individualidade de cada caminhante.
+                Sua formação acadêmica em <strong>Teologia</strong> ampliou ainda mais esse olhar — permitindo que ele acolha pessoas de qualquer crença, sem impor caminhos, reconhecendo que o sagrado tem muitos nomes e que o amor é a linguagem comum a todos eles.
               </p>
             </div>
           </FadeIn>
 
+          {/* Como ele conduz */}
           <FadeIn delay={160}>
-            <div className="rounded-2xl bg-primary/5 border border-primary/15 p-5">
-              <div className="flex items-center gap-2 mb-3">
+            <div className="rounded-2xl border border-border/60 overflow-hidden">
+              <div className="bg-muted/40 px-5 py-3 flex items-center gap-2 border-b border-border/40">
                 <Sparkles className="w-4 h-4 text-primary" />
-                <span className="text-xs font-bold uppercase tracking-wider text-primary">Sua Condução</span>
+                <span className="text-xs font-bold uppercase tracking-wider text-foreground">Como ele conduz</span>
               </div>
-              <p className="text-sm text-foreground/90 leading-relaxed">
-                Marcada pelo <strong>amor, pela firmeza e pela sabedoria</strong>. Em cada cerimônia, Txai Raimundo cria um ambiente seguro e sagrado, onde os participantes podem se entregar ao processo de cura com confiança e entrega. Seu olhar atento e sua presença serena são faróis que iluminam o caminho daqueles que buscam a reconexão com o divino.
+              <div className="p-5 space-y-3 text-sm text-foreground/90 leading-relaxed">
+                <p>
+                  Com <strong>firmeza e ternura</strong> ao mesmo tempo. Ele sabe quando estar presente em silêncio e quando se aproximar com uma palavra ou um canto. Nenhum detalhe passa despercebido — e isso não é uma promessa, é o que quem já participou relata, cerimônia após cerimônia.
+                </p>
+                <p>
+                  Se em algum momento você se sentir perdido, com medo ou precisando de apoio, ele e a equipe estarão lá. Você não será abandonado ao processo — será <strong>guiado através dele</strong>.
+                </p>
+              </div>
+            </div>
+          </FadeIn>
+
+          {/* CTA tranquilizador */}
+          <FadeIn delay={200}>
+            <div className="rounded-2xl bg-gradient-to-br from-primary/10 to-primary/5 border border-primary/15 p-5 text-center">
+              <Heart className="w-5 h-5 text-primary mx-auto mb-2" />
+              <p className="font-display text-sm font-semibold text-foreground mb-2">
+                Você está em boas mãos.
+              </p>
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                Décadas de prática, humildade e cuidado genuíno com cada pessoa — isso é o que você encontrará ao lado de Txai Raimundo. Entre com confiança.
               </p>
             </div>
           </FadeIn>
+
         </div>
       )}
 
