@@ -1,4 +1,4 @@
-import { lazy, Suspense } from "react";
+import { lazy, Suspense, useEffect } from "react";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -57,7 +57,17 @@ const queryClient = new QueryClient({
   },
 });
 
-const App = () => (
+const App = () => {
+  useEffect(() => {
+    const el = document.getElementById('splash-screen');
+    if (!el) return;
+    el.style.opacity = '0';
+    el.style.visibility = 'hidden';
+    const t = setTimeout(() => el.remove(), 600);
+    return () => clearTimeout(t);
+  }, []);
+
+  return (
   <QueryClientProvider client={queryClient}>
     <AuthProvider>
       <NotificationProvider>
@@ -118,6 +128,7 @@ const App = () => (
       </NotificationProvider>
     </AuthProvider>
   </QueryClientProvider>
-);
+  );
+};
 
 export default App;
