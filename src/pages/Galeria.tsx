@@ -38,6 +38,7 @@ import {
 import { formatDateBR } from '@/lib/date-utils';
 import { cn } from '@/lib/utils';
 import type { GaleriaItemComCerimonia } from '@/types';
+import FadeIn from '@/components/ui/FadeIn';
 
 
 // ── Utilitário de compressão ─────────────────────────────────────────────────
@@ -627,6 +628,7 @@ const Galeria: React.FC = () => {
 
       {/* Barra de filtro + agrupamento */}
       {!isLoading && galeria && galeria.length > 0 && (
+        <FadeIn>
         <div className="flex flex-wrap items-center gap-3 mb-6">
           {/* Dropdown de cerimônia */}
           <Select value={filtroCerimonia} onValueChange={setFiltroCerimonia}>
@@ -664,6 +666,7 @@ const Galeria: React.FC = () => {
             </button>
           </div>
         </div>
+        </FadeIn>
       )}
 
       {/* Conteúdo */}
@@ -678,7 +681,8 @@ const Galeria: React.FC = () => {
       ) : itemsFiltrados.length > 0 ? (
         <div className="space-y-8">
           {grupos.map((grupo, gi) => (
-            <div key={gi}>
+            <FadeIn key={gi} delay={gi * 80}>
+            <div>
               {/* Cabeçalho do grupo */}
               <div className="flex items-center gap-2 mb-3">
                 {agrupamento === 'data'
@@ -734,6 +738,7 @@ const Galeria: React.FC = () => {
                 ))}
               </div>
             </div>
+            </FadeIn>
           ))}
         </div>
       ) : (

@@ -21,6 +21,7 @@ import {
 import type { DiarioEntrada, HumorType } from '@/types';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
+import FadeIn from '@/components/ui/FadeIn';
 
 // -------------------------------------------------------
 // Constantes
@@ -260,6 +261,7 @@ const Insights: React.FC = () => {
   return (
     <div className="container max-w-2xl mx-auto px-4 py-6 space-y-8">
       {/* Header */}
+      <FadeIn>
       <div className="flex items-start gap-3">
         <div className="w-10 h-10 rounded-2xl bg-primary/10 flex items-center justify-center shrink-0">
           <Sparkles className="w-5 h-5 text-primary" />
@@ -269,8 +271,10 @@ const Insights: React.FC = () => {
           <p className="text-sm text-muted-foreground">Sua história com as medicinas sagradas</p>
         </div>
       </div>
+      </FadeIn>
 
       {/* ── Estatísticas ── */}
+      <FadeIn delay={80}>
       <section>
         <h2 className="font-display text-base font-semibold text-foreground mb-3">Visão Geral</h2>
         {loadingStats ? (
@@ -319,10 +323,12 @@ const Insights: React.FC = () => {
           </div>
         ) : null}
       </section>
+      </FadeIn>
 
       <OrganicDivider variant="dots" />
 
       {/* ── Timeline ── */}
+      <FadeIn delay={80}>
       <section>
         <h2 className="font-display text-base font-semibold text-foreground mb-4">Histórico de Cerimônias</h2>
         {loadingTimeline ? (
@@ -386,10 +392,12 @@ const Insights: React.FC = () => {
           </div>
         )}
       </section>
+      </FadeIn>
 
       <OrganicDivider variant="dots" />
 
       {/* ── Diário ── */}
+      <FadeIn delay={80}>
       <section>
         <div className="flex items-center justify-between mb-4">
           <h2 className="font-display text-base font-semibold text-foreground">Diário Pessoal</h2>
@@ -451,6 +459,7 @@ const Insights: React.FC = () => {
           </div>
         )}
       </section>
+      </FadeIn>
     </div>
   );
 };

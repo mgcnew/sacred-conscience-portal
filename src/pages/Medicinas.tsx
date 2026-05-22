@@ -4,24 +4,28 @@ import { Leaf } from 'lucide-react';
 import { PageHeader, PageContainer } from '@/components/shared';
 import { MEDICINAS } from '@/constants/medicinas';
 import MedicinaModal from '@/components/medicinas/MedicinaModal';
+import FadeIn from '@/components/ui/FadeIn';
 
 const Medicinas = () => {
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
 
   return (
     <PageContainer maxWidth="2xl">
-      <PageHeader
-        icon={Leaf}
-        title="Estudo das Medicinas"
-        description="Conheça as ferramentas sagradas que utilizamos em nosso templo para cura, expansão e reconexão."
-        centered
-        className="mb-8"
-      />
+      <FadeIn>
+        <PageHeader
+          icon={Leaf}
+          title="Estudo das Medicinas"
+          description="Conheça as ferramentas sagradas que utilizamos em nosso templo para cura, expansão e reconexão."
+          centered
+          className="mb-8"
+        />
+      </FadeIn>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {MEDICINAS.map((medicina, i) => {
           const IconComponent = medicina.icone;
           return (
+            <FadeIn key={medicina.id} delay={i * 60}>
             <Card
               key={medicina.id}
               className="cursor-pointer overflow-hidden h-full flex flex-col hover:shadow-lg transition-all duration-300 group border-border/60"
@@ -59,6 +63,7 @@ const Medicinas = () => {
                 </p>
               </CardContent>
             </Card>
+            </FadeIn>
           );
         })}
       </div>

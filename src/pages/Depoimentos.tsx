@@ -37,14 +37,15 @@ import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { formatDateBR } from '@/lib/date-utils';
 import { cn } from '@/lib/utils';
-import { 
-    useDepoimentosInfinito, 
-    useCerimoniasSelect, 
+import {
+    useDepoimentosInfinito,
+    useCerimoniasSelect,
     useMeusDepoimentosPendentes,
     useRoles,
     useUserRoles,
     getUserRoleFromData
 } from '@/hooks/queries';
+import FadeIn from '@/components/ui/FadeIn';
 
 // Componente para o Card de Depoimento individual
 const TestimonialCard = ({ 
@@ -393,6 +394,7 @@ const Depoimentos: React.FC = () => {
             
             <div className="pt-8 md:pt-12">
                 {/* Header Centralizado e Elegante */}
+                <FadeIn>
                 <PageHeader
                     centered
                     icon={MessageSquareQuote}
@@ -428,6 +430,7 @@ const Depoimentos: React.FC = () => {
                         </div>
                     )}
                 </PageHeader>
+                </FadeIn>
 
                 {/* Aviso de depoimento pendente */}
                 {meusDepoimentos && meusDepoimentos.length > 0 && (
@@ -444,6 +447,7 @@ const Depoimentos: React.FC = () => {
                 )}
 
                 {/* Grid de Depoimentos (Manual Columns para evitar pulos no Masonry) */}
+                <FadeIn delay={80}>
                 <div className="relative">
                     {isLoading ? (
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -552,6 +556,7 @@ const Depoimentos: React.FC = () => {
                         </>
                     )}
                 </div>
+                </FadeIn>
             </div>
         </PageContainer>
     );

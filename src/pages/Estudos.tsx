@@ -45,6 +45,7 @@ import {
 } from '@/hooks/queries/useMateriais';
 import { MaterialCard, MaterialModal, MaterialSkeleton } from '@/components/estudos';
 import type { MaterialComAutor, Material } from '@/types';
+import FadeIn from '@/components/ui/FadeIn';
 
 // Threshold para ativar virtualização (evita overhead em listas pequenas)
 const VIRTUALIZATION_THRESHOLD = 12;
@@ -282,11 +283,13 @@ const Estudos: React.FC = () => {
 
   return (
     <PageContainer maxWidth="xl">
-      <PageHeader
-        icon={BookOpen}
-        title="Estudos"
-        description="Materiais para integração e aprofundamento pós-consagração."
-      />
+      <FadeIn>
+        <PageHeader
+          icon={BookOpen}
+          title="Estudos"
+          description="Materiais para integração e aprofundamento pós-consagração."
+        />
+      </FadeIn>
 
       {/* FAB para criar material */}
       {podeGerenciar && (
@@ -302,6 +305,7 @@ const Estudos: React.FC = () => {
       )}
 
       {/* Filtros */}
+      <FadeIn delay={80}>
       <div className="flex flex-col sm:flex-row gap-3 mb-6">
         <SearchInput
           placeholder="Buscar materiais..."
@@ -324,6 +328,7 @@ const Estudos: React.FC = () => {
           </SelectContent>
         </Select>
       </div>
+      </FadeIn>
 
       {/* Loading com skeletons otimizados */}
       {isLoading && (
@@ -339,6 +344,7 @@ const Estudos: React.FC = () => {
         <>
           {/* Destaques */}
           {destaques.length > 0 && (
+            <FadeIn delay={120}>
             <div className="mb-8">
               <div className="flex items-center gap-2 mb-4">
                 <Sparkles className="w-5 h-5 text-yellow-500" />
@@ -357,6 +363,7 @@ const Estudos: React.FC = () => {
                 ))}
               </div>
             </div>
+            </FadeIn>
           )}
 
           {/* Outros materiais - com virtualização para listas grandes */}
