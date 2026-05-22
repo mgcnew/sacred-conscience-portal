@@ -257,7 +257,7 @@ const MainLayout: React.FC = () => {
         "transition-all duration-300",
         isChatPage ? "h-dvh overflow-hidden" : "min-h-screen",
         "pt-20 lg:pt-14",
-        isChatPage ? "pb-16 lg:pb-0" : "pb-24 lg:pb-0",
+        isChatPage ? "pb-16 lg:pb-0" : "pb-4 lg:pb-0",
         sidebarCollapsed ? "lg:pl-16" : "lg:pl-56"
       )}>
         <div key={location.pathname} className="page-transition">
@@ -271,7 +271,7 @@ const MainLayout: React.FC = () => {
       {/* Footer — oculto em páginas de chat para evitar scroll externo */}
       {!isChatPage && (
         <footer className={cn(
-          "border-t border-border py-8 bg-muted/30 transition-all duration-300",
+          "border-t border-border pt-8 pb-24 lg:pb-8 bg-muted/30 transition-all duration-300",
           sidebarCollapsed ? "lg:pl-16" : "lg:pl-56"
         )}>
           <div className="container flex flex-col items-center gap-3">
