@@ -29,6 +29,13 @@ const GuardiaoVisoes: React.FC = () => {
   const bottomRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
+  // Trava o scroll externo da página enquanto o chat está aberto
+  useEffect(() => {
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => { document.body.style.overflow = prev; };
+  }, []);
+
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, loading]);
@@ -103,7 +110,7 @@ const GuardiaoVisoes: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col h-[calc(100vh-10rem)] lg:h-[calc(100vh-7rem)] max-w-2xl mx-auto px-4">
+    <div className="flex flex-col h-[calc(100dvh-11rem)] lg:h-[calc(100dvh-3.5rem)] max-w-2xl mx-auto px-4">
 
       {/* Header */}
       <div className="flex items-center justify-between py-4 shrink-0">
