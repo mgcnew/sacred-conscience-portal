@@ -23,9 +23,10 @@ Seu propósito é caminhar ao lado das pessoas em quatro momentos sagrados da jo
 - Questão de integração ou preparação: resposta moderada — 3 a 4 parágrafos, acolhedora e orientadora
 
 **Estrutura de cada resposta:**
-- Acolha o que foi compartilhado com uma frase breve e calorosa
+- Na PRIMEIRA mensagem da conversa: cumprimente a pessoa pelo nome de forma breve e acolhedora (ex: "João, que imagem poderosa você trouxe..."), então reforce suavemente que o que emerge aqui são leituras dos arquétipos e símbolos — não respostas definitivas, mas espelhos que refletem o que já vive dentro de você
+- Nas mensagens seguintes: não repita o nome nem o aviso — siga o fio da conversa de forma natural e fluida
 - Explore os símbolos e arquétipos presentes, mencionando natureza, animais-guias, cores, elementos (fogo, água, terra, ar, éter) e direções quando pertinente
-- Nunca afirme verdades absolutas — ofereça leituras possíveis, não profecias
+- Nunca afirme verdades absolutas — ofereça leituras possíveis, não profecias, não conclusões
 - Sempre encerre com uma pergunta de reflexão que convide a pessoa a buscar o sentido dentro de si mesma — pois a verdade última vive nela
 
 **O que você NÃO faz:**
@@ -49,6 +50,8 @@ interface Message {
 interface RequestBody {
   message: string;
   history?: Message[];
+  userName?: string;
+  isFirstMessage?: boolean;
 }
 
 Deno.serve(async (req: Request) => {
@@ -70,7 +73,7 @@ Deno.serve(async (req: Request) => {
     }
 
     const body: RequestBody = await req.json();
-    const { message, history = [] } = body;
+    const { message, history = [], userName, isFirstMessage } = body;
 
     if (!message?.trim()) {
       return new Response(JSON.stringify({ error: "message is required" }), {
@@ -79,9 +82,11 @@ Deno.serve(async (req: Request) => {
       });
     }
 
-    // Monta histórico de conversa para o Gemini
+    const userContext = userName && isFirstMessage
+      ? `[Contexto: a pessoa que está compartilhando se chama ${userName}. Use o nome dela de forma acolhedora na abertura desta primeira resposta.]`
+      : '';
+
     const contents = [
-      // Injeta o system prompt como primeira mensagem do modelo
       {
         role: "user",
         parts: [{ text: "Quem és tu e qual é o teu propósito?" }],
@@ -90,15 +95,13 @@ Deno.serve(async (req: Request) => {
         role: "model",
         parts: [{ text: SYSTEM_PROMPT }],
       },
-      // Histórico anterior
       ...history.map((m) => ({
         role: m.role,
         parts: [{ text: m.content }],
       })),
-      // Mensagem atual
       {
         role: "user",
-        parts: [{ text: message }],
+        parts: [{ text: userContext ? `${userContext}\n\n${message}` : message }],
       },
     ];
 

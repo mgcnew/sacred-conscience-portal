@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Eye, Send, Sparkles, RotateCcw, ChevronDown } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
 import { cn } from '@/lib/utils';
 
 interface Message {
@@ -22,12 +23,29 @@ const SUGGESTIONS = [
 ];
 
 const GuardiaoVisoes: React.FC = () => {
+  const { user } = useAuth();
   const [messages, setMessages] = useState<Message[]>([WELCOME_MESSAGE]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [userName, setUserName] = useState<string>('');
   const bottomRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  // Busca o primeiro nome do perfil
+  useEffect(() => {
+    if (!user?.id) return;
+    supabase
+      .from('profiles')
+      .select('full_name')
+      .eq('id', user.id)
+      .single()
+      .then(({ data }) => {
+        if (data?.full_name) {
+          setUserName(data.full_name.split(' ')[0]);
+        }
+      });
+  }, [user?.id]);
 
   // Trava o scroll externo da página enquanto o chat está aberto
   useEffect(() => {
@@ -66,7 +84,7 @@ const GuardiaoVisoes: React.FC = () => {
     try {
       const { data, error: fnError } = await supabase.functions.invoke(
         'guardiao-visoes',
-        { body: { message: trimmed, history } }
+        { body: { message: trimmed, history, userName, isFirstMessage: history.length === 0 } }
       );
 
       if (fnError) {
