@@ -13,6 +13,7 @@ import {
   BookOpen,
   Wallet,
   Sparkles,
+  Eye,
   LucideIcon,
 } from 'lucide-react';
 import { ROUTES, AppRoute } from '@/constants/routes';
@@ -41,6 +42,7 @@ export const essentialNavItems: NavItem[] = [
   { icon: FileText, label: 'Minha Ficha', path: ROUTES.ANAMNESE },
   { icon: Calendar, label: 'Cerimônias', path: ROUTES.CERIMONIAS },
   { icon: Sparkles, label: 'Insights', path: ROUTES.INSIGHTS },
+  { icon: Eye, label: 'Guardião das Visões', path: ROUTES.GUARDIAO_VISOES, highlight: true },
 ];
 
 // 📚 Aprender - conteúdo educativo

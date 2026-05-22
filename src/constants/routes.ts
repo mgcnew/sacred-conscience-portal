@@ -40,6 +40,9 @@ export const ROUTES = {
   // Insights / Jornada pessoal
   INSIGHTS: '/insights',
 
+  // Guardião das Visões — interpretação de visões e sonhos com IA
+  GUARDIAO_VISOES: '/guardiao-visoes',
+
 } as const;
 
 /**
