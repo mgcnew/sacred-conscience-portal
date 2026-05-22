@@ -62,17 +62,22 @@ const GuardiaoVisoes: React.FC = () => {
         { body: { message: trimmed, history } }
       );
 
-      if (fnError) throw fnError;
-      if (!data?.reply) throw new Error('Resposta vazia');
+      if (fnError) {
+        console.error('FnError:', fnError);
+        throw new Error(fnError.message || JSON.stringify(fnError));
+      }
+      if (!data?.reply) {
+        console.error('Data sem reply:', data);
+        throw new Error(data?.error || 'Resposta vazia');
+      }
 
       setMessages((prev) => [
         ...prev,
         { role: 'model', content: data.reply },
       ]);
     } catch (err: any) {
-      setError(
-        'O Guardião não conseguiu responder agora. Tente novamente em instantes.'
-      );
+      console.error('Erro Guardião:', err);
+      setError(err.message || 'Erro desconhecido. Veja o console para detalhes.');
     } finally {
       setLoading(false);
     }
