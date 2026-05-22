@@ -17,7 +17,7 @@ export const APP_CONFIG = {
   
   // Cores do tema (usadas no PWA manifest e meta tags)
   themeColor: '#7c3aed', // Roxo principal
-  backgroundColor: '#0f0f0f', // Fundo escuro
+  backgroundColor: '#ffffff', // Branco — alinhado com o fundo do ícone PWA
   
   // Contatos
   contacts: {
