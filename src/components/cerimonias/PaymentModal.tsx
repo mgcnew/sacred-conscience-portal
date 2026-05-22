@@ -4,7 +4,7 @@ import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerDescription, Dr
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { AlertCircle, CheckCircle2, Copy, CreditCard, Loader2, ArrowLeft, Smartphone, Banknote, ShieldCheck } from "lucide-react";
+import { AlertCircle, CheckCircle2, Copy, CreditCard, Loader2, ArrowLeft, Smartphone, Banknote, ShieldCheck, Leaf, ArrowRight } from "lucide-react";
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { APP_CONFIG } from '@/config/app';
@@ -32,6 +32,49 @@ const formatValue = (centavos: number | null): string => {
   if (!centavos) return 'A consultar';
   return (centavos / 100).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 };
+
+// Step 0 — Comprometimento
+const CommitmentContent: React.FC<{
+  ceremonyTitle: string;
+  ceremonyValue: number | null;
+}> = ({ ceremonyTitle, ceremonyValue }) => (
+  <div className="space-y-5 animate-in fade-in slide-in-from-bottom-3 duration-300">
+    {/* Resumo da cerimônia */}
+    <div className="flex items-center justify-between p-4 rounded-2xl bg-gradient-to-br from-primary/10 to-primary/5 border border-primary/10">
+      <div className="space-y-0.5 min-w-0 mr-3">
+        <p className="text-[10px] uppercase tracking-widest text-muted-foreground font-bold">Cerimônia</p>
+        <h4 className="font-display text-sm font-semibold text-foreground line-clamp-2 leading-snug">{ceremonyTitle}</h4>
+      </div>
+      <div className="text-right shrink-0">
+        <p className="text-xl font-black text-primary font-display">{formatValue(ceremonyValue)}</p>
+      </div>
+    </div>
+
+    {/* Mensagem central */}
+    <div className="rounded-2xl bg-primary/5 border border-primary/20 p-5 space-y-4">
+      <div className="flex items-center gap-2">
+        <div className="w-8 h-8 rounded-full bg-primary/15 flex items-center justify-center shrink-0">
+          <Leaf className="w-4 h-4 text-primary" />
+        </div>
+        <p className="text-sm font-semibold text-foreground">Antes de confirmar, leia com atenção</p>
+      </div>
+      <p className="text-sm text-foreground/80 leading-relaxed">
+        Cada vaga é preciosa e pode ser a jornada de outra pessoa. <strong>Confirme apenas se tiver certeza da sua presença.</strong>
+      </p>
+      <p className="text-sm text-foreground/80 leading-relaxed">
+        Caso precise desistir, avise-nos com pelo menos <strong>3 dias de antecedência</strong> — assim honramos o espaço sagrado e quem aguarda uma oportunidade.
+      </p>
+    </div>
+
+    {/* Alerta de prazo */}
+    <div className="flex items-start gap-3 p-3 rounded-xl bg-amber-500/5 border border-amber-500/10">
+      <AlertCircle className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
+      <p className="text-[11px] text-amber-800/80 dark:text-amber-200/80 leading-snug">
+        Para garantir sua vaga, realize a contribuição até <span className="font-bold text-amber-600 dark:text-amber-400">5 dias antes</span> da cerimônia.
+      </p>
+    </div>
+  </div>
+);
 
 // Conteúdo compartilhado
 const PaymentContent: React.FC<{
@@ -99,22 +142,6 @@ const PaymentContent: React.FC<{
           <div className="text-right">
             <p className="text-xl font-black text-primary font-display">{formatValue(ceremonyValue)}</p>
           </div>
-        </div>
-
-        {/* Alerta de Prazo */}
-        <div className="flex items-start gap-3 p-3 rounded-xl bg-amber-500/5 border border-amber-500/10">
-          <AlertCircle className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
-          <p className="text-[11px] text-amber-800/80 dark:text-amber-200/80 leading-snug">
-            Para garantir sua vaga, realize a contribuição até <span className="font-bold text-amber-600 dark:text-amber-400">5 dias antes</span> da cerimônia.
-          </p>
-        </div>
-
-        {/* Aviso de responsabilidade */}
-        <div className="flex items-start gap-3 p-3 rounded-xl bg-primary/5 border border-primary/15">
-          <span className="text-base leading-none mt-0.5">🌿</span>
-          <p className="text-[11px] text-foreground/70 leading-snug">
-            Cada vaga é preciosa e pode ser a jornada de outra pessoa. <span className="font-semibold text-foreground/90">Confirme apenas se tiver certeza da sua presença.</span> Caso precise desistir, avise-nos com pelo menos <span className="font-semibold text-foreground/90">3 dias de antecedência</span> — assim honramos o espaço sagrado e quem aguarda uma oportunidade.
-          </p>
         </div>
 
         {/* Seleção de Pagamento Visual */}
@@ -246,6 +273,7 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
   ceremonyId, userId, userEmail, userName, isPending
 }) => {
   const isMobile = useIsMobile();
+  const [step, setStep] = useState<'commitment' | 'payment'>('commitment');
   const [paymentMethod, setPaymentMethod] = useState<string>("");
   const [isProcessingOnline, setIsProcessingOnline] = useState(false);
   const [showMPOptions, setShowMPOptions] = useState(false);
@@ -254,6 +282,7 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
 
   useEffect(() => {
     if (!isOpen) {
+      setStep('commitment');
       setPaymentMethod("");
       setIsProcessingOnline(false);
       setShowMPOptions(false);
@@ -332,6 +361,29 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
 
   if (!isOpen) return null;
 
+  const modalTitle = step === 'commitment'
+    ? 'Confirmar Presença'
+    : showMPOptions ? 'Pagamento Online' : 'Forma de Pagamento';
+
+  const footerCommitment = (isMobile?: boolean) => (
+    <div className={cn("flex gap-2 w-full", isMobile ? "flex-col-reverse" : "justify-end")}>
+      <Button
+        variant="ghost"
+        onClick={onClose}
+        className={cn("rounded-xl h-11 font-bold text-muted-foreground", isMobile ? "w-full" : "px-6")}
+      >
+        Cancelar
+      </Button>
+      <Button
+        onClick={() => setStep('payment')}
+        className={cn("rounded-xl h-11 font-bold gap-2", isMobile ? "w-full" : "px-8")}
+      >
+        Entendi, avançar
+        <ArrowRight className="w-4 h-4" />
+      </Button>
+    </div>
+  );
+
   // Mobile: Drawer
   if (isMobile) {
     return (
@@ -340,34 +392,40 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
           <div className="mx-auto w-12 h-1.5 bg-muted rounded-full mt-4 mb-2" />
           <DrawerHeader className="pb-2">
             <DrawerTitle className="font-display text-2xl font-bold text-primary text-center">
-              {showMPOptions ? 'Pagamento Online' : 'Confirmar Presença'}
+              {modalTitle}
             </DrawerTitle>
           </DrawerHeader>
           <div className="px-5 pb-6 overflow-y-auto">
-            <PaymentContent
-              ceremonyTitle={ceremonyTitle}
-              ceremonyValue={ceremonyValue}
-              paymentMethod={paymentMethod}
-              setPaymentMethod={setPaymentMethod}
-              handleCopyPixKey={handleCopyPixKey}
-              showMPOptions={showMPOptions}
-              selectedMPMethod={selectedMPMethod}
-              onMPMethodSelect={handleMPMethodSelect}
-              onBackFromMP={handleBackFromMP}
-              valorComTaxa={valorComTaxa}
-            />
+            {step === 'commitment' ? (
+              <CommitmentContent ceremonyTitle={ceremonyTitle} ceremonyValue={ceremonyValue} />
+            ) : (
+              <PaymentContent
+                ceremonyTitle={ceremonyTitle}
+                ceremonyValue={ceremonyValue}
+                paymentMethod={paymentMethod}
+                setPaymentMethod={setPaymentMethod}
+                handleCopyPixKey={handleCopyPixKey}
+                showMPOptions={showMPOptions}
+                selectedMPMethod={selectedMPMethod}
+                onMPMethodSelect={handleMPMethodSelect}
+                onBackFromMP={handleBackFromMP}
+                valorComTaxa={valorComTaxa}
+              />
+            )}
           </div>
           <DrawerFooter className="pt-2 border-t bg-muted/10">
-            <PaymentButtons
-              onClose={onClose}
-              handleConfirm={handleConfirm}
-              paymentMethod={paymentMethod}
-              isPending={isPending}
-              isProcessingOnline={isProcessingOnline}
-              isMobile
-              showMPOptions={showMPOptions}
-              selectedMPMethod={selectedMPMethod}
-            />
+            {step === 'commitment' ? footerCommitment(true) : (
+              <PaymentButtons
+                onClose={onClose}
+                handleConfirm={handleConfirm}
+                paymentMethod={paymentMethod}
+                isPending={isPending}
+                isProcessingOnline={isProcessingOnline}
+                isMobile
+                showMPOptions={showMPOptions}
+                selectedMPMethod={selectedMPMethod}
+              />
+            )}
           </DrawerFooter>
         </DrawerContent>
       </Drawer>
@@ -380,35 +438,41 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
       <DialogContent className="sm:max-w-[440px] p-0 overflow-hidden rounded-[2rem] border-none shadow-2xl">
         <DialogHeader className="p-6 pb-0">
           <DialogTitle className="font-display text-2xl font-bold text-primary">
-            {showMPOptions ? 'Pagamento Online' : 'Confirmar Presença'}
+            {modalTitle}
           </DialogTitle>
         </DialogHeader>
-        
+
         <div className="p-6 pt-4">
-          <PaymentContent
-            ceremonyTitle={ceremonyTitle}
-            ceremonyValue={ceremonyValue}
-            paymentMethod={paymentMethod}
-            setPaymentMethod={setPaymentMethod}
-            handleCopyPixKey={handleCopyPixKey}
-            showMPOptions={showMPOptions}
-            selectedMPMethod={selectedMPMethod}
-            onMPMethodSelect={handleMPMethodSelect}
-            onBackFromMP={handleBackFromMP}
-            valorComTaxa={valorComTaxa}
-          />
+          {step === 'commitment' ? (
+            <CommitmentContent ceremonyTitle={ceremonyTitle} ceremonyValue={ceremonyValue} />
+          ) : (
+            <PaymentContent
+              ceremonyTitle={ceremonyTitle}
+              ceremonyValue={ceremonyValue}
+              paymentMethod={paymentMethod}
+              setPaymentMethod={setPaymentMethod}
+              handleCopyPixKey={handleCopyPixKey}
+              showMPOptions={showMPOptions}
+              selectedMPMethod={selectedMPMethod}
+              onMPMethodSelect={handleMPMethodSelect}
+              onBackFromMP={handleBackFromMP}
+              valorComTaxa={valorComTaxa}
+            />
+          )}
         </div>
 
         <div className="p-6 pt-4 bg-muted/20 border-t flex justify-end">
-          <PaymentButtons
-            onClose={onClose}
-            handleConfirm={handleConfirm}
-            paymentMethod={paymentMethod}
-            isPending={isPending}
-            isProcessingOnline={isProcessingOnline}
-            showMPOptions={showMPOptions}
-            selectedMPMethod={selectedMPMethod}
-          />
+          {step === 'commitment' ? footerCommitment() : (
+            <PaymentButtons
+              onClose={onClose}
+              handleConfirm={handleConfirm}
+              paymentMethod={paymentMethod}
+              isPending={isPending}
+              isProcessingOnline={isProcessingOnline}
+              showMPOptions={showMPOptions}
+              selectedMPMethod={selectedMPMethod}
+            />
+          )}
         </div>
       </DialogContent>
     </Dialog>
