@@ -65,42 +65,45 @@ const SobreNos: React.FC = () => {
       {tab === 'templo' && (
         <div className="space-y-6">
 
+          {/* Quem somos */}
           <FadeIn>
             <div className="space-y-4 text-foreground/90 leading-relaxed text-sm md:text-base">
               <p>
                 Somos um <strong>Templo Xamânico Universalista</strong>, um espaço sagrado dedicado ao despertar da consciência, ao acolhimento amoroso e à cura espiritual. Aqui, caminhamos guiados por Deus, por Jesus Cristo e pelos mentores espirituais, valorizando a luz divina que habita em cada ser.
               </p>
               <p>
-                Em nosso templo, consagramos com profundo respeito e responsabilidade as medicinas sagradas <strong>Ayahuasca</strong>, <strong>Rapé</strong>, <strong>Sananga</strong>, entre outras ferramentas de cura ancestral e espiritual. Também realizamos trabalhos de energização, harmonização, limpeza espiritual e vivências que despertam o autoconhecimento e a conexão com o sagrado.
+                Em nosso templo, consagramos com profundo respeito e responsabilidade as medicinas sagradas <strong>Ayahuasca</strong>, <strong>Rapé</strong>, <strong>Sananga</strong>, entre outras ferramentas de cura ancestral e espiritual. Também realizamos trabalhos de energização, harmonização, limpeza espiritual e vivências que despertam o autoconhecimento e a reconexão com o sagrado.
               </p>
             </div>
           </FadeIn>
 
-          <FadeIn delay={80}>
+          {/* CTA — Você está seguro aqui */}
+          <FadeIn delay={60}>
             <div className="rounded-2xl bg-primary/5 border border-primary/15 p-5">
               <div className="flex items-center gap-2 mb-3">
                 <Heart className="w-4 h-4 text-primary" />
-                <span className="text-xs font-bold uppercase tracking-wider text-primary">Nossa Missão</span>
+                <span className="text-xs font-bold uppercase tracking-wider text-primary">Você está seguro aqui</span>
               </div>
               <p className="text-sm text-foreground/90 leading-relaxed">
-                Acreditamos que <strong>todos são bem-vindos</strong>. Não limitamos ninguém, pois compreendemos que cada alma está em seu próprio caminho de evolução. A única condição para caminhar conosco é crer em Deus, pois é Ele quem guia, protege e ilumina nossos trabalhos.
+                Se é a sua primeira vez ou se carrega dúvidas no coração, saiba: você será recebido com <strong>amor, respeito e cuidado</strong>. Não há julgamentos, não há pressa. Cada pessoa chega com sua história, e nós honramos isso. O nosso espaço é de acolhimento — você não precisa saber nada antes de entrar, apenas precisar vir.
               </p>
             </div>
           </FadeIn>
 
-          <FadeIn delay={120}>
+          {/* Missão */}
+          <FadeIn delay={100}>
             <div className="space-y-4 text-foreground/90 leading-relaxed text-sm md:text-base">
               <p>
-                Desde nossa fundação, em <strong>2021</strong>, temos dedicado cada cerimônia ao amor, ao equilíbrio e ao propósito maior de servir ao próximo. Ao longo desses anos, presenciamos inúmeras histórias de superação e renascimento — relatos de cura, transformação e libertação que surgem ao final de cada trabalho, e até mesmo meses depois.
+                Acreditamos que <strong>todos são bem-vindos</strong>. Não limitamos ninguém, pois compreendemos que cada alma está em seu próprio caminho de evolução. A única condição para caminhar conosco é crer em Deus, pois é Ele quem guia, protege e ilumina nossos trabalhos.
               </p>
               <p>
-                Cada testemunho é para nós uma bênção, uma confirmação do quanto o caminho é sagrado e do quanto Deus age através das medicinas e das vivências espirituais.
+                Desde nossa fundação, em <strong>2021</strong>, temos dedicado cada cerimônia ao amor, ao equilíbrio e ao propósito maior de servir ao próximo. Presenciamos inúmeras histórias de superação, cura e renascimento — relatos que surgem ao final de cada trabalho, e até meses depois, quando as pessoas retornam para compartilhar como as medicinas seguiram agindo em suas vidas.
               </p>
             </div>
           </FadeIn>
 
           {/* Stats */}
-          <FadeIn delay={160}>
+          <FadeIn delay={140}>
             <div className="grid grid-cols-3 gap-3">
               {[
                 { value: '2021', label: 'Fundação' },
@@ -115,17 +118,43 @@ const SobreNos: React.FC = () => {
             </div>
           </FadeIn>
 
-          <FadeIn delay={200}>
-            <div className="rounded-2xl bg-gradient-to-br from-primary/10 to-primary/5 border border-primary/15 p-5 text-center">
-              <Sparkles className="w-5 h-5 text-primary mx-auto mb-2" />
-              <p className="font-display text-sm font-semibold text-foreground mb-1">
+          {/* Guardiões e ajudadores */}
+          <FadeIn delay={180}>
+            <div className="rounded-2xl border border-border/60 overflow-hidden">
+              <div className="bg-muted/40 px-5 py-3 flex items-center gap-2 border-b border-border/40">
+                <Star className="w-4 h-4 text-amber-500" />
+                <span className="text-xs font-bold uppercase tracking-wider text-foreground">Nossa Equipe Sagrada</span>
+              </div>
+              <div className="p-5 space-y-4 text-sm text-foreground/90 leading-relaxed">
+                <p>
+                  Você não estará sozinho durante nenhum momento da cerimônia. Além do nosso Mestre, contamos com uma equipe de <strong>Guardiões</strong> — voluntários treinados e comprometidos com a sua segurança física, emocional e espiritual durante todo o trabalho.
+                </p>
+                <p>
+                  Os <strong>Ajudadores</strong> cuidam do espaço, da logística e de tudo o que você precisar: água, banheiro, cobertor, um ombro amigo. São pessoas que já caminharam por aqui e escolheram servir — porque sentiram no próprio coração o quanto um suporte atencioso faz diferença numa noite sagrada.
+                </p>
+                <p>
+                  Juntos, formamos uma família. E quando você cruzar nossa porta, fará parte dela.
+                </p>
+              </div>
+            </div>
+          </FadeIn>
+
+          {/* CTA final */}
+          <FadeIn delay={220}>
+            <div className="rounded-2xl bg-gradient-to-br from-primary/12 to-primary/5 border border-primary/20 p-6 text-center">
+              <Sparkles className="w-6 h-6 text-primary mx-auto mb-3" />
+              <h3 className="font-display text-base font-bold text-foreground mb-2">
                 Se você sente o chamado, permita-se viver essa experiência.
+              </h3>
+              <p className="text-sm text-muted-foreground leading-relaxed mb-4">
+                Venha com seu coração aberto. Nós cuidamos do resto — com amor, respeito e profunda gratidão pela sua confiança.
               </p>
-              <p className="text-xs text-muted-foreground leading-relaxed">
-                Venha fazer parte do nosso templo e caminhar conosco rumo à consciência divina.
+              <p className="text-xs text-primary font-semibold">
+                🌿 Bem-vindo ao Templo Xamânico Consciência Divinal
               </p>
             </div>
           </FadeIn>
+
         </div>
       )}
 
