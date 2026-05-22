@@ -27,17 +27,19 @@ export interface MyInscription {
 }
 
 /**
- * Hook para buscar últimas inscrições do usuário
+ * Hook para buscar inscrições do usuário
  * Requirements: 3.1 - Seção Minhas Consagrações
- * 
- * Retorna as últimas inscrições do usuário ordenadas por data da cerimônia
- * (mais recente primeiro) com join em cerimonias.
+ *
+ * @param onlyUpcoming - quando true, retorna apenas cerimônias futuras (>= hoje), ordenadas da mais próxima para a mais distante
  */
-export const useMyInscriptions = (userId: string | undefined, limit = 3) => {
+export const useMyInscriptions = (userId: string | undefined, limit = 3, onlyUpcoming = false) => {
   return useQuery({
-    queryKey: ['my-inscriptions', userId, limit],
+    queryKey: ['my-inscriptions', userId, limit, onlyUpcoming],
     enabled: !!userId,
     queryFn: async (): Promise<MyInscription[]> => {
+      // Busca mais registros quando filtramos por data, para garantir `limit` resultados após o filtro
+      const fetchLimit = onlyUpcoming ? limit * 5 : limit;
+
       const { data, error } = await supabase
         .from('inscricoes')
         .select(`
@@ -58,18 +60,19 @@ export const useMyInscriptions = (userId: string | undefined, limit = 3) => {
         .eq('user_id', userId!)
         .or('cancelada.is.null,cancelada.eq.false')
         .order('data_inscricao', { ascending: false })
-        .limit(limit);
+        .limit(fetchLimit);
 
       if (error) throw error;
 
-      // Mapear para o formato esperado e determinar status
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const inscriptions: MyInscription[] = (data || [])
         .filter((item: { cerimonias: unknown }) => item.cerimonias !== null)
         .map((item: { id: string; pago: boolean; data_inscricao: string; presenca_confirmada: boolean; confirmado_em: string | null; cerimonias: unknown }) => {
-          // Determinar status baseado no pagamento
-          const status: 'confirmada' | 'pendente' | 'cancelada' = item.pago 
-            ? 'confirmada' 
+          const status: 'confirmada' | 'pendente' | 'cancelada' = item.pago
+            ? 'confirmada'
             : 'pendente';
 
           return {
@@ -82,13 +85,21 @@ export const useMyInscriptions = (userId: string | undefined, limit = 3) => {
             cerimonia: item.cerimonias as CerimoniaData,
           };
         })
-        // Ordenar por data da cerimônia (mais recente primeiro)
-        .sort((a: MyInscription, b: MyInscription) => 
-          new Date(b.cerimonia.data).getTime() - new Date(a.cerimonia.data).getTime()
-        );
+        .filter((i: MyInscription) => {
+          if (!onlyUpcoming) return true;
+          const [y, m, d] = i.cerimonia.data.split('-').map(Number);
+          return new Date(y, m - 1, d) >= today;
+        })
+        // Mais próxima primeiro quando onlyUpcoming, mais recente primeiro nos outros casos
+        .sort((a: MyInscription, b: MyInscription) =>
+          onlyUpcoming
+            ? new Date(a.cerimonia.data).getTime() - new Date(b.cerimonia.data).getTime()
+            : new Date(b.cerimonia.data).getTime() - new Date(a.cerimonia.data).getTime()
+        )
+        .slice(0, limit);
 
       return inscriptions;
     },
-    staleTime: 1000 * 60 * 2, // 2 minutos
+    staleTime: 1000 * 60 * 2,
   });
 };

@@ -54,7 +54,7 @@ const Index: React.FC = () => {
     data: inscriptions = [],
     isLoading: inscriptionsLoading,
     error: inscriptionsError,
-  } = useMyInscriptions(user?.id, 3);
+  } = useMyInscriptions(user?.id, 3, true);
 
   useEffect(() => {
     const checkAnamnese = async () => {
@@ -296,7 +296,7 @@ const Index: React.FC = () => {
             <FadeIn delay={80}>
               <section>
                 <div className="flex items-center justify-between mb-3 px-0.5">
-                  <h2 className="font-display text-lg font-bold">Suas Inscrições</h2>
+                  <h2 className="font-display text-lg font-bold">Próximas Inscrições</h2>
                 </div>
                 <SectionErrorBoundary
                   sectionTitle="Minhas Consagrações"
