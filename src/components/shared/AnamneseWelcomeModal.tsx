@@ -58,30 +58,30 @@ const AnamneseWelcomeModal: React.FC = () => {
 
   return (
     <Dialog open={open} onOpenChange={() => {}}>
-      <DialogContent className="sm:max-w-md p-0 overflow-hidden rounded-2xl border-none shadow-2xl [&>button]:hidden">
+      <DialogContent className="sm:max-w-md w-[calc(100vw-2rem)] max-h-[90vh] p-0 flex flex-col rounded-2xl border-none shadow-2xl [&>button]:hidden overflow-hidden">
 
-        {/* Header com glow */}
-        <div className="relative overflow-hidden bg-gradient-to-br from-primary/15 via-primary/8 to-transparent pt-8 pb-5 px-6 text-center">
+        {/* Header fixo com glow */}
+        <div className="relative overflow-hidden bg-gradient-to-br from-primary/15 via-primary/8 to-transparent pt-6 pb-4 px-6 text-center shrink-0">
           <div className="absolute top-0 left-1/2 -translate-x-1/2 w-48 h-48 rounded-full bg-primary/15 blur-3xl pointer-events-none" />
           <div className="relative z-10">
-            <div className="mx-auto w-16 h-16 rounded-2xl bg-white shadow-md flex items-center justify-center mb-4">
+            <div className="mx-auto w-14 h-14 rounded-2xl bg-white shadow-md flex items-center justify-center mb-3">
               <img
                 src="/logo-conciencia.webp"
                 alt="Consciência Divinal"
-                className="w-12 h-12 object-contain"
+                className="w-10 h-10 object-contain"
               />
             </div>
-            <h2 className="font-display text-xl font-bold text-foreground leading-snug">
+            <h2 className="font-display text-lg font-bold text-foreground leading-snug">
               Seja bem-vindo(a) à sua jornada 🌿
             </h2>
-            <p className="text-sm text-muted-foreground mt-1.5 leading-relaxed">
+            <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
               Estamos felizes em ter você no Portal Sagrado da Consciência Divinal.
             </p>
           </div>
         </div>
 
-        {/* Corpo */}
-        <div className="px-6 py-5 space-y-4">
+        {/* Corpo scrollável */}
+        <div className="flex-1 overflow-y-auto px-6 py-4 space-y-4 overscroll-contain">
 
           {/* O que é a anamnese */}
           <div className="space-y-2.5">
@@ -130,8 +130,8 @@ const AnamneseWelcomeModal: React.FC = () => {
           </label>
         </div>
 
-        {/* Footer */}
-        <div className="px-6 pb-6 flex flex-col gap-2">
+        {/* Footer fixo */}
+        <div className="px-6 pb-5 pt-3 flex flex-col gap-2 border-t border-border/40 shrink-0 bg-background">
           <Button
             onClick={handleGoToAnamnese}
             className="w-full gap-2 font-semibold"
