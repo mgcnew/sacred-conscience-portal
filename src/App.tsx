@@ -61,7 +61,7 @@ const App = () => {
   useEffect(() => {
     const el = document.getElementById('splash-screen');
     if (!el) return;
-    const MIN_MS = 3000;
+    const MIN_MS = 2000;
     const elapsed = Date.now() - ((window as any).__splashStart ?? Date.now());
     const delay = Math.max(0, MIN_MS - elapsed);
     const t = setTimeout(() => {
