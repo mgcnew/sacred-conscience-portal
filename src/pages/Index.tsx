@@ -16,6 +16,7 @@ import {
   Image,
   Leaf,
   Sparkles,
+  Eye,
 } from 'lucide-react';
 import { ROUTES } from '@/constants';
 import { APP_CONFIG } from '@/config/app';
@@ -319,7 +320,7 @@ const Index: React.FC = () => {
               <div className="grid grid-cols-2 gap-3">
                 {([
                   { label: 'Cursos', desc: 'Expanda seus conhecimentos', icon: GraduationCap, route: ROUTES.CURSOS, from: 'from-primary/5', to: 'to-primary/10', color: 'text-primary' },
-                  { label: 'Loja', desc: 'Artesanatos sagrados', icon: ShoppingBag, route: ROUTES.LOJA, from: 'from-amber-500/5', to: 'to-amber-500/10', color: 'text-amber-600' },
+                  { label: 'Guardião', desc: 'Interprete suas visões', icon: Eye, route: ROUTES.GUARDIAO_VISOES, from: 'from-violet-500/5', to: 'to-violet-500/10', color: 'text-violet-600' },
                   { label: 'Medicinas', desc: 'Conheça as plantas', icon: Leaf, route: ROUTES.MEDICINAS, from: 'from-green-500/5', to: 'to-green-500/10', color: 'text-green-600' },
                   { label: 'Estudos', desc: 'Pós-consagração', icon: BookOpen, route: ROUTES.ESTUDOS, from: 'from-blue-500/5', to: 'to-blue-500/10', color: 'text-blue-500' },
                 ] as const).map(({ label, desc, icon: Icon, route, from, to, color }) => (
