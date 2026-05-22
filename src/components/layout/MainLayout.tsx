@@ -3,7 +3,7 @@ import { Outlet, useNavigate, useLocation, Navigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { User, Loader2 } from 'lucide-react';
+import { User, Loader2, Info, HelpCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { ModeToggle } from '@/components/mode-toggle';
 import { ROUTES } from '@/constants';
@@ -245,7 +245,21 @@ const MainLayout: React.FC = () => {
               </span>
             </div>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1">
+            <button
+              onClick={() => navigate(ROUTES.SOBRE_NOS)}
+              title="Sobre Nós"
+              className="w-9 h-9 flex items-center justify-center rounded-md text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
+            >
+              <Info className="w-4 h-4" />
+            </button>
+            <button
+              onClick={() => navigate(ROUTES.FAQ)}
+              title="FAQ"
+              className="w-9 h-9 flex items-center justify-center rounded-md text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
+            >
+              <HelpCircle className="w-4 h-4" />
+            </button>
             <NotificationBell />
             <ModeToggle />
           </div>
@@ -257,7 +271,7 @@ const MainLayout: React.FC = () => {
         "transition-all duration-300",
         isChatPage ? "h-dvh overflow-hidden" : "min-h-screen",
         "pt-20 lg:pt-14",
-        isChatPage ? "pb-16 lg:pb-0" : "pb-4 lg:pb-0",
+        isChatPage ? "pb-16 lg:pb-0" : "pb-20 lg:pb-0",
         sidebarCollapsed ? "lg:pl-16" : "lg:pl-56"
       )}>
         <div key={location.pathname} className="page-transition">
@@ -267,29 +281,6 @@ const MainLayout: React.FC = () => {
 
       {/* Scroll to Top */}
       {!isChatPage && <ScrollToTop />}
-
-      {/* Footer — oculto em páginas de chat para evitar scroll externo */}
-      {!isChatPage && (
-        <footer className={cn(
-          "border-t border-border pt-8 pb-24 lg:pb-8 bg-muted/30 transition-all duration-300",
-          sidebarCollapsed ? "lg:pl-16" : "lg:pl-56"
-        )}>
-          <div className="container flex flex-col items-center gap-3">
-            <div className="flex items-center gap-4 text-sm text-muted-foreground">
-              <button onClick={() => navigate(ROUTES.SOBRE_NOS)} className="hover:text-foreground transition-colors">
-                Sobre Nós
-              </button>
-              <span className="text-border">·</span>
-              <button onClick={() => navigate(ROUTES.FAQ)} className="hover:text-foreground transition-colors">
-                FAQ
-              </button>
-            </div>
-            <p className="text-xs text-muted-foreground/70">
-              © 2024 Consciência Divinal. Com amor e respeito pelas medicinas ancestrais.
-            </p>
-          </div>
-        </footer>
-      )}
     </div>
   );
 };
