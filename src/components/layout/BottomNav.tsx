@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Home, Calendar, Image, Grid2x2, LogOut, Leaf, Heart, Sun, Moon } from 'lucide-react';
+import { Home, Calendar, Image, Grid2x2, LogOut, Leaf, Heart, Sun, Moon, Info, HelpCircle } from 'lucide-react';
 import {
   Drawer,
   DrawerContent,
@@ -217,6 +217,24 @@ const BottomNav: React.FC<BottomNavProps> = ({ isAdmin, isSuperAdmin, onSignOut 
                 <span className="font-medium text-sm">Emergência</span>
               </button>
 
+              {/* Sobre Nós */}
+              <button
+                onClick={() => { navigate(ROUTES.SOBRE_NOS); setMoreOpen(false); }}
+                className="flex items-center justify-center w-12 h-12 rounded-xl bg-muted/50 text-muted-foreground active:bg-muted transition-colors"
+                aria-label="Sobre Nós"
+              >
+                <Info className="w-5 h-5" />
+              </button>
+
+              {/* FAQ */}
+              <button
+                onClick={() => { navigate(ROUTES.FAQ); setMoreOpen(false); }}
+                className="flex items-center justify-center w-12 h-12 rounded-xl bg-muted/50 text-muted-foreground active:bg-muted transition-colors"
+                aria-label="FAQ"
+              >
+                <HelpCircle className="w-5 h-5" />
+              </button>
+
               {/* Theme toggle */}
               <button
                 onClick={() => setTheme(isDark ? 'light' : 'dark')}
@@ -229,10 +247,10 @@ const BottomNav: React.FC<BottomNavProps> = ({ isAdmin, isSuperAdmin, onSignOut 
               {/* Sign out */}
               <button
                 onClick={handleSignOut}
-                className="flex-1 flex items-center justify-center gap-2 px-3 py-3 rounded-xl text-destructive bg-destructive/8 active:bg-destructive/15 transition-colors"
+                className="flex items-center justify-center w-12 h-12 rounded-xl text-destructive bg-destructive/8 active:bg-destructive/15 transition-colors"
+                aria-label="Sair"
               >
                 <LogOut className="w-5 h-5" />
-                <span className="font-medium text-sm">Sair</span>
               </button>
             </div>
           </div>
