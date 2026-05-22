@@ -122,7 +122,10 @@ Deno.serve(async (req: Request) => {
     if (!response.ok) {
       const err = await response.text();
       console.error("Gemini error:", err);
-      throw new Error(`Gemini API error: ${response.status}`);
+      return new Response(JSON.stringify({ error: `Gemini ${response.status}: ${err}` }), {
+        status: 500,
+        headers: { ...CORS_HEADERS, "Content-Type": "application/json" },
+      });
     }
 
     const data = await response.json();

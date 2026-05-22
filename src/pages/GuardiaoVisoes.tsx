@@ -63,8 +63,14 @@ const GuardiaoVisoes: React.FC = () => {
       );
 
       if (fnError) {
-        console.error('FnError:', fnError);
-        throw new Error(fnError.message || JSON.stringify(fnError));
+        // Tenta extrair o corpo da resposta de erro
+        let detail = fnError.message;
+        try {
+          const body = await (fnError as any).context?.json?.();
+          if (body?.error) detail = body.error;
+        } catch {}
+        console.error('FnError detail:', detail);
+        throw new Error(detail);
       }
       if (!data?.reply) {
         console.error('Data sem reply:', data);
