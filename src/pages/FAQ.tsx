@@ -9,6 +9,8 @@ import {
 import { AlertTriangle, MessageCircle, Leaf, Shield, Sparkles, Heart } from 'lucide-react';
 import { PageContainer } from '@/components/shared';
 import { APP_CONFIG } from '@/config/app';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
 import { cn } from '@/lib/utils';
 
 const faqCategories = [
@@ -126,10 +128,31 @@ const faqCategories = [
 ];
 
 const FAQ: React.FC = () => {
+  const { user } = useAuth();
   const location = useLocation();
   const [showWelcome, setShowWelcome] = useState(false);
   const [activeSection, setActiveSection] = useState('preparacao');
+  const [userName, setUserName] = useState('');
   const sectionRefs = useRef<Record<string, HTMLDivElement | null>>({});
+
+  useEffect(() => {
+    if (!user?.id) return;
+    supabase
+      .from('profiles')
+      .select('full_name')
+      .eq('id', user.id)
+      .single()
+      .then(({ data }) => {
+        if (data?.full_name) setUserName(data.full_name.split(' ')[0]);
+      });
+  }, [user?.id]);
+
+  const whatsappHref = (() => {
+    const msg = userName
+      ? `Olá! Sou ${userName} e estou no aplicativo ${APP_CONFIG.name}. Li o FAQ mas ainda tenho algumas dúvidas. Podem me ajudar?`
+      : `Olá! Estou no aplicativo ${APP_CONFIG.name}. Li o FAQ mas ainda tenho algumas dúvidas. Podem me ajudar?`;
+    return `https://wa.me/${APP_CONFIG.contacts.whatsappLider}?text=${encodeURIComponent(msg)}`;
+  })();
 
   useEffect(() => {
     if (location.state?.fromInscription) {
@@ -270,7 +293,7 @@ const FAQ: React.FC = () => {
           Nossa equipe está disponível para te acolher e responder com carinho antes da cerimônia.
         </p>
         <a
-          href={`https://wa.me/${APP_CONFIG.contacts.whatsappLider}`}
+          href={whatsappHref}
           target="_blank"
           rel="noopener noreferrer"
           className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-primary text-primary-foreground text-sm font-semibold hover:bg-primary/90 active:scale-95 transition-all"
