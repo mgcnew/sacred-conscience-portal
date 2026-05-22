@@ -15,6 +15,7 @@ import {
   Users,
   Image,
   Leaf,
+  Sparkles,
 } from 'lucide-react';
 import { ROUTES } from '@/constants';
 import { APP_CONFIG } from '@/config/app';
@@ -75,22 +76,83 @@ const Index: React.FC = () => {
 
   const anamnesePending = hasAnamnese === false || isAnamneseComplete === false;
 
+  // Próxima cerimônia inscrita (futura)
+  const nextUpcomingInscription = React.useMemo(() => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    return inscriptions
+      .filter(i => {
+        const [y, m, d] = i.cerimonia.data.split('-').map(Number);
+        return new Date(y, m - 1, d) >= today;
+      })
+      .sort((a, b) => a.cerimonia.data.localeCompare(b.cerimonia.data))[0] ?? null;
+  }, [inscriptions]);
+
   const quickActions = [
-    { label: 'Eventos', icon: CalendarDays, route: ROUTES.CERIMONIAS, color: 'text-primary' },
-    { label: 'Galeria', icon: Image, route: ROUTES.GALERIA, color: 'text-primary' },
-    { label: 'Partilhas', icon: Users, route: ROUTES.PARTILHAS, color: 'text-primary' },
-    { label: 'Loja', icon: ShoppingBag, route: ROUTES.LOJA, color: 'text-amber-600' },
+    { label: 'Eventos', icon: CalendarDays, route: ROUTES.CERIMONIAS, color: 'text-primary', bg: 'bg-primary/10' },
+    { label: 'Galeria', icon: Image, route: ROUTES.GALERIA, color: 'text-blue-500', bg: 'bg-blue-500/10' },
+    { label: 'Partilhas', icon: Users, route: ROUTES.PARTILHAS, color: 'text-purple-500', bg: 'bg-purple-500/10' },
+    { label: 'Loja', icon: ShoppingBag, route: ROUTES.LOJA, color: 'text-amber-600', bg: 'bg-amber-500/10' },
   ];
+
+  const HeroStrip = () => {
+    if (inscriptionsLoading) return null;
+
+    if (nextUpcomingInscription) {
+      const [y, m, d] = nextUpcomingInscription.cerimonia.data.split('-').map(Number);
+      const date = new Date(y, m - 1, d);
+      const today = new Date(); today.setHours(0, 0, 0, 0);
+      const days = Math.round((date.getTime() - today.getTime()) / 86400000);
+      const isNear = days <= 3;
+      const label = days === 0 ? 'Hoje!' : days === 1 ? 'Amanhã!' : `${days} dias`;
+
+      return (
+        <div className={`rounded-2xl border p-4 mb-6 ${
+          isNear
+            ? 'bg-gradient-to-r from-amber-500/10 to-amber-500/5 border-amber-500/30'
+            : 'bg-gradient-to-r from-primary/10 via-primary/5 to-transparent border-primary/20'
+        }`}>
+          <div className="flex items-center justify-between gap-3">
+            <div className="min-w-0">
+              <p className="text-xs text-muted-foreground mb-0.5">Próxima cerimônia</p>
+              <p className="font-display font-semibold text-sm leading-tight truncate">
+                {nextUpcomingInscription.cerimonia.nome || 'Cerimônia'}
+              </p>
+              {nextUpcomingInscription.cerimonia.medicina_principal && (
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  {nextUpcomingInscription.cerimonia.medicina_principal}
+                </p>
+              )}
+            </div>
+            <div className="text-right shrink-0">
+              <p className={`text-2xl font-bold leading-none ${isNear ? 'text-amber-600 dark:text-amber-400' : 'text-primary'}`}>
+                {label}
+              </p>
+              {days > 1 && <p className="text-[10px] text-muted-foreground">restantes</p>}
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    return (
+      <div className="rounded-2xl bg-gradient-to-r from-primary/8 to-transparent border border-primary/15 px-4 py-3 mb-6">
+        <p className="font-display italic text-sm text-muted-foreground text-center leading-relaxed">
+          "A medicina não cura, ela revela. O caminho da cura está dentro de você."
+        </p>
+      </div>
+    );
+  };
 
   const QuickActionsScroll = () => (
     <div className="flex gap-3 overflow-x-auto pb-1 -mx-4 px-4 scrollbar-none">
-      {quickActions.map(({ label, icon: Icon, route, color }) => (
+      {quickActions.map(({ label, icon: Icon, route, color, bg }) => (
         <button
           key={label}
           onClick={() => navigate(route)}
           className="flex flex-col items-center gap-1.5 min-w-[80px] group"
         >
-          <div className="w-[64px] h-[64px] rounded-2xl bg-card border border-border/50 shadow-sm flex items-center justify-center group-active:scale-95 transition-transform">
+          <div className={`w-[64px] h-[64px] rounded-2xl ${bg} border border-border/30 shadow-sm flex items-center justify-center group-active:scale-95 transition-transform`}>
             <Icon className={`w-6 h-6 ${color}`} />
           </div>
           <span className="text-[11px] font-medium text-muted-foreground text-center">{label}</span>
@@ -101,13 +163,15 @@ const Index: React.FC = () => {
 
   const QuickActionsGrid = () => (
     <div className="grid grid-cols-2 gap-2">
-      {quickActions.map(({ label, icon: Icon, route, color }) => (
+      {quickActions.map(({ label, icon: Icon, route, color, bg }) => (
         <button
           key={label}
           onClick={() => navigate(route)}
           className="flex flex-col items-center gap-2 p-4 rounded-xl bg-card border border-border/50 shadow-sm hover:bg-accent/40 active:scale-95 transition-all text-center"
         >
-          <Icon className={`w-5 h-5 ${color}`} />
+          <div className={`w-9 h-9 rounded-xl ${bg} flex items-center justify-center mb-0.5`}>
+            <Icon className={`w-5 h-5 ${color}`} />
+          </div>
           <span className="text-xs font-semibold text-foreground">{label}</span>
         </button>
       ))}
@@ -144,6 +208,9 @@ const Index: React.FC = () => {
       <div className="container max-w-6xl mx-auto px-4 py-5">
 
 
+
+        {/* Hero strip — contexto da próxima cerimônia */}
+        <HeroStrip />
 
         {/* Mobile Quick Actions */}
         <div className="lg:hidden mb-6">
@@ -238,42 +305,34 @@ const Index: React.FC = () => {
               </section>
             )}
 
-            {/* Cursos + Loja grid — mobile & desktop main column */}
-            <div className="grid grid-cols-2 gap-3">
-              <Card
-                className="overflow-hidden cursor-pointer border-none shadow-sm bg-gradient-to-br from-primary/5 to-primary/10 active:scale-95 transition-transform"
-                onClick={() => navigate(ROUTES.CURSOS)}
-              >
-                <CardContent className="p-4 flex flex-col items-center text-center gap-2">
-                  <div className="w-10 h-10 rounded-full bg-background flex items-center justify-center shadow-sm text-primary">
-                    <GraduationCap className="w-5 h-5" />
-                  </div>
-                  <div>
-                    <h3 className="font-bold text-sm">Cursos</h3>
-                    <p className="text-[10px] text-muted-foreground leading-tight mt-0.5">
-                      Expanda seus conhecimentos
-                    </p>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card
-                className="overflow-hidden cursor-pointer border-none shadow-sm bg-gradient-to-br from-amber-500/5 to-amber-500/10 active:scale-95 transition-transform"
-                onClick={() => navigate(ROUTES.LOJA)}
-              >
-                <CardContent className="p-4 flex flex-col items-center text-center gap-2">
-                  <div className="w-10 h-10 rounded-full bg-background flex items-center justify-center shadow-sm text-amber-600">
-                    <ShoppingBag className="w-5 h-5" />
-                  </div>
-                  <div>
-                    <h3 className="font-bold text-sm">Loja</h3>
-                    <p className="text-[10px] text-muted-foreground leading-tight mt-0.5">
-                      Artesanatos sagrados
-                    </p>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
+            {/* Explore o Templo */}
+            <section>
+              <h2 className="font-display text-lg font-bold mb-3 px-0.5">Explore o Templo</h2>
+              <div className="grid grid-cols-2 gap-3">
+                {([
+                  { label: 'Cursos', desc: 'Expanda seus conhecimentos', icon: GraduationCap, route: ROUTES.CURSOS, from: 'from-primary/5', to: 'to-primary/10', color: 'text-primary' },
+                  { label: 'Loja', desc: 'Artesanatos sagrados', icon: ShoppingBag, route: ROUTES.LOJA, from: 'from-amber-500/5', to: 'to-amber-500/10', color: 'text-amber-600' },
+                  { label: 'Medicinas', desc: 'Conheça as plantas', icon: Leaf, route: ROUTES.MEDICINAS, from: 'from-green-500/5', to: 'to-green-500/10', color: 'text-green-600' },
+                  { label: 'Estudos', desc: 'Pós-consagração', icon: BookOpen, route: ROUTES.ESTUDOS, from: 'from-blue-500/5', to: 'to-blue-500/10', color: 'text-blue-500' },
+                ] as const).map(({ label, desc, icon: Icon, route, from, to, color }) => (
+                  <Card
+                    key={label}
+                    className={`overflow-hidden cursor-pointer border-none shadow-sm bg-gradient-to-br ${from} ${to} active:scale-95 transition-transform`}
+                    onClick={() => navigate(route)}
+                  >
+                    <CardContent className="p-4 flex flex-col items-center text-center gap-2">
+                      <div className="w-10 h-10 rounded-full bg-background flex items-center justify-center shadow-sm">
+                        <Icon className={`w-5 h-5 ${color}`} />
+                      </div>
+                      <div>
+                        <h3 className="font-bold text-sm">{label}</h3>
+                        <p className="text-[10px] text-muted-foreground leading-tight mt-0.5">{desc}</p>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </section>
 
             {/* Mobile: Quote + Social */}
             <div className="lg:hidden space-y-5 pt-2 pb-4">
@@ -286,6 +345,31 @@ const Index: React.FC = () => {
 
           {/* Desktop Sidebar */}
           <aside className="hidden lg:flex flex-col gap-4 sticky top-20">
+            {/* Próxima cerimônia — countdown */}
+            {nextUpcomingInscription && (() => {
+              const [y, m, d] = nextUpcomingInscription.cerimonia.data.split('-').map(Number);
+              const date = new Date(y, m - 1, d);
+              const today = new Date(); today.setHours(0, 0, 0, 0);
+              const days = Math.round((date.getTime() - today.getTime()) / 86400000);
+              const isNear = days <= 3;
+              return (
+                <div className={`rounded-xl border p-4 ${isNear ? 'bg-amber-500/8 border-amber-500/30' : 'bg-primary/5 border-primary/15'}`}>
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-2">Sua próxima cerimônia</p>
+                  <p className="font-display font-semibold text-sm leading-tight mb-1 truncate">
+                    {nextUpcomingInscription.cerimonia.nome || 'Cerimônia'}
+                  </p>
+                  <div className="flex items-end justify-between gap-2">
+                    <p className="text-xs text-muted-foreground">
+                      {nextUpcomingInscription.cerimonia.medicina_principal || ''}
+                    </p>
+                    <p className={`text-xl font-bold leading-none ${isNear ? 'text-amber-600 dark:text-amber-400' : 'text-primary'}`}>
+                      {days === 0 ? 'Hoje!' : days === 1 ? 'Amanhã!' : `${days}d`}
+                    </p>
+                  </div>
+                </div>
+              );
+            })()}
+
             {/* Quick Actions 2×2 */}
             <div>
               <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2 px-0.5">
@@ -293,6 +377,22 @@ const Index: React.FC = () => {
               </h3>
               <QuickActionsGrid />
             </div>
+
+            {/* Sua jornada */}
+            {inscriptions.length > 0 && (
+              <div className="rounded-xl bg-gradient-to-br from-purple-500/5 to-purple-500/10 border border-purple-500/15 p-4">
+                <div className="flex items-center gap-2 mb-3">
+                  <Sparkles className="w-4 h-4 text-purple-500" />
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Sua Jornada</p>
+                </div>
+                <p className="text-2xl font-bold text-purple-600 dark:text-purple-400 leading-none">
+                  {inscriptions.length}
+                </p>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  {inscriptions.length === 1 ? 'inscrição registrada' : 'inscrições registradas'}
+                </p>
+              </div>
+            )}
 
             {/* Sacred Quote */}
             <div className="rounded-xl bg-primary/5 border border-primary/10 p-4">

@@ -1,4 +1,4 @@
-import { Calendar, MapPin, Users, AlertCircle } from "lucide-react";
+import { Calendar, MapPin, Users, AlertCircle, Leaf } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 import { Card, CardContent } from "@/components/ui/card";
@@ -15,6 +15,20 @@ interface UpcomingCeremoniesSectionProps {
   error: Error | null;
   hasAnamnese: boolean;
 }
+
+const medicinaBadgeClass = (medicina: string | null) => {
+  if (!medicina) return null;
+  const m = medicina.toLowerCase();
+  if (m.includes('ayahuasca') || m.includes('hoasca') || m.includes('daime'))
+    return 'bg-green-100 text-green-700 dark:bg-green-950/40 dark:text-green-400';
+  if (m.includes('rapé') || m.includes('rape'))
+    return 'bg-orange-100 text-orange-700 dark:bg-orange-950/40 dark:text-orange-400';
+  if (m.includes('sananga'))
+    return 'bg-blue-100 text-blue-700 dark:bg-blue-950/40 dark:text-blue-400';
+  if (m.includes('kambô') || m.includes('kambo'))
+    return 'bg-amber-100 text-amber-700 dark:bg-amber-950/40 dark:text-amber-400';
+  return 'bg-purple-100 text-purple-700 dark:bg-purple-950/40 dark:text-purple-400';
+};
 
 export function UpcomingCeremoniesSection({
   ceremonies,
@@ -95,6 +109,15 @@ export function UpcomingCeremoniesSection({
                   <h3 className="font-semibold text-sm leading-tight truncate mb-1.5">
                     {ceremony.nome || "Cerimônia"}
                   </h3>
+                  {ceremony.medicina_principal && (() => {
+                    const cls = medicinaBadgeClass(ceremony.medicina_principal);
+                    return cls ? (
+                      <span className={`inline-flex items-center gap-1 text-[10px] font-medium px-1.5 py-0.5 rounded-full mb-1.5 ${cls}`}>
+                        <Leaf className="w-2.5 h-2.5" />
+                        {ceremony.medicina_principal}
+                      </span>
+                    ) : null;
+                  })()}
                   <div className="flex items-center gap-1 text-xs text-muted-foreground mb-2">
                     <MapPin className="h-3 w-3 shrink-0" />
                     <span className="truncate">{ceremony.local}</span>
