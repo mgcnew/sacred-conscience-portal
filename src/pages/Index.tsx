@@ -200,7 +200,7 @@ const Index: React.FC = () => {
   );
 
   return (
-    <div className="min-h-screen overflow-x-hidden pb-24 md:pb-8">
+    <div className="overflow-x-hidden pb-24 md:pb-8">
       <ConvitePartilhaModal />
 
 
