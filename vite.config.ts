@@ -20,7 +20,7 @@ export default defineConfig(({ mode }) => ({
       filename: "sw.ts",
       registerType: "autoUpdate",
       injectRegister: "auto",
-      includeAssets: ["favicon.png", "logo-full.png", "logo-topbar.png"],
+      includeAssets: ["favicon.png", "logo-full.png", "logo-topbar.png", "pwa-192x192.png", "pwa-512x512.png", "pwa-512x512-maskable.png"],
       manifest: {
         name: APP_CONFIG.name,
         short_name: APP_CONFIG.shortName,
@@ -44,7 +44,7 @@ export default defineConfig(({ mode }) => ({
             purpose: "any",
           },
           {
-            src: "/pwa-512x512.png",
+            src: "/pwa-512x512-maskable.png",
             sizes: "512x512",
             type: "image/png",
             purpose: "maskable",
