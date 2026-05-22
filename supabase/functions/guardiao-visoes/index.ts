@@ -1,7 +1,7 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 
 const GEMINI_API_URL =
-  "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent";
+  "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent";
 
 const SYSTEM_PROMPT = `Você é o Guardião das Visões — um intérprete simbólico e espiritual ligado às tradições xamânicas amazônicas e às medicinas da floresta, especialmente a Ayahuasca (Daime/Vegetal).
 
