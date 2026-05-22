@@ -6,12 +6,11 @@ import {
   Dialog,
   DialogContent,
   DialogDescription,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Heart, X } from 'lucide-react';
+import { Heart, Clock, BellOff } from 'lucide-react';
 import { ROUTES } from '@/constants';
 
 interface CerimoniaPendente {
@@ -21,10 +20,12 @@ interface CerimoniaPendente {
   cerimoniaData: string;
 }
 
-/**
- * Modal que aparece convidando o usuário a partilhar após uma cerimônia
- * Verifica se há cerimônias passadas sem partilha
- */
+const skipKey = (userId: string, cerimoniaId: string) =>
+  `convite-partilha-skip-${userId}-${cerimoniaId}`;
+
+const snoozedTodayKey = (userId: string) =>
+  `convite-partilha-snoozed-${userId}`;
+
 const ConvitePartilhaModal: React.FC = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -35,22 +36,12 @@ const ConvitePartilhaModal: React.FC = () => {
     const verificarCerimoniasPendentes = async () => {
       if (!user?.id) return;
 
-      // Verificar se já foi dispensado hoje
-      const dismissedKey = `convite-partilha-dismissed-${user.id}`;
-      const dismissed = localStorage.getItem(dismissedKey);
-      if (dismissed) {
-        const dismissedDate = new Date(dismissed);
-        const hoje = new Date();
-        // Se foi dispensado hoje, não mostrar
-        if (dismissedDate.toDateString() === hoje.toDateString()) {
-          return;
-        }
-      }
+      // Se adiou hoje, não incomodar de novo
+      const snoozed = localStorage.getItem(snoozedTodayKey(user.id));
+      if (snoozed && new Date(snoozed).toDateString() === new Date().toDateString()) return;
 
       try {
-        // Buscar inscrições de cerimônias passadas que o usuário participou (pago=true)
-        // e que ainda não tem partilha
-        const { data: inscricoes, error: inscricoesError } = await supabase
+        const { data: inscricoes, error } = await supabase
           .from('inscricoes')
           .select(`
             id,
@@ -67,13 +58,15 @@ const ConvitePartilhaModal: React.FC = () => {
           .order('cerimonias(data)', { ascending: false })
           .limit(5);
 
-        if (inscricoesError) throw inscricoesError;
+        if (error) throw error;
         if (!inscricoes || inscricoes.length === 0) return;
 
-        // Para cada inscrição, verificar se já tem partilha
         for (const inscricao of inscricoes) {
           const cerimonia = inscricao.cerimonias as any;
-          
+
+          // Pular cerimônias que o usuário optou por nunca partilhar
+          if (localStorage.getItem(skipKey(user.id, cerimonia.id))) continue;
+
           const { data: partilha } = await supabase
             .from('depoimentos')
             .select('id')
@@ -81,7 +74,6 @@ const ConvitePartilhaModal: React.FC = () => {
             .eq('cerimonia_id', cerimonia.id)
             .maybeSingle();
 
-          // Se não tem partilha, mostrar modal
           if (!partilha) {
             setCerimoniaPendente({
               inscricaoId: inscricao.id,
@@ -93,65 +85,84 @@ const ConvitePartilhaModal: React.FC = () => {
             break;
           }
         }
-      } catch (error) {
-        console.error('Erro ao verificar cerimônias pendentes:', error);
+      } catch (err) {
+        console.error('Erro ao verificar cerimônias pendentes:', err);
       }
     };
 
-    // Aguardar um pouco antes de verificar
     const timer = setTimeout(verificarCerimoniasPendentes, 3000);
     return () => clearTimeout(timer);
   }, [user?.id]);
 
   const handlePartilhar = () => {
     setOpen(false);
-    // Navegar para partilhas com o ID da cerimônia como parâmetro
     navigate(`${ROUTES.PARTILHAS}?cerimonia=${cerimoniaPendente?.cerimoniaId}`);
   };
 
-  const handleDismiss = () => {
+  // Adiar — some hoje, volta amanhã
+  const handleSnooze = () => {
     setOpen(false);
-    // Salvar que foi dispensado hoje
     if (user?.id) {
-      localStorage.setItem(
-        `convite-partilha-dismissed-${user.id}`,
-        new Date().toISOString()
-      );
+      localStorage.setItem(snoozedTodayKey(user.id), new Date().toISOString());
     }
+  };
+
+  // Nunca mais para esta cerimônia específica
+  const handleNeverForThis = () => {
+    setOpen(false);
+    if (user?.id && cerimoniaPendente) {
+      localStorage.setItem(skipKey(user.id, cerimoniaPendente.cerimoniaId), '1');
+    }
+  };
+
+  const formatDate = (dateStr: string) => {
+    const [y, m, d] = dateStr.split('-');
+    return `${d}/${m}/${y}`;
   };
 
   if (!cerimoniaPendente) return null;
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogContent className="sm:max-w-md">
+    <Dialog open={open} onOpenChange={handleSnooze}>
+      <DialogContent className="sm:max-w-sm [&>button]:hidden">
         <DialogHeader>
-          <div className="mx-auto w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-2">
-            <Heart className="w-6 h-6 text-primary" />
+          <div className="mx-auto w-14 h-14 rounded-full bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center mb-1">
+            <Heart className="w-7 h-7 text-primary" />
           </div>
-          <DialogTitle className="text-center">Como foi sua experiência?</DialogTitle>
-          <DialogDescription className="text-center">
-            Você participou da cerimônia "{cerimoniaPendente.cerimoniaNome}". 
-            Gostaríamos de saber como foi sua jornada.
+          <DialogTitle className="text-center font-display text-lg">
+            Como foi sua experiência?
+          </DialogTitle>
+          <DialogDescription className="text-center text-sm leading-relaxed">
+            <span className="font-medium text-foreground">{cerimoniaPendente.cerimoniaNome}</span>
+            <br />
+            <span className="text-xs text-muted-foreground">{formatDate(cerimoniaPendente.cerimoniaData)}</span>
           </DialogDescription>
         </DialogHeader>
 
-        <div className="py-4">
-          <p className="text-sm text-muted-foreground text-center">
-            Sua partilha pode inspirar e ajudar outras pessoas em suas jornadas de cura e autoconhecimento.
-          </p>
-        </div>
+        <p className="text-xs text-muted-foreground text-center leading-relaxed -mt-1">
+          Sua partilha pode inspirar outras pessoas em suas jornadas.
+        </p>
 
-        <DialogFooter className="flex-col sm:flex-row gap-2">
-          <Button variant="outline" onClick={handleDismiss} className="w-full sm:w-auto">
-            <X className="w-4 h-4 mr-2" />
-            Agora não
+        <div className="flex flex-col gap-2 mt-1">
+          <Button onClick={handlePartilhar} className="w-full gap-2">
+            <Heart className="w-4 h-4" />
+            Quero partilhar
           </Button>
-          <Button onClick={handlePartilhar} className="w-full sm:w-auto">
-            <Heart className="w-4 h-4 mr-2" />
-            Compartilhar Partilha
+
+          <Button variant="outline" onClick={handleSnooze} className="w-full gap-2">
+            <Clock className="w-4 h-4" />
+            Agora não (lembrar amanhã)
           </Button>
-        </DialogFooter>
+
+          <button
+            type="button"
+            onClick={handleNeverForThis}
+            className="text-xs text-muted-foreground hover:text-foreground transition-colors flex items-center justify-center gap-1.5 py-1"
+          >
+            <BellOff className="w-3.5 h-3.5" />
+            Não quero partilhar sobre esta cerimônia
+          </button>
+        </div>
       </DialogContent>
     </Dialog>
   );
