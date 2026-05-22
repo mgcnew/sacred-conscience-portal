@@ -259,7 +259,7 @@ const GuardiaoVisoes: React.FC = () => {
             <Send className="w-4 h-4" />
           </button>
         </div>
-        <p className="text-[10px] text-muted-foreground/50 text-center mt-1.5">
+        <p className="hidden lg:block text-[10px] text-muted-foreground/50 text-center mt-1.5">
           Enter para enviar · Shift+Enter para nova linha
         </p>
       </div>
