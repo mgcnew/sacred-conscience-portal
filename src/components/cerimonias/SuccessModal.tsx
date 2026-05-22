@@ -2,7 +2,7 @@ import { useState, memo } from 'react';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerDescription, DrawerFooter } from "@/components/ui/drawer";
 import { Button } from "@/components/ui/button";
-import { Sparkles, Heart, ArrowRight, Package, CheckCircle2 } from "lucide-react";
+import { Sparkles, Heart, ArrowRight, CheckCircle2 } from "lucide-react";
 import { useIsMobile } from '@/hooks/useIsMobile';
 
 const DEFAULT_ITENS = [
@@ -21,7 +21,7 @@ interface SuccessModalProps {
 // Conteúdo Step 1
 const Step1Content: React.FC<{ ceremonyName: string }> = ({ ceremonyName }) => (
   <div className="space-y-4 text-center">
-    <div className="mx-auto w-14 h-14 rounded-full bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center">
+    <div className="mx-auto w-14 h-14 rounded-full bg-gradient-to-br from-primary/20 to-primary/10 flex items-center justify-center">
       <Sparkles className="w-7 h-7 text-primary" />
     </div>
 
@@ -49,21 +49,21 @@ const Step2Content: React.FC<{ itensLevar?: string | null }> = ({ itensLevar }) 
 
   return (
     <div className="space-y-4 text-center">
-      <div className="mx-auto w-14 h-14 rounded-full bg-gradient-to-br from-secondary/20 to-primary/20 flex items-center justify-center">
-        <Package className="w-7 h-7 text-secondary" />
+      <div className="mx-auto w-14 h-14 rounded-full bg-gradient-to-br from-primary/20 to-primary/10 flex items-center justify-center">
+        <img src="/logo-conciencia.webp" alt="Consciência Divinal" className="w-9 h-9 object-contain" />
       </div>
 
       <div className="space-y-2">
-        <h3 className="font-display text-xl text-secondary">📝 O que levar?</h3>
+        <h3 className="font-display text-xl text-primary">📝 O que levar?</h3>
         <p className="text-xs text-muted-foreground">
           Para ajudar no bom funcionamento do trabalho:
         </p>
       </div>
 
-      <div className="bg-secondary/5 p-3 rounded-lg border border-secondary/20 space-y-2.5 text-left">
+      <div className="bg-primary/5 p-3 rounded-lg border border-primary/20 space-y-2.5 text-left">
         {itens.map((item, i) => (
           <div key={i} className="flex items-start gap-2.5">
-            <CheckCircle2 className="w-4 h-4 text-secondary shrink-0 mt-0.5" />
+            <CheckCircle2 className="w-4 h-4 text-primary shrink-0 mt-0.5" />
             <p className="text-sm font-medium leading-snug">{item}</p>
           </div>
         ))}
