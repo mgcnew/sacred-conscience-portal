@@ -12,6 +12,30 @@ import { cn } from '@/lib/utils';
 import { ROUTES } from '@/constants';
 import { getAllNavItems } from '@/constants/navigation';
 
+// Mapa de cores por rota — icon (ativo), bg (pílula ativa), dot (indicador)
+const NAV_COLORS: Record<string, { icon: string; bg: string; dot: string; label: string }> = {
+  [ROUTES.HOME]:          { icon: 'text-primary',     bg: 'bg-primary/12',     dot: 'bg-primary',     label: 'text-primary' },
+  [ROUTES.CERIMONIAS]:    { icon: 'text-emerald-500', bg: 'bg-emerald-500/12', dot: 'bg-emerald-500', label: 'text-emerald-600 dark:text-emerald-400' },
+  [ROUTES.GALERIA]:       { icon: 'text-blue-500',    bg: 'bg-blue-500/12',    dot: 'bg-blue-500',    label: 'text-blue-600 dark:text-blue-400' },
+  [ROUTES.ANAMNESE]:      { icon: 'text-rose-500',    bg: 'bg-rose-500/12',    dot: 'bg-rose-500',    label: 'text-rose-600 dark:text-rose-400' },
+  [ROUTES.INSIGHTS]:      { icon: 'text-violet-500',  bg: 'bg-violet-500/12',  dot: 'bg-violet-500',  label: 'text-violet-600 dark:text-violet-400' },
+  [ROUTES.MEDICINAS]:     { icon: 'text-green-600',   bg: 'bg-green-600/12',   dot: 'bg-green-600',   label: 'text-green-700 dark:text-green-400' },
+  [ROUTES.ESTUDOS]:       { icon: 'text-sky-500',     bg: 'bg-sky-500/12',     dot: 'bg-sky-500',     label: 'text-sky-600 dark:text-sky-400' },
+  [ROUTES.CURSOS]:        { icon: 'text-indigo-500',  bg: 'bg-indigo-500/12',  dot: 'bg-indigo-500',  label: 'text-indigo-600 dark:text-indigo-400' },
+  [ROUTES.BIBLIOTECA]:    { icon: 'text-purple-500',  bg: 'bg-purple-500/12',  dot: 'bg-purple-500',  label: 'text-purple-600 dark:text-purple-400' },
+  [ROUTES.PARTILHAS]:     { icon: 'text-pink-500',    bg: 'bg-pink-500/12',    dot: 'bg-pink-500',    label: 'text-pink-600 dark:text-pink-400' },
+  [ROUTES.LOJA]:          { icon: 'text-amber-600',   bg: 'bg-amber-500/12',   dot: 'bg-amber-500',   label: 'text-amber-700 dark:text-amber-400' },
+  [ROUTES.CONFIGURACOES]: { icon: 'text-slate-500',   bg: 'bg-slate-500/12',   dot: 'bg-slate-500',   label: 'text-slate-600 dark:text-slate-400' },
+  [ROUTES.ADMIN]:         { icon: 'text-red-500',     bg: 'bg-red-500/12',     dot: 'bg-red-500',     label: 'text-red-600 dark:text-red-400' },
+  [ROUTES.FINANCEIRO]:    { icon: 'text-teal-500',    bg: 'bg-teal-500/12',    dot: 'bg-teal-500',    label: 'text-teal-600 dark:text-teal-400' },
+};
+
+const DEFAULT_COLOR = { icon: 'text-primary', bg: 'bg-primary/12', dot: 'bg-primary', label: 'text-primary' };
+const getNavColor = (path: string) => NAV_COLORS[path] ?? DEFAULT_COLOR;
+
+// Cor fixa para o botão "Mais" quando algum item do drawer está ativo
+const MORE_ACTIVE_COLOR = { icon: 'text-violet-500', bg: 'bg-violet-500/12', dot: 'bg-violet-500', label: 'text-violet-600 dark:text-violet-400' };
+
 const MAIN_TABS = [
   { icon: Home, label: 'Início', path: ROUTES.HOME },
   { icon: Calendar, label: 'Cerimônias', path: ROUTES.CERIMONIAS },
@@ -62,6 +86,7 @@ const BottomNav: React.FC<BottomNavProps> = ({ isAdmin, isSuperAdmin, onSignOut 
         <div className="flex items-center justify-around h-16 px-1">
           {MAIN_TABS.map(({ icon: Icon, label, path }) => {
             const isActive = location.pathname === path;
+            const c = getNavColor(path);
             return (
               <button
                 key={path}
@@ -70,18 +95,18 @@ const BottomNav: React.FC<BottomNavProps> = ({ isAdmin, isSuperAdmin, onSignOut 
               >
                 <div className="relative flex flex-col items-center">
                   {isActive && (
-                    <span className="absolute -top-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-primary" />
+                    <span className={cn('absolute -top-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full', c.dot)} />
                   )}
                   <div
                     className={cn(
                       'w-11 h-9 rounded-2xl flex items-center justify-center transition-all duration-200',
-                      isActive ? 'bg-primary/12' : 'group-active:bg-muted/60'
+                      isActive ? c.bg : 'group-active:bg-muted/60'
                     )}
                   >
                     <Icon
                       className={cn(
                         'w-5 h-5 transition-colors duration-200',
-                        isActive ? 'text-primary' : 'text-muted-foreground'
+                        isActive ? c.icon : 'text-muted-foreground'
                       )}
                       strokeWidth={isActive ? 2.2 : 1.8}
                     />
@@ -90,7 +115,7 @@ const BottomNav: React.FC<BottomNavProps> = ({ isAdmin, isSuperAdmin, onSignOut 
                 <span
                   className={cn(
                     'text-[10px] font-medium transition-colors duration-200',
-                    isActive ? 'text-primary' : 'text-muted-foreground'
+                    isActive ? c.label : 'text-muted-foreground'
                   )}
                 >
                   {label}
@@ -106,18 +131,18 @@ const BottomNav: React.FC<BottomNavProps> = ({ isAdmin, isSuperAdmin, onSignOut 
           >
             <div className="relative flex flex-col items-center">
               {isMoreActive && (
-                <span className="absolute -top-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-primary" />
+                <span className={cn('absolute -top-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full', MORE_ACTIVE_COLOR.dot)} />
               )}
               <div
                 className={cn(
                   'w-11 h-9 rounded-2xl flex items-center justify-center transition-all duration-200',
-                  isMoreActive ? 'bg-primary/12' : 'group-active:bg-muted/60'
+                  isMoreActive ? MORE_ACTIVE_COLOR.bg : 'group-active:bg-muted/60'
                 )}
               >
                 <Grid2x2
                   className={cn(
                     'w-5 h-5 transition-colors duration-200',
-                    isMoreActive ? 'text-primary' : 'text-muted-foreground'
+                    isMoreActive ? MORE_ACTIVE_COLOR.icon : 'text-muted-foreground'
                   )}
                   strokeWidth={isMoreActive ? 2.2 : 1.8}
                 />
@@ -126,7 +151,7 @@ const BottomNav: React.FC<BottomNavProps> = ({ isAdmin, isSuperAdmin, onSignOut 
             <span
               className={cn(
                 'text-[10px] font-medium transition-colors duration-200',
-                isMoreActive ? 'text-primary' : 'text-muted-foreground'
+                isMoreActive ? MORE_ACTIVE_COLOR.label : 'text-muted-foreground'
               )}
             >
               Mais
@@ -151,22 +176,27 @@ const BottomNav: React.FC<BottomNavProps> = ({ isAdmin, isSuperAdmin, onSignOut 
             <div className="grid grid-cols-3 gap-3 mb-5">
               {moreItems.map((item) => {
                 const isActive = location.pathname === item.path;
+                const c = getNavColor(item.path);
                 return (
                   <button
                     key={item.path}
                     onClick={() => handleMoreItemClick(item.path)}
                     className={cn(
                       'flex flex-col items-center gap-2 p-3 rounded-2xl transition-all duration-150 active:scale-95',
-                      isActive
-                        ? 'bg-primary/12 text-primary'
-                        : 'bg-muted/50 text-muted-foreground hover:bg-muted active:bg-muted'
+                      isActive ? c.bg : 'bg-muted/50 hover:bg-muted'
                     )}
                   >
                     <item.icon
-                      className={cn('w-6 h-6', isActive && 'text-primary')}
+                      className={cn(
+                        'w-6 h-6 transition-colors',
+                        isActive ? c.icon : cn(c.icon, 'opacity-50')
+                      )}
                       strokeWidth={isActive ? 2.2 : 1.8}
                     />
-                    <span className="text-[11px] font-medium text-center leading-tight">
+                    <span className={cn(
+                      'text-[11px] font-medium text-center leading-tight transition-colors',
+                      isActive ? c.label : 'text-muted-foreground'
+                    )}>
                       {item.label}
                     </span>
                   </button>
