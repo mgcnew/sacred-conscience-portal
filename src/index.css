@@ -231,6 +231,35 @@
     display: none;
   }
 
+  /* Scrollbar fina com tema místico/espiritual */
+  .scrollbar-mystical {
+    scrollbar-width: thin;
+    scrollbar-color: hsl(var(--primary) / 0.3) transparent;
+  }
+  .scrollbar-mystical::-webkit-scrollbar {
+    width: 3px;
+  }
+  .scrollbar-mystical::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .scrollbar-mystical::-webkit-scrollbar-thumb {
+    background: linear-gradient(
+      to bottom,
+      hsl(var(--primary) / 0.15),
+      hsl(var(--primary) / 0.45),
+      hsl(var(--primary) / 0.15)
+    );
+    border-radius: 9999px;
+  }
+  .scrollbar-mystical::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(
+      to bottom,
+      hsl(var(--primary) / 0.3),
+      hsl(var(--primary) / 0.7),
+      hsl(var(--primary) / 0.3)
+    );
+  }
+
   /* Smooth Animations */
   .animate-fade-in {
     opacity: 0;

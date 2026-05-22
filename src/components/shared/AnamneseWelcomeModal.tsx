@@ -81,7 +81,7 @@ const AnamneseWelcomeModal: React.FC = () => {
         </div>
 
         {/* Corpo scrollável */}
-        <div className="flex-1 overflow-y-auto px-6 py-4 space-y-4 overscroll-contain">
+        <div className="flex-1 overflow-y-auto px-6 py-4 space-y-4 overscroll-contain scrollbar-mystical">
 
           {/* O que é a anamnese */}
           <div className="space-y-2.5">
