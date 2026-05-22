@@ -44,6 +44,9 @@ const MainLayout: React.FC = () => {
   // Tutorial onboarding
   const { showTutorial, completeOnboarding, closeTutorial } = useOnboarding();
   
+  // Páginas sem footer nem scroll externo (ex: chats)
+  const isChatPage = location.pathname === ROUTES.GUARDIAO_VISOES;
+
   // Páginas que não requerem anamnese (a própria página de anamnese e auth)
   const isAnamnesePage = location.pathname === ROUTES.ANAMNESE;
   const requiresAnamnese = !isAnamnesePage && !isLoadingAnamnese && !anamnese;
@@ -251,7 +254,8 @@ const MainLayout: React.FC = () => {
 
       {/* Main Content */}
       <main className={cn(
-        "min-h-screen transition-all duration-300",
+        "transition-all duration-300",
+        isChatPage ? "h-dvh overflow-hidden" : "min-h-screen",
         "pt-20 lg:pt-14",
         "pb-24 lg:pb-0",
         sidebarCollapsed ? "lg:pl-16" : "lg:pl-56"
@@ -262,28 +266,30 @@ const MainLayout: React.FC = () => {
       </main>
 
       {/* Scroll to Top */}
-      <ScrollToTop />
+      {!isChatPage && <ScrollToTop />}
 
-      {/* Footer */}
-      <footer className={cn(
-        "border-t border-border py-8 bg-muted/30 transition-all duration-300",
-        sidebarCollapsed ? "lg:pl-16" : "lg:pl-56"
-      )}>
-        <div className="container flex flex-col items-center gap-3">
-          <div className="flex items-center gap-4 text-sm text-muted-foreground">
-            <button onClick={() => navigate(ROUTES.SOBRE_NOS)} className="hover:text-foreground transition-colors">
-              Sobre Nós
-            </button>
-            <span className="text-border">·</span>
-            <button onClick={() => navigate(ROUTES.FAQ)} className="hover:text-foreground transition-colors">
-              FAQ
-            </button>
+      {/* Footer — oculto em páginas de chat para evitar scroll externo */}
+      {!isChatPage && (
+        <footer className={cn(
+          "border-t border-border py-8 bg-muted/30 transition-all duration-300",
+          sidebarCollapsed ? "lg:pl-16" : "lg:pl-56"
+        )}>
+          <div className="container flex flex-col items-center gap-3">
+            <div className="flex items-center gap-4 text-sm text-muted-foreground">
+              <button onClick={() => navigate(ROUTES.SOBRE_NOS)} className="hover:text-foreground transition-colors">
+                Sobre Nós
+              </button>
+              <span className="text-border">·</span>
+              <button onClick={() => navigate(ROUTES.FAQ)} className="hover:text-foreground transition-colors">
+                FAQ
+              </button>
+            </div>
+            <p className="text-xs text-muted-foreground/70">
+              © 2024 Consciência Divinal. Com amor e respeito pelas medicinas ancestrais.
+            </p>
           </div>
-          <p className="text-xs text-muted-foreground/70">
-            © 2024 Consciência Divinal. Com amor e respeito pelas medicinas ancestrais.
-          </p>
-        </div>
-      </footer>
+        </footer>
+      )}
     </div>
   );
 };

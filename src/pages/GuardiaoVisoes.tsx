@@ -47,13 +47,6 @@ const GuardiaoVisoes: React.FC = () => {
       });
   }, [user?.id]);
 
-  // Trava o scroll externo da página enquanto o chat está aberto
-  useEffect(() => {
-    const prev = document.body.style.overflow;
-    document.body.style.overflow = 'hidden';
-    return () => { document.body.style.overflow = prev; };
-  }, []);
-
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, loading]);
