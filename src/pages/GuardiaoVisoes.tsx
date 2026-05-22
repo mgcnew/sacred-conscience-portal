@@ -121,7 +121,7 @@ const GuardiaoVisoes: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col h-[calc(100dvh-11rem)] lg:h-[calc(100dvh-3.5rem)] max-w-2xl mx-auto px-4">
+    <div className="flex flex-col h-[calc(100dvh-9rem)] lg:h-[calc(100dvh-3.5rem)] max-w-2xl mx-auto px-4">
 
       {/* Header */}
       <div className="flex items-center justify-between py-4 shrink-0">

@@ -257,7 +257,7 @@ const MainLayout: React.FC = () => {
         "transition-all duration-300",
         isChatPage ? "h-dvh overflow-hidden" : "min-h-screen",
         "pt-20 lg:pt-14",
-        "pb-24 lg:pb-0",
+        isChatPage ? "pb-16 lg:pb-0" : "pb-24 lg:pb-0",
         sidebarCollapsed ? "lg:pl-16" : "lg:pl-56"
       )}>
         <div key={location.pathname} className="page-transition">
