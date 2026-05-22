@@ -95,14 +95,46 @@ export function UpcomingCeremoniesSection({
             onClick={() => navigate(`${ROUTES.CERIMONIAS}#${ceremony.id}`)}
           >
             <CardContent className="p-0">
-              <div className="flex items-stretch">
-                {/* Date badge */}
-                <div className="flex flex-col items-center justify-center bg-primary/8 border-r border-border/40 px-3 py-4 min-w-[60px]">
-                  <span className="text-xl font-bold text-primary leading-none">{dayNum}</span>
-                  <span className="text-[10px] font-semibold text-primary/70 uppercase tracking-wide mt-0.5">
-                    {monthShort}
-                  </span>
+              {/* Banner — só aparece quando a cerimônia tem imagem */}
+              {ceremony.banner_url && (
+                <div className="relative h-[100px] w-full overflow-hidden">
+                  <img
+                    src={ceremony.banner_url}
+                    alt={ceremony.nome || 'Cerimônia'}
+                    className="w-full h-full object-cover"
+                  />
+                  {/* Gradiente para proteger legibilidade do conteúdo abaixo */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-background/60 to-transparent" />
+                  {/* Data sobreposta no banner */}
+                  <div className="absolute bottom-2 left-3 flex items-baseline gap-1">
+                    <span className="text-2xl font-bold text-white drop-shadow leading-none">{dayNum}</span>
+                    <span className="text-xs font-semibold text-white/80 uppercase tracking-wide drop-shadow">{monthShort}</span>
+                  </div>
+                  {/* Vagas sobreposta no banner */}
+                  <div className="absolute bottom-2 right-3">
+                    <Badge
+                      variant={ceremony.vagas_disponiveis > 0 ? "default" : "secondary"}
+                      className="flex items-center gap-1 text-[10px] h-5 shadow"
+                    >
+                      <Users className="h-2.5 w-2.5" />
+                      {ceremony.vagas_disponiveis > 0
+                        ? `${ceremony.vagas_disponiveis} ${ceremony.vagas_disponiveis === 1 ? "vaga" : "vagas"}`
+                        : "Esgotado"}
+                    </Badge>
+                  </div>
                 </div>
+              )}
+
+              <div className="flex items-stretch">
+                {/* Date badge — só aparece quando NÃO há banner */}
+                {!ceremony.banner_url && (
+                  <div className="flex flex-col items-center justify-center bg-primary/8 border-r border-border/40 px-3 py-4 min-w-[60px]">
+                    <span className="text-xl font-bold text-primary leading-none">{dayNum}</span>
+                    <span className="text-[10px] font-semibold text-primary/70 uppercase tracking-wide mt-0.5">
+                      {monthShort}
+                    </span>
+                  </div>
+                )}
 
                 {/* Content */}
                 <div className="flex-1 p-3 min-w-0">
@@ -123,19 +155,22 @@ export function UpcomingCeremoniesSection({
                     <span className="truncate">{ceremony.local}</span>
                   </div>
                   <div className="flex items-center justify-between gap-2">
-                    <Badge
-                      variant={ceremony.vagas_disponiveis > 0 ? "default" : "secondary"}
-                      className="flex items-center gap-1 text-[10px] h-5"
-                    >
-                      <Users className="h-2.5 w-2.5" />
-                      {ceremony.vagas_disponiveis > 0
-                        ? `${ceremony.vagas_disponiveis} ${ceremony.vagas_disponiveis === 1 ? "vaga" : "vagas"}`
-                        : "Esgotado"}
-                    </Badge>
+                    {/* Vagas — só aparece aqui quando não há banner (quando há, está no banner) */}
+                    {!ceremony.banner_url && (
+                      <Badge
+                        variant={ceremony.vagas_disponiveis > 0 ? "default" : "secondary"}
+                        className="flex items-center gap-1 text-[10px] h-5"
+                      >
+                        <Users className="h-2.5 w-2.5" />
+                        {ceremony.vagas_disponiveis > 0
+                          ? `${ceremony.vagas_disponiveis} ${ceremony.vagas_disponiveis === 1 ? "vaga" : "vagas"}`
+                          : "Esgotado"}
+                      </Badge>
+                    )}
                     <Button
                       size="sm"
                       variant="ghost"
-                      className="h-7 text-xs text-primary px-2"
+                      className="h-7 text-xs text-primary px-2 ml-auto"
                       onClick={(e) => {
                         e.stopPropagation();
                         navigate(`${ROUTES.CERIMONIAS}#${ceremony.id}`);
