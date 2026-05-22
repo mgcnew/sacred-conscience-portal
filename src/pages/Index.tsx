@@ -54,7 +54,7 @@ const Index: React.FC = () => {
     data: inscriptions = [],
     isLoading: inscriptionsLoading,
     error: inscriptionsError,
-  } = useMyInscriptions(user?.id, 3, true);
+  } = useMyInscriptions(user?.id, 1, true);
 
   useEffect(() => {
     const checkAnamnese = async () => {
