@@ -61,9 +61,13 @@ const App = () => {
   useEffect(() => {
     const el = document.getElementById('splash-screen');
     if (!el) return;
-    el.style.opacity = '0';
-    el.style.visibility = 'hidden';
-    const t = setTimeout(() => el.remove(), 600);
+    const MIN_MS = 3000;
+    const elapsed = Date.now() - ((window as any).__splashStart ?? Date.now());
+    const delay = Math.max(0, MIN_MS - elapsed);
+    const t = setTimeout(() => {
+      el.style.opacity = '0';
+      setTimeout(() => el.remove(), 700);
+    }, delay);
     return () => clearTimeout(t);
   }, []);
 
