@@ -109,6 +109,14 @@ const PaymentContent: React.FC<{
           </p>
         </div>
 
+        {/* Aviso de responsabilidade */}
+        <div className="flex items-start gap-3 p-3 rounded-xl bg-primary/5 border border-primary/15">
+          <span className="text-base leading-none mt-0.5">🌿</span>
+          <p className="text-[11px] text-foreground/70 leading-snug">
+            Cada vaga é preciosa e pode ser a jornada de outra pessoa. <span className="font-semibold text-foreground/90">Confirme apenas se tiver certeza da sua presença.</span> Caso precise desistir, avise-nos com pelo menos <span className="font-semibold text-foreground/90">3 dias de antecedência</span> — assim honramos o espaço sagrado e quem aguarda uma oportunidade.
+          </p>
+        </div>
+
         {/* Seleção de Pagamento Visual */}
         <div className="space-y-3">
           <Label className="text-[10px] uppercase tracking-widest text-muted-foreground font-bold ml-1">
