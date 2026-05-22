@@ -56,7 +56,7 @@ const Step2Content: React.FC<{ itensLevar?: string | null }> = ({ itensLevar }) 
       <div className="space-y-2">
         <h3 className="font-display text-xl text-primary">📝 O que levar?</h3>
         <p className="text-xs text-muted-foreground">
-          Para ajudar no bom funcionamento do trabalho:
+          Com cuidado e intenção, prepare o que levar:
         </p>
       </div>
 
