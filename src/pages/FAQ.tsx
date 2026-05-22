@@ -12,6 +12,7 @@ import { APP_CONFIG } from '@/config/app';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { cn } from '@/lib/utils';
+import FadeIn from '@/components/ui/FadeIn';
 
 const faqCategories = [
   {
@@ -197,6 +198,7 @@ const FAQ: React.FC = () => {
       )}
 
       {/* Hero */}
+      <FadeIn>
       <div className="text-center mb-8">
         <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 border border-primary/20 mb-4">
           <Leaf className="w-3.5 h-3.5 text-primary" />
@@ -209,8 +211,10 @@ const FAQ: React.FC = () => {
           Preparação, cerimônia, segurança e integração — leia com atenção e chegue pronto para viver plenamente esta experiência.
         </p>
       </div>
+      </FadeIn>
 
       {/* Quick-nav pills */}
+      <FadeIn delay={80}>
       <div className="flex gap-2 overflow-x-auto pb-1 -mx-4 px-4 mb-8 scrollbar-none">
         {faqCategories.map((cat) => (
           <button
@@ -226,12 +230,13 @@ const FAQ: React.FC = () => {
           </button>
         ))}
       </div>
+      </FadeIn>
 
       {/* Categorias */}
       <div className="space-y-6">
-        {faqCategories.map((category) => (
+        {faqCategories.map((category, i) => (
+          <FadeIn key={category.id} delay={i * 80}>
           <div
-            key={category.id}
             ref={el => { sectionRefs.current[category.id] = el; }}
             className={cn('rounded-2xl border overflow-hidden scroll-mt-20', category.color.card)}
           >
@@ -269,10 +274,12 @@ const FAQ: React.FC = () => {
               </Accordion>
             </div>
           </div>
+          </FadeIn>
         ))}
       </div>
 
       {/* Aviso de segurança */}
+      <FadeIn>
       <div className="mt-6 flex items-start gap-3 p-4 rounded-2xl bg-amber-500/8 border border-amber-500/20">
         <AlertTriangle className="w-5 h-5 text-amber-500 shrink-0 mt-0.5" />
         <div>
@@ -282,8 +289,10 @@ const FAQ: React.FC = () => {
           </p>
         </div>
       </div>
+      </FadeIn>
 
       {/* Footer CTA */}
+      <FadeIn delay={60}>
       <div className="mt-8 rounded-2xl bg-gradient-to-br from-primary/10 to-primary/5 border border-primary/15 p-6 text-center">
         <div className="w-10 h-10 rounded-full bg-primary/15 flex items-center justify-center mx-auto mb-3">
           <Heart className="w-5 h-5 text-primary" />
@@ -302,6 +311,7 @@ const FAQ: React.FC = () => {
           Falar com a equipe
         </a>
       </div>
+      </FadeIn>
 
     </PageContainer>
   );

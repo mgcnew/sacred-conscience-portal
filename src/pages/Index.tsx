@@ -33,6 +33,7 @@ import ConvitePartilhaModal from '@/components/shared/ConvitePartilhaModal';
 // Custom hooks
 import { useUpcomingCeremonies } from '@/hooks/queries/useUpcomingCeremonies';
 import { useMyInscriptions } from '@/hooks/queries/useMyInscriptions';
+import FadeIn from '@/components/ui/FadeIn';
 
 
 const Index: React.FC = () => {
@@ -210,12 +211,14 @@ const Index: React.FC = () => {
 
 
         {/* Hero strip — contexto da próxima cerimônia */}
-        <HeroStrip />
+        <FadeIn>
+          <HeroStrip />
+        </FadeIn>
 
         {/* Mobile Quick Actions */}
-        <div className="lg:hidden mb-6">
+        <FadeIn delay={80} className="lg:hidden mb-6">
           <QuickActionsScroll />
-        </div>
+        </FadeIn>
 
         {/* Two-column grid */}
         <div className="grid grid-cols-1 lg:grid-cols-[1fr_280px] gap-6 items-start">
@@ -259,6 +262,7 @@ const Index: React.FC = () => {
             {isAdmin && <AdminReminders />}
 
             {/* Upcoming Ceremonies */}
+            <FadeIn delay={60}>
             <section>
               <div className="flex items-center justify-between mb-3 px-0.5">
                 <h2 className="font-display text-lg font-bold">Próximos Eventos</h2>
@@ -284,9 +288,11 @@ const Index: React.FC = () => {
                 />
               </SectionErrorBoundary>
             </section>
+            </FadeIn>
 
             {/* My Inscriptions */}
             {(inscriptions.length > 0 || inscriptionsLoading) && (
+            <FadeIn delay={80}>
               <section>
                 <div className="flex items-center justify-between mb-3 px-0.5">
                   <h2 className="font-display text-lg font-bold">Suas Inscrições</h2>
@@ -303,9 +309,11 @@ const Index: React.FC = () => {
                   />
                 </SectionErrorBoundary>
               </section>
+            </FadeIn>
             )}
 
             {/* Explore o Templo */}
+            <FadeIn delay={100}>
             <section>
               <h2 className="font-display text-lg font-bold mb-3 px-0.5">Explore o Templo</h2>
               <div className="grid grid-cols-2 gap-3">
@@ -333,14 +341,17 @@ const Index: React.FC = () => {
                 ))}
               </div>
             </section>
+            </FadeIn>
 
             {/* Mobile: Quote + Social */}
+            <FadeIn delay={120}>
             <div className="lg:hidden space-y-5 pt-2 pb-4">
               <blockquote className="font-display text-center text-base md:text-lg italic text-muted-foreground px-2">
                 "A medicina não cura, ela revela. O caminho da cura está dentro de você."
               </blockquote>
               <SocialLinks />
             </div>
+            </FadeIn>
           </div>
 
           {/* Desktop Sidebar */}
