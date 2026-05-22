@@ -188,12 +188,12 @@ const MainLayout: React.FC = () => {
       <div className="lg:hidden fixed top-0 left-0 right-0 z-50 bg-background/90 backdrop-blur-md border-b border-border/30 px-4">
         <div className="flex h-16 items-center justify-between">
           <div
-            className="flex items-center gap-2.5 cursor-pointer active:opacity-70 transition-opacity"
+            className="flex items-center gap-2.5 cursor-pointer hover:bg-muted/50 active:bg-muted/70 rounded-xl px-1.5 py-1 -ml-1.5 transition-colors"
             onClick={() => navigate(ROUTES.HOME)}
           >
-            <Avatar className="w-10 h-10 border-2 border-primary/25 shadow-sm">
+            <Avatar className="w-10 h-10 ring-2 ring-primary/30 ring-offset-2 ring-offset-background shadow-sm">
               <AvatarImage src={userAvatar || undefined} alt={userName} />
-              <AvatarFallback className="bg-primary/10 text-primary text-sm font-semibold">
+              <AvatarFallback className="bg-gradient-to-br from-primary/25 to-secondary/15 text-primary text-sm font-semibold">
                 {userName?.charAt(0)?.toUpperCase() || <User className="w-4 h-4" />}
               </AvatarFallback>
             </Avatar>
@@ -224,18 +224,18 @@ const MainLayout: React.FC = () => {
         sidebarCollapsed ? "left-16" : "left-56"
       )}>
         <div className="flex h-full items-center justify-between px-6">
-          <div 
-            className="flex items-center gap-3 cursor-pointer hover:opacity-80 transition-opacity"
+          <div
+            className="flex items-center gap-3 cursor-pointer hover:bg-muted/50 rounded-xl px-2 py-1 -ml-2 transition-colors"
             onClick={() => navigate(ROUTES.HOME)}
           >
-            <Avatar className="w-9 h-9 border-2 border-primary/20">
+            <Avatar className="w-9 h-9 ring-2 ring-primary/30 ring-offset-2 ring-offset-background">
               <AvatarImage src={userAvatar || undefined} alt={userName} />
-              <AvatarFallback className="bg-primary/10 text-primary text-sm">
+              <AvatarFallback className="bg-gradient-to-br from-primary/25 to-secondary/15 text-primary text-sm">
                 {userName?.charAt(0)?.toUpperCase() || <User className="w-4 h-4" />}
               </AvatarFallback>
             </Avatar>
             <div className="flex flex-col gap-0">
-              <span className="text-xs text-muted-foreground font-medium">Bem-vindo</span>
+              <span className="text-xs text-muted-foreground font-medium">{getGreeting()}</span>
               <span className="text-sm font-semibold text-foreground">
                 {userName || 'Usuário'}
               </span>
