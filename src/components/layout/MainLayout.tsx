@@ -10,7 +10,7 @@ import { ROUTES } from '@/constants';
 import NotificationBell from '@/components/layout/NotificationBell';
 import Sidebar from '@/components/layout/Sidebar';
 import BottomNav from '@/components/layout/BottomNav';
-import { WelcomeModal, InstallPWAPrompt, OnboardingTutorial } from '@/components/shared';
+import { WelcomeModal, InstallPWAPrompt, OnboardingTutorial, AnamneseWelcomeModal } from '@/components/shared';
 import PWAUpdatePrompt from '@/components/shared/PWAUpdatePrompt';
 import { ScrollToTop } from '@/components/ui/scroll-to-top';
 import { useUserAnamnese } from '@/hooks/queries/useProfiles';
@@ -166,6 +166,7 @@ const MainLayout: React.FC = () => {
     <div className="min-h-screen bg-background">
       <PWAUpdatePrompt />
       <WelcomeModal />
+      <AnamneseWelcomeModal />
       <InstallPWAPrompt />
       <OnboardingTutorial
         isAdmin={isAdmin}
