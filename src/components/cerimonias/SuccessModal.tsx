@@ -6,10 +6,40 @@ import { Sparkles, Heart, ArrowRight, CheckCircle2 } from "lucide-react";
 import { useIsMobile } from '@/hooks/useIsMobile';
 
 const DEFAULT_ITENS = [
-  '2 rolos de papel higiênico',
-  'Alimentos para partilha',
-  'Uma vela',
+  '🧻 2 rolos de papel higiênico',
+  '🍎 Alimentos para partilha',
+  '🕯️ Uma vela',
 ];
+
+const EMOJI_MAP: { keywords: string[]; emoji: string }[] = [
+  { keywords: ['papel higiênico', 'papel higienico', 'papel'], emoji: '🧻' },
+  { keywords: ['alimento', 'comida', 'fruta', 'lanche', 'partilha'], emoji: '🍎' },
+  { keywords: ['vela', 'velas'], emoji: '🕯️' },
+  { keywords: ['água', 'agua', 'garrafa'], emoji: '💧' },
+  { keywords: ['roupa', 'roupas', 'vestimenta', 'vestuário'], emoji: '👕' },
+  { keywords: ['cobertor', 'manta', 'colchão', 'colchonete'], emoji: '🛏️' },
+  { keywords: ['travesseiro', 'almofada'], emoji: '🪄' },
+  { keywords: ['toalha'], emoji: '🏳️' },
+  { keywords: ['documento', 'rg', 'identidade', 'cpf'], emoji: '🪪' },
+  { keywords: ['dinheiro', 'pagamento', 'pix'], emoji: '💰' },
+  { keywords: ['medicamento', 'remédio', 'remedio'], emoji: '💊' },
+  { keywords: ['incenso'], emoji: '🌿' },
+  { keywords: ['cristal', 'pedra'], emoji: '💎' },
+  { keywords: ['caderno', 'diário', 'diario', 'caneta'], emoji: '📓' },
+  { keywords: ['flor', 'flores'], emoji: '🌸' },
+  { keywords: ['terço', 'terco', 'rosário', 'rosario'], emoji: '📿' },
+  { keywords: ['sapato', 'sandália', 'sandalia', 'chinelo'], emoji: '👟' },
+];
+
+function addEmojiToItem(item: string): string {
+  const lower = item.toLowerCase();
+  // Já tem emoji no início — não adicionar
+  if (/^\p{Emoji}/u.test(item.trim())) return item;
+  const match = EMOJI_MAP.find(({ keywords }) =>
+    keywords.some(kw => lower.includes(kw))
+  );
+  return match ? `${match.emoji} ${item}` : item;
+}
 
 interface SuccessModalProps {
   isOpen: boolean;
@@ -44,7 +74,7 @@ const Step1Content: React.FC<{ ceremonyName: string }> = ({ ceremonyName }) => (
 // Conteúdo Step 2 — itens dinâmicos por cerimônia
 const Step2Content: React.FC<{ itensLevar?: string | null }> = ({ itensLevar }) => {
   const itens = itensLevar
-    ? itensLevar.split('\n').map(l => l.trim()).filter(Boolean)
+    ? itensLevar.split('\n').map(l => l.trim()).filter(Boolean).map(addEmojiToItem)
     : DEFAULT_ITENS;
 
   return (
