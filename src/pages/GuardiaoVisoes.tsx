@@ -239,7 +239,7 @@ const GuardiaoVisoes: React.FC = () => {
       {messages.length > 1 && (
         <div className="shrink-0 pb-2">
           <a
-            href={`https://wa.me/${APP_CONFIG.contacts.whatsappLider}?text=${encodeURIComponent('Olá Mestre Knai, tenho dúvidas sobre minhas visões e gostaria de conversar.')}`}
+            href={`https://wa.me/${APP_CONFIG.contacts.whatsappLider}?text=${encodeURIComponent('Olá Mestre Kenay, tenho dúvidas sobre minhas visões e gostaria de conversar.')}`}
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center gap-2.5 px-4 py-2.5 rounded-xl bg-green-500/10 border border-green-500/20 hover:bg-green-500/15 hover:border-green-500/35 transition-all group"
@@ -249,7 +249,7 @@ const GuardiaoVisoes: React.FC = () => {
             </svg>
             <p className="text-xs text-muted-foreground group-hover:text-foreground transition-colors leading-tight">
               Ainda com dúvidas sobre suas visões?{' '}
-              <span className="font-medium text-green-600 dark:text-green-400">Converse com o Mestre Knai</span>
+              <span className="font-medium text-green-600 dark:text-green-400">Converse com o Mestre Kenay</span>
             </p>
           </a>
         </div>
