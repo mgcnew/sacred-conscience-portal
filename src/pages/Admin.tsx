@@ -44,7 +44,6 @@ import { LogsTab } from '@/components/admin/LogsTab';
 import { TaxasMPTab } from '@/components/admin/TaxasMPTab';
 import { DashboardTab } from '@/components/admin/DashboardTab';
 import { VendasTab } from '@/components/admin/VendasTab';
-import { DepoimentosTab } from '@/components/admin/DepoimentosTab';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import {
@@ -61,7 +60,6 @@ import {
   Trash2,
   DollarSign,
   CreditCard,
-  MessageSquareQuote,
   Download,
   Filter,
   ChevronDown,
@@ -94,10 +92,8 @@ import {
   useAnamneses,
   useCerimoniasAdmin,
   useInscricoesAdmin,
-  useDepoimentosPendentes,
   useRoles,
   useUserRoles,
-
   useMinhasPermissoes,
   usePagamentosProdutos,
 } from '@/hooks/queries';
@@ -184,7 +180,6 @@ const Admin: React.FC = () => {
   const { data: inscricoes, isLoading: isLoadingInscricoes } = useInscricoesAdmin();
   const { data: categoriasFinanceiras } = useCategoriasFinanceiras();
 
-  const { data: depoimentosPendentes, isLoading: isLoadingDepoimentos, error: depoimentosError } = useDepoimentosPendentes();
   const { data: pagamentosProdutos, isLoading: isLoadingPagamentos } = usePagamentosProdutos();
   
   // Estado para confirmação de pagamento e valor
@@ -212,51 +207,6 @@ const Admin: React.FC = () => {
   const { temPermissao, temPermissaoExplicita, isSuperAdmin } = useCheckPermissao();
 
 
-
-  // Mutation para aprovar depoimento
-  const approveDepoimentoMutation = useMutation({
-    mutationFn: async (depoimentoId: string) => {
-      const { error } = await supabase
-        .from('depoimentos')
-        .update({ aprovado: true, approved_at: new Date().toISOString() })
-        .eq('id', depoimentoId);
-      if (error) throw error;
-    },
-    onSuccess: () => {
-      toast.success(TOAST_MESSAGES.depoimento.aprovado.title, {
-        description: TOAST_MESSAGES.depoimento.aprovado.description,
-      });
-      queryClient.invalidateQueries({ queryKey: ['admin-depoimentos-pendentes'] });
-      queryClient.invalidateQueries({ queryKey: ['depoimentos-aprovados'] });
-    },
-    onError: () => {
-      toast.error(TOAST_MESSAGES.depoimento.erroAprovar.title, {
-        description: TOAST_MESSAGES.depoimento.erroAprovar.description,
-      });
-    }
-  });
-
-  // Mutation para rejeitar/deletar depoimento
-  const rejectDepoimentoMutation = useMutation({
-    mutationFn: async (depoimentoId: string) => {
-      const { error } = await supabase
-        .from('depoimentos')
-        .delete()
-        .eq('id', depoimentoId);
-      if (error) throw error;
-    },
-    onSuccess: () => {
-      toast.success(TOAST_MESSAGES.depoimento.rejeitado.title, {
-        description: TOAST_MESSAGES.depoimento.rejeitado.description,
-      });
-      queryClient.invalidateQueries({ queryKey: ['admin-depoimentos-pendentes'] });
-    },
-    onError: () => {
-      toast.error(TOAST_MESSAGES.depoimento.erroRejeitar.title, {
-        description: TOAST_MESSAGES.depoimento.erroRejeitar.description,
-      });
-    }
-  });
 
   // Mutation para atualizar status de pagamento
   const togglePaymentMutation = useMutation({
@@ -745,13 +695,6 @@ const Admin: React.FC = () => {
     if (temPermissao('gerenciar_pagamentos')) {
       tabs.push({ value: 'inscricoes', label: 'Inscrições' });
     }
-    if (temPermissao('aprovar_depoimentos')) {
-      tabs.push({ 
-        value: 'depoimentos', 
-        label: isMobile ? 'Partilhas' : 'Partilhas',
-        badge: depoimentosPendentes?.length || 0
-      });
-    }
     if (temPermissao('ver_cerimonias')) {
       tabs.push({ value: 'cerimonias', label: isMobile ? 'Eventos' : 'Cerimônias' });
     }
@@ -768,7 +711,7 @@ const Admin: React.FC = () => {
     }
 
     return tabs;
-  }, [isMobile, temPermissao, temPermissaoExplicita, isSuperAdmin, depoimentosPendentes]);
+  }, [isMobile, temPermissao, temPermissaoExplicita, isSuperAdmin]);
 
   return (
     <div className="min-h-screen py-4 md:py-6 bg-background/50 pb-20">
@@ -2086,17 +2029,6 @@ const Admin: React.FC = () => {
                 )}
               </CardContent>
             </Card>
-          </TabsContent>
-
-          {/* DEPOIMENTOS TAB */}
-          <TabsContent value="depoimentos" className="space-y-6 ">
-            <DepoimentosTab
-              depoimentosPendentes={depoimentosPendentes}
-              isLoadingDepoimentos={isLoadingDepoimentos}
-              depoimentosError={depoimentosError}
-              approveDepoimentoMutation={approveDepoimentoMutation}
-              rejectDepoimentoMutation={rejectDepoimentoMutation}
-            />
           </TabsContent>
 
           {/* CERIMONIAS TAB */}
