@@ -42,7 +42,7 @@ const DialogContent = React.forwardRef<
         transform: 'translate(-50%, -50%)',
       }}
       className={cn(
-        "z-50 grid w-full max-w-lg gap-4 border bg-background p-6 shadow-xl dark:shadow-2xl sm:rounded-xl",
+        "z-50 grid w-full max-w-lg gap-4 border bg-background p-6 shadow-xl dark:shadow-2xl rounded-xl",
         className,
       )}
       {...props}
