@@ -117,21 +117,21 @@ const AnamneseWelcomeModal: React.FC = () => {
             </p>
           </div>
 
-          {/* Checkbox */}
+        </div>
+
+        {/* Footer fixo */}
+        <div className="px-6 pb-5 pt-3 flex flex-col gap-3 border-t border-border/40 shrink-0 bg-background">
+          {/* Checkbox sempre visível */}
           <label className="flex items-start gap-3 cursor-pointer group">
             <Checkbox
               checked={checked}
               onCheckedChange={(v) => setChecked(!!v)}
               className="mt-0.5 shrink-0"
             />
-            <span className="text-sm text-foreground/80 leading-relaxed group-hover:text-foreground transition-colors">
+            <span className="text-sm text-foreground/80 leading-relaxed group-hover:text-foreground transition-colors select-none">
               Compreendo a importância da ficha de anamnese e estou ciente de que preciso preenchê-la para participar das cerimônias.
             </span>
           </label>
-        </div>
-
-        {/* Footer fixo */}
-        <div className="px-6 pb-5 pt-3 flex flex-col gap-2 border-t border-border/40 shrink-0 bg-background">
           <Button
             onClick={handleGoToAnamnese}
             className="w-full gap-2 font-semibold"
