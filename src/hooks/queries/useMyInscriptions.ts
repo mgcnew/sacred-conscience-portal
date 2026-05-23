@@ -2,6 +2,30 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 
 /**
+ * Verifica se o usuário já participou de ao menos uma cerimônia
+ * (inscrição com presenca_confirmada = true e não cancelada)
+ */
+export const useTemConsagracao = (userId: string | undefined) => {
+  return useQuery({
+    queryKey: ['tem-consagracao', userId],
+    enabled: !!userId,
+    staleTime: 1000 * 60 * 10,
+    queryFn: async (): Promise<boolean> => {
+      const { data, error } = await supabase
+        .from('inscricoes')
+        .select('id')
+        .eq('user_id', userId!)
+        .eq('presenca_confirmada', true)
+        .or('cancelada.is.null,cancelada.eq.false')
+        .limit(1);
+
+      if (error) throw error;
+      return (data?.length ?? 0) > 0;
+    },
+  });
+};
+
+/**
  * Dados da cerimônia na inscrição
  */
 interface CerimoniaData {

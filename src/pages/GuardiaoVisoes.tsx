@@ -1,11 +1,16 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Eye, Send, Sparkles, RotateCcw, ChevronDown, Share2, Link2, MessageSquareText } from 'lucide-react';
+import { Eye, Send, Sparkles, RotateCcw, ChevronDown, Share2, Link2, MessageSquareText, Lock } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { APP_CONFIG } from '@/config/app';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Button } from '@/components/ui/button';
+import { Skeleton } from '@/components/ui/skeleton';
+import { useTemConsagracao } from '@/hooks/queries/useMyInscriptions';
+import { ROUTES } from '@/constants';
 
 interface Message {
   role: 'user' | 'model';
@@ -26,7 +31,9 @@ const SUGGESTIONS = [
 ];
 
 const GuardiaoVisoes: React.FC = () => {
-  const { user } = useAuth();
+  const { user, isAdmin, isGuardiao } = useAuth();
+  const navigate = useNavigate();
+  const { data: temConsagracao, isLoading: isCheckingAcesso } = useTemConsagracao(user?.id);
   const [messages, setMessages] = useState<Message[]>([WELCOME_MESSAGE]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
@@ -163,6 +170,59 @@ const GuardiaoVisoes: React.FC = () => {
       send(input);
     }
   };
+
+  const temAcesso = isAdmin || isGuardiao || temConsagracao === true;
+
+  if (isCheckingAcesso) {
+    return (
+      <div className="max-w-2xl mx-auto px-4 py-8 space-y-3">
+        <Skeleton className="h-10 w-48" />
+        <Skeleton className="h-32 w-full" />
+        <Skeleton className="h-24 w-full" />
+      </div>
+    );
+  }
+
+  if (!temAcesso) {
+    return (
+      <div className="max-w-2xl mx-auto px-4 py-12 flex flex-col items-center text-center gap-6">
+        <div className="relative w-20 h-20 rounded-3xl bg-gradient-to-br from-violet-600/20 to-primary/10 flex items-center justify-center">
+          <Eye className="w-9 h-9 text-violet-400/60" />
+          <div className="absolute -bottom-1 -right-1 w-7 h-7 rounded-full bg-background border-2 border-border flex items-center justify-center">
+            <Lock className="w-3.5 h-3.5 text-muted-foreground" />
+          </div>
+        </div>
+
+        <div className="space-y-2 max-w-sm">
+          <h1 className="font-display text-xl font-bold text-foreground">
+            Guardião das Visões
+          </h1>
+          <p className="text-muted-foreground text-sm leading-relaxed">
+            Este espaço é reservado para quem já vivenciou ao menos uma cerimônia conosco.
+          </p>
+        </div>
+
+        <div className="bg-violet-500/8 border border-violet-500/20 rounded-2xl px-6 py-5 max-w-sm space-y-3 text-left">
+          <p className="text-sm text-foreground/80 leading-relaxed">
+            🌿 O Guardião das Visões é um lugar sagrado de integração — ele acolhe visões, sonhos e símbolos que emergem da experiência com as medicinas.
+          </p>
+          <p className="text-sm text-muted-foreground leading-relaxed">
+            Ao participar de uma cerimônia e ter sua presença confirmada, este espaço se abrirá para você.
+          </p>
+        </div>
+
+        <div className="flex flex-col gap-2 w-full max-w-xs">
+          <Button onClick={() => navigate(ROUTES.CERIMONIAS)} className="w-full gap-2">
+            <Sparkles className="w-4 h-4" />
+            Ver cerimônias disponíveis
+          </Button>
+          <Button variant="ghost" onClick={() => navigate(ROUTES.HOME)} className="w-full text-muted-foreground">
+            Voltar ao início
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col h-[calc(100dvh-9rem)] lg:h-[calc(100dvh-3.5rem)] max-w-2xl mx-auto px-4">
