@@ -221,8 +221,30 @@ const SobreNos: React.FC = () => {
             </div>
           </FadeIn>
 
-          {/* Como ele conduz */}
+          {/* Caminhada pessoal */}
           <FadeIn delay={160}>
+            <div className="rounded-2xl bg-muted/30 border border-border/50 p-5 space-y-3 text-sm text-foreground/90 leading-relaxed">
+              <div className="flex items-center gap-2 mb-1">
+                <Leaf className="w-4 h-4 text-primary" />
+                <span className="text-xs font-bold uppercase tracking-wider text-primary">Uma caminhada de fé e renascimento</span>
+              </div>
+              <p>
+                A jornada de Txai Raimundo foi marcada pela <strong>fé, pela superação e pelo renascimento</strong>. Sempre guiado pela Fonte e pelo Mestre Yeshua, ao longo dos anos percorreu diferentes caminhos espirituais, bebeu de tradições distintas e acumulou um entendimento raro sobre a espiritualidade humana em toda a sua profundidade.
+              </p>
+              <p>
+                Mas essa trajetória não foi feita apenas de luz. Txai Raimundo também enfrentou momentos de <strong>grande dor</strong>. Em um desses caminhos, encarou a própria sombra — um ponto tão escuro que quase tirou dele a chance de continuar.
+              </p>
+              <p>
+                Foi justamente nesse abismo que ele renasceu.
+              </p>
+              <p>
+                É por isso que quando alguém chega ao templo carregando um peso que não consegue nem nomear, ele reconhece. Não pela teoria, mas porque já esteve lá. Essa vivência não o diminui — ela é a raiz da sua compaixão e a razão pela qual tantos se sentem verdadeiramente compreendidos ao seu lado.
+              </p>
+            </div>
+          </FadeIn>
+
+          {/* Como ele conduz */}
+          <FadeIn delay={200}>
             <div className="rounded-2xl border border-border/60 overflow-hidden">
               <div className="bg-muted/40 px-5 py-3 flex items-center gap-2 border-b border-border/40">
                 <Sparkles className="w-4 h-4 text-primary" />
@@ -240,7 +262,7 @@ const SobreNos: React.FC = () => {
           </FadeIn>
 
           {/* CTA tranquilizador */}
-          <FadeIn delay={200}>
+          <FadeIn delay={240}>
             <div className="rounded-2xl bg-gradient-to-br from-primary/10 to-primary/5 border border-primary/15 p-5 text-center">
               <Heart className="w-5 h-5 text-primary mx-auto mb-2" />
               <p className="font-display text-sm font-semibold text-foreground mb-2">
