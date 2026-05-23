@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { createPortal } from 'react-dom';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { Plus, X, type LucideIcon } from 'lucide-react';
@@ -15,22 +16,16 @@ interface AdminFabProps {
   className?: string;
 }
 
-/**
- * Floating Action Button para ações de admin
- * Expande para mostrar múltiplas opções
- */
 export const AdminFab: React.FC<AdminFabProps> = ({ actions, className }) => {
   const [isOpen, setIsOpen] = useState(false);
 
-  // Se só tem uma ação, mostra direto sem expandir
   if (actions.length === 1) {
     const action = actions[0];
-    return (
+    return createPortal(
       <Button
         onClick={action.onClick}
         className={cn(
-          'fixed bottom-20 right-4 z-40 rounded-full shadow-lg h-14 w-14 p-0',
-          'lg:bottom-6 lg:right-6',
+          'fixed bottom-20 right-4 z-[200] rounded-full shadow-lg h-14 w-14 p-0',
           'bg-primary hover:bg-primary/90 text-primary-foreground',
           'transition-all duration-200 hover:scale-105 active:scale-95',
           className
@@ -38,12 +33,13 @@ export const AdminFab: React.FC<AdminFabProps> = ({ actions, className }) => {
         aria-label={action.label}
       >
         <action.icon className="w-6 h-6" />
-      </Button>
+      </Button>,
+      document.body
     );
   }
 
-  return (
-    <div className={cn('fixed bottom-20 right-4 z-40 lg:bottom-6 lg:right-6', className)}>
+  return createPortal(
+    <div className={cn('fixed bottom-20 right-4 z-[200]', className)}>
       {/* Ações expandidas */}
       <div
         className={cn(
@@ -98,7 +94,8 @@ export const AdminFab: React.FC<AdminFabProps> = ({ actions, className }) => {
           aria-hidden="true"
         />
       )}
-    </div>
+    </div>,
+    document.body
   );
 };
 
