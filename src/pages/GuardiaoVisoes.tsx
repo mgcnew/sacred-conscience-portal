@@ -255,7 +255,7 @@ const GuardiaoVisoes: React.FC = () => {
       {messages.length > 1 && (
         <div className="shrink-0 pb-2">
           <a
-            href={`https://wa.me/${APP_CONFIG.contacts.whatsappLider}?text=${encodeURIComponent('Olá Mestre Kenay, tenho dúvidas sobre minhas visões e gostaria de conversar.')}`}
+            href={`https://wa.me/${APP_CONFIG.contacts.whatsappLider}?text=${encodeURIComponent(`Olá Mestre Kenay, ${userName ? `sou ${userName}, ` : ''}fui direcionado pelo Guardião das Visões do aplicativo Consciência Divinal. Tenho dúvidas sobre minhas visões e gostaria de conversar.`)}`}
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center gap-2.5 px-4 py-2.5 rounded-xl bg-green-500/10 border border-green-500/20 hover:bg-green-500/15 hover:border-green-500/35 transition-all group"
