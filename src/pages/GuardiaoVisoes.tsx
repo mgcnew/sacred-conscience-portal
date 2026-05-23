@@ -1,10 +1,11 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Eye, Send, Sparkles, RotateCcw, ChevronDown, Share2 } from 'lucide-react';
+import { Eye, Send, Sparkles, RotateCcw, ChevronDown, Share2, Link2, MessageSquareText } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { cn } from '@/lib/utils';
 import { APP_CONFIG } from '@/config/app';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 
 interface Message {
   role: 'user' | 'model';
@@ -120,16 +121,39 @@ const GuardiaoVisoes: React.FC = () => {
     setError(null);
   };
 
-  const handleShare = async () => {
+  const [shareOpen, setShareOpen] = useState(false);
+
+  const handleSharePagina = async () => {
+    setShareOpen(false);
     const url = `${window.location.origin}/guardiao-visoes`;
     const text = `🌿 *Guardião das Visões*\n\nSe você viveu visões em cerimônia ou tem sonhos que querem ser compreendidos, temos um espaço sagrado para isso no app Consciência Divinal.\n\nO Guardião das Visões interpreta símbolos, arquétipos e imagens com sabedoria xamânica — de forma acolhedora e gratuita.\n\nAcesse aqui 👇`;
     if (navigator.share) {
-      try {
-        await navigator.share({ title: 'Guardião das Visões — Consciência Divinal', text, url });
-      } catch { /* cancelado */ }
+      try { await navigator.share({ title: 'Guardião das Visões — Consciência Divinal', text, url }); } catch { /* cancelado */ }
     } else {
       await navigator.clipboard.writeText(`${text}\n${url}`);
       toast.success('Link copiado!');
+    }
+  };
+
+  const handleShareConversa = async () => {
+    setShareOpen(false);
+    const conversa = messages
+      .filter(m => m !== WELCOME_MESSAGE)
+      .map(m => `${m.role === 'user' ? '🧑 Eu' : '🌿 Guardião'}:\n${m.content}`)
+      .join('\n\n');
+
+    if (!conversa.trim()) {
+      toast.error('Nenhuma conversa para compartilhar ainda.');
+      return;
+    }
+
+    const texto = `🌿 *Conversa com o Guardião das Visões*\n\n${conversa}\n\n— Consciência Divinal`;
+
+    if (navigator.share) {
+      try { await navigator.share({ title: 'Conversa com o Guardião das Visões', text: texto }); } catch { /* cancelado */ }
+    } else {
+      await navigator.clipboard.writeText(texto);
+      toast.success('Conversa copiada!');
     }
   };
 
@@ -160,13 +184,37 @@ const GuardiaoVisoes: React.FC = () => {
           </div>
         </div>
         <div className="flex items-center gap-1">
-          <button
-            onClick={handleShare}
-            className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors px-2 py-1.5 rounded-lg hover:bg-muted/50"
-          >
-            <Share2 className="w-3.5 h-3.5" />
-            <span className="hidden sm:inline">Compartilhar</span>
-          </button>
+          <Popover open={shareOpen} onOpenChange={setShareOpen}>
+            <PopoverTrigger asChild>
+              <button className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors px-2 py-1.5 rounded-lg hover:bg-muted/50">
+                <Share2 className="w-3.5 h-3.5" />
+                <span className="hidden sm:inline">Compartilhar</span>
+              </button>
+            </PopoverTrigger>
+            <PopoverContent align="end" className="w-52 p-1.5">
+              <button
+                onClick={handleSharePagina}
+                className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm hover:bg-muted transition-colors text-left"
+              >
+                <Link2 className="w-4 h-4 text-muted-foreground shrink-0" />
+                <div>
+                  <p className="font-medium leading-tight">Compartilhar página</p>
+                  <p className="text-[11px] text-muted-foreground">Convite para o grupo</p>
+                </div>
+              </button>
+              <button
+                onClick={handleShareConversa}
+                disabled={messages.length <= 1}
+                className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm hover:bg-muted transition-colors text-left disabled:opacity-40 disabled:cursor-not-allowed"
+              >
+                <MessageSquareText className="w-4 h-4 text-muted-foreground shrink-0" />
+                <div>
+                  <p className="font-medium leading-tight">Compartilhar conversa</p>
+                  <p className="text-[11px] text-muted-foreground">Exportar este diálogo</p>
+                </div>
+              </button>
+            </PopoverContent>
+          </Popover>
           <button
             onClick={reset}
             className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors px-2 py-1.5 rounded-lg hover:bg-muted/50"
