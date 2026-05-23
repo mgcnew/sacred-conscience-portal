@@ -193,7 +193,7 @@ export const PermissoesTab: React.FC = () => {
           )}
 
           {/* Layout two-column no desktop */}
-          <div className="flex flex-col lg:flex-row min-h-[320px]">
+          <div className="flex flex-col lg:flex-row">
             {/* Lista de usuários com permissões */}
             <div className={cn(
               'lg:w-64 xl:w-72 shrink-0 lg:border-r',
@@ -265,7 +265,7 @@ export const PermissoesTab: React.FC = () => {
                 </div>
 
                 {/* Toggles por categoria */}
-                <div className="flex-1 overflow-y-auto p-4 space-y-5">
+                <div className="p-4 space-y-5">
                   {Object.entries(permissoesPorCategoria).map(([categoria, perms]) => {
                     const config = categoriaConfig[categoria] || {
                       icon: <Settings className="w-3.5 h-3.5" />,
