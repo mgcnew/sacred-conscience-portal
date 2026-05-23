@@ -3,6 +3,7 @@ import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Calendar, Plus, Users, History, ClipboardCheck } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import { PageHeader, PageContainer } from '@/components/shared';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { cn } from '@/lib/utils';
@@ -350,11 +351,22 @@ const Cerimonias: React.FC = () => {
         icon={Calendar}
         title="Cerimônias"
         description="Agenda sagrada de cura e expansão."
-      />
+      >
+        {isAdmin && (
+          <Button
+            onClick={() => setIsCreateModalOpen(true)}
+            className="hidden lg:inline-flex items-center gap-2"
+          >
+            <Plus className="w-4 h-4" />
+            Nova Cerimônia
+          </Button>
+        )}
+      </PageHeader>
 
-      {/* FAB para admin criar cerimônia */}
+      {/* FAB mobile para admin criar cerimônia */}
       {isAdmin && (
         <AdminFab
+          className="lg:hidden"
           actions={[
             {
               icon: Plus,
