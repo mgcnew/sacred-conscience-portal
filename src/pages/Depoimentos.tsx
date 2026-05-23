@@ -14,22 +14,26 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Skeleton } from '@/components/ui/skeleton';
-import { 
-    MessageSquareQuote, 
-    PenLine, 
-    Clock, 
-    CheckCircle2, 
-    Sparkles, 
-    Loader2, 
-    Quote, 
-    Calendar, 
-    Instagram, 
-    Share2, 
-    MessageCircle, 
+import {
+    MessageSquareQuote,
+    PenLine,
+    Clock,
+    CheckCircle2,
+    Sparkles,
+    Loader2,
+    Quote,
+    Calendar,
+    Instagram,
+    Share2,
+    MessageCircle,
     User,
     Heart,
-    Star
+    Star,
+    ShieldCheck,
+    XCircle,
+    AlertTriangle,
 } from 'lucide-react';
+import { LoadingButton } from '@/components/ui/loading-button';
 import { PageHeader, PageContainer } from '@/components/shared';
 import { toast } from 'sonner';
 import { TOAST_MESSAGES } from '@/constants/messages';
@@ -41,6 +45,7 @@ import {
     useDepoimentosInfinito,
     useCerimoniasSelect,
     useMeusDepoimentosPendentes,
+    useDepoimentosPendentes,
     useRoles,
     useUserRoles,
     getUserRoleFromData
@@ -293,11 +298,154 @@ function ShareExperienceModal({
     );
 }
 
+// Modal de moderação — visível apenas para admin/guardião
+function ModeracaoModal({
+    isOpen,
+    onClose,
+    isMobile,
+}: {
+    isOpen: boolean;
+    onClose: () => void;
+    isMobile: boolean;
+}) {
+    const queryClient = useQueryClient();
+    const { data: pendentes = [], isLoading, error } = useDepoimentosPendentes();
+
+    const approveMutation = useMutation({
+        mutationFn: async (id: string) => {
+            const { error } = await supabase.from('depoimentos').update({ aprovado: true }).eq('id', id);
+            if (error) throw error;
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['admin-depoimentos-pendentes'] });
+            queryClient.invalidateQueries({ queryKey: ['depoimentos-aprovados'] });
+            toast.success('Partilha aprovada!');
+        },
+        onError: () => toast.error('Erro ao aprovar'),
+    });
+
+    const rejectMutation = useMutation({
+        mutationFn: async (id: string) => {
+            const { error } = await supabase.from('depoimentos').delete().eq('id', id);
+            if (error) throw error;
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['admin-depoimentos-pendentes'] });
+            toast.success('Partilha rejeitada');
+        },
+        onError: () => toast.error('Erro ao rejeitar'),
+    });
+
+    const content = (
+        <div className="space-y-4">
+            {isLoading ? (
+                <div className="flex justify-center py-12">
+                    <Loader2 className="w-6 h-6 animate-spin text-primary" />
+                </div>
+            ) : error ? (
+                <div className="text-center py-10 text-destructive">
+                    <AlertTriangle className="w-10 h-10 mx-auto mb-2 opacity-70" />
+                    <p className="text-sm font-medium">Erro ao carregar partilhas</p>
+                </div>
+            ) : pendentes.length === 0 ? (
+                <div className="text-center py-12 text-muted-foreground">
+                    <CheckCircle2 className="w-10 h-10 mx-auto mb-2 opacity-40" />
+                    <p className="font-medium">Nenhuma partilha pendente</p>
+                    <p className="text-sm">Todas as partilhas foram moderadas.</p>
+                </div>
+            ) : (
+                pendentes.map((dep) => (
+                    <div key={dep.id} className="rounded-xl border border-amber-200 bg-amber-50/40 dark:bg-amber-950/20 dark:border-amber-900 p-4 space-y-3">
+                        <div className="flex items-center gap-2 text-sm">
+                            <div className="w-7 h-7 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                                <span className="text-xs font-medium text-primary">
+                                    {dep.profiles?.full_name?.charAt(0).toUpperCase() || '?'}
+                                </span>
+                            </div>
+                            <div className="min-w-0 flex-1">
+                                <p className="font-medium text-foreground leading-none">{dep.profiles?.full_name || 'Anônimo'}</p>
+                                <p className="text-xs text-muted-foreground mt-0.5">
+                                    {format(new Date(dep.created_at), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}
+                                </p>
+                            </div>
+                            {dep.autoriza_instagram && (
+                                <span className="text-[10px] font-medium text-pink-600 bg-pink-50 dark:bg-pink-950/30 px-2 py-0.5 rounded-full border border-pink-200 dark:border-pink-800 shrink-0">Instagram</span>
+                            )}
+                        </div>
+                        <p className="text-sm text-foreground/90 italic border-l-2 border-primary/30 pl-3 leading-relaxed">
+                            "{dep.texto}"
+                        </p>
+                        <div className="flex gap-2 pt-1">
+                            <LoadingButton
+                                size="sm"
+                                className="bg-green-600 hover:bg-green-700 flex-1"
+                                onClick={() => approveMutation.mutate(dep.id)}
+                                loading={approveMutation.isPending}
+                                loadingText="..."
+                            >
+                                <CheckCircle2 className="w-3.5 h-3.5 mr-1" /> Aprovar
+                            </LoadingButton>
+                            <LoadingButton
+                                size="sm"
+                                variant="outline"
+                                className="text-destructive border-destructive hover:bg-destructive hover:text-destructive-foreground flex-1"
+                                onClick={() => rejectMutation.mutate(dep.id)}
+                                loading={rejectMutation.isPending}
+                                loadingText="..."
+                            >
+                                <XCircle className="w-3.5 h-3.5 mr-1" /> Rejeitar
+                            </LoadingButton>
+                        </div>
+                    </div>
+                ))
+            )}
+        </div>
+    );
+
+    if (isMobile) {
+        return (
+            <Drawer open={isOpen} onOpenChange={onClose}>
+                <DrawerContent className="max-h-[90vh]">
+                    <div className="mx-auto w-12 h-1.5 rounded-full bg-muted-foreground/20 mb-2" />
+                    <DrawerHeader>
+                        <DrawerTitle className="font-display flex items-center gap-2">
+                            <ShieldCheck className="w-5 h-5 text-primary" />
+                            Moderação de Partilhas
+                        </DrawerTitle>
+                        <DrawerDescription>
+                            Aprove ou rejeite partilhas enviadas pelos consagradores.
+                        </DrawerDescription>
+                    </DrawerHeader>
+                    <div className="px-4 pb-6 overflow-y-auto">{content}</div>
+                </DrawerContent>
+            </Drawer>
+        );
+    }
+
+    return (
+        <Dialog open={isOpen} onOpenChange={onClose}>
+            <DialogContent className="max-w-lg max-h-[80vh] flex flex-col">
+                <DialogHeader>
+                    <DialogTitle className="font-display flex items-center gap-2">
+                        <ShieldCheck className="w-5 h-5 text-primary" />
+                        Moderação de Partilhas
+                    </DialogTitle>
+                    <DialogDescription>
+                        Aprove ou rejeite partilhas enviadas pelos consagradores.
+                    </DialogDescription>
+                </DialogHeader>
+                <div className="overflow-y-auto flex-1 pt-2">{content}</div>
+            </DialogContent>
+        </Dialog>
+    );
+}
+
 const Depoimentos: React.FC = () => {
     const { user } = useAuth();
     const queryClient = useQueryClient();
     const isMobile = useIsMobile();
     const [isDialogOpen, setIsDialogOpen] = useState(false);
+    const [isModeracaoOpen, setIsModeracaoOpen] = useState(false);
     const [texto, setTexto] = useState('');
     const [cerimoniaId, setCerimoniaId] = useState<string>('livre');
     const [autorizaInstagram, setAutorizaInstagram] = useState(false);
@@ -343,6 +491,11 @@ const Depoimentos: React.FC = () => {
     const { data: userRoles } = useUserRoles();
     const userRole = user ? getUserRoleFromData(user.id, userRoles, roles) : 'consagrador';
     const canShareAll = userRole === 'admin' || userRole === 'guardiao';
+    const canModerate = canShareAll;
+
+    // Contagem de pendentes para badge (apenas para moderadores)
+    const { data: pendentesCount } = useDepoimentosPendentes();
+    const numeroPendentes = canModerate ? (pendentesCount?.length ?? 0) : 0;
 
     // Mutation para criar depoimento
     const createMutation = useMutation({
@@ -429,6 +582,23 @@ const Depoimentos: React.FC = () => {
                                 Convidar pelo WhatsApp
                             </Button>
 
+                            {canModerate && (
+                                <Button
+                                    size="lg"
+                                    variant="outline"
+                                    className="relative gap-2 px-6 rounded-full border-amber-500/40 text-amber-700 dark:text-amber-400 hover:bg-amber-500/8 hover:border-amber-500/60 transition-all hover:scale-105 active:scale-95"
+                                    onClick={() => setIsModeracaoOpen(true)}
+                                >
+                                    <ShieldCheck className="w-5 h-5" />
+                                    Moderar
+                                    {numeroPendentes > 0 && (
+                                        <span className="absolute -top-1.5 -right-1.5 min-w-[20px] h-5 px-1 rounded-full bg-amber-500 text-white text-[11px] font-bold flex items-center justify-center leading-none">
+                                            {numeroPendentes}
+                                        </span>
+                                    )}
+                                </Button>
+                            )}
+
                             <ShareExperienceModal
                                 isOpen={isDialogOpen}
                                 onClose={() => setIsDialogOpen(false)}
@@ -442,6 +612,12 @@ const Depoimentos: React.FC = () => {
                                 setAutorizaInstagram={setAutorizaInstagram}
                                 handleSubmit={handleSubmit}
                                 isPending={createMutation.isPending}
+                            />
+
+                            <ModeracaoModal
+                                isOpen={isModeracaoOpen}
+                                onClose={() => setIsModeracaoOpen(false)}
+                                isMobile={isMobile}
                             />
                         </div>
                     )}
