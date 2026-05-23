@@ -27,6 +27,7 @@ export const ROUTES = {
   
   // Estudos/Materiais pós-consagração
   ESTUDOS: '/estudos',
+  ESTUDO_DETALHE: '/estudos/:id',
   
   // Admin (requer permissão)
   ADMIN: '/admin',

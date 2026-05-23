@@ -1,4 +1,5 @@
 import { useState, useMemo, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { BookOpen, Sparkles, Plus, Loader2, Upload } from 'lucide-react';
 import { SearchInput } from '@/components/ui/search-input';
 import { toast } from 'sonner';
@@ -44,8 +45,9 @@ import {
   useDeleteMaterial,
   CATEGORIAS_MATERIAIS,
 } from '@/hooks/queries/useMateriais';
-import { MaterialCard, MaterialModal, MaterialSkeleton } from '@/components/estudos';
-import type { MaterialComAutor, Material } from '@/types';
+import { MaterialCard, MaterialSkeleton } from '@/components/estudos';
+import type { Material } from '@/types';
+import { ROUTES } from '@/constants';
 import FadeIn from '@/components/ui/FadeIn';
 
 // Threshold para ativar virtualização (evita overhead em listas pequenas)
@@ -75,11 +77,10 @@ const Estudos: React.FC = () => {
   const { user, isAdmin } = useAuth();
   const { data: minhasPermissoes } = useMinhasPermissoes();
   const isMobile = useIsMobile();
-  
+  const navigate = useNavigate();
+
   const [selectedCategoria, setSelectedCategoria] = useState('todas');
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedMaterial, setSelectedMaterial] = useState<MaterialComAutor | null>(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
   const [isFormDialogOpen, setIsFormDialogOpen] = useState(false);
   const [editingMaterial, setEditingMaterial] = useState<Material | null>(null);
   const [formData, setFormData] = useState<FormData>(initialFormData);
@@ -135,16 +136,6 @@ const Estudos: React.FC = () => {
   // Separar destaques (apenas publicados com destaque) dos outros
   const destaques = materiaisFiltrados.filter((m) => m.destaque && m.publicado);
   const outros = materiaisFiltrados.filter((m) => !(m.destaque && m.publicado));
-
-  const handleOpenMaterial = (material: MaterialComAutor) => {
-    setSelectedMaterial(material);
-    setIsModalOpen(true);
-  };
-
-  const handleCloseModal = () => {
-    setIsModalOpen(false);
-    setSelectedMaterial(null);
-  };
 
   const handleOpenCreate = () => {
     setEditingMaterial(null);
@@ -396,7 +387,7 @@ const Estudos: React.FC = () => {
                   <MaterialCard
                     key={material.id}
                     material={material}
-                    onClick={() => handleOpenMaterial(material)}
+                    onClick={() => navigate(`/estudos/${material.id}`)}
                     onEdit={podeGerenciar ? () => handleOpenEdit(material) : undefined}
                     onDelete={podeGerenciar ? () => handleDelete(material) : undefined}
                     featured
@@ -426,7 +417,7 @@ const Estudos: React.FC = () => {
                       <MaterialCard
                         key={material.id}
                         material={material}
-                        onClick={() => handleOpenMaterial(material)}
+                        onClick={() => navigate(`/estudos/${material.id}`)}
                         onEdit={podeGerenciar ? () => handleOpenEdit(material) : undefined}
                         onDelete={podeGerenciar ? () => handleDelete(material) : undefined}
                       />
@@ -440,7 +431,7 @@ const Estudos: React.FC = () => {
                     <MaterialCard
                       key={material.id}
                       material={material}
-                      onClick={() => handleOpenMaterial(material)}
+                      onClick={() => navigate(`/estudos/${material.id}`)}
                       onEdit={podeGerenciar ? () => handleOpenEdit(material) : undefined}
                       onDelete={podeGerenciar ? () => handleDelete(material) : undefined}
                     />
@@ -479,13 +470,6 @@ const Estudos: React.FC = () => {
           )}
         </>
       )}
-
-      {/* Modal de leitura */}
-      <MaterialModal
-        material={selectedMaterial}
-        isOpen={isModalOpen}
-        onClose={handleCloseModal}
-      />
 
       {/* Modal de criação/edição - Drawer no mobile, Dialog no desktop */}
       {isMobile ? (
