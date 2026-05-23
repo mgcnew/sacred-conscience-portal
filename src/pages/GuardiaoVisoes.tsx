@@ -102,7 +102,12 @@ const GuardiaoVisoes: React.FC = () => {
       ]);
     } catch (err: any) {
       console.error('Erro Guardião:', err);
-      setError(err.message || 'Erro desconhecido. Veja o console para detalhes.');
+      const msg = err.message || '';
+      if (msg.includes('RATE_LIMIT') || msg.includes('429')) {
+        setError('RATE_LIMIT');
+      } else {
+        setError(msg || 'Erro desconhecido.');
+      }
     } finally {
       setLoading(false);
     }
@@ -207,9 +212,20 @@ const GuardiaoVisoes: React.FC = () => {
 
         {/* Error */}
         {error && (
-          <div className="text-center text-xs text-destructive/80 py-2 px-4 bg-destructive/5 rounded-xl border border-destructive/15">
-            {error}
-          </div>
+          error === 'RATE_LIMIT' ? (
+            <div className="flex justify-start">
+              <div className="w-7 h-7 rounded-xl bg-gradient-to-br from-violet-600/30 to-primary/20 flex items-center justify-center shrink-0 mr-2 mt-1">
+                <Eye className="w-3.5 h-3.5 text-violet-400" />
+              </div>
+              <div className="max-w-[80%] rounded-2xl rounded-tl-sm px-4 py-3 bg-muted/60 border border-border/30 text-sm leading-relaxed text-foreground/80">
+                Neste momento muitas almas estão buscando orientação ao mesmo tempo. O Guardião precisa de um instante de silêncio — tente novamente em alguns momentos. 🌿
+              </div>
+            </div>
+          ) : (
+            <div className="text-center text-xs text-destructive/80 py-2 px-4 bg-destructive/5 rounded-xl border border-destructive/15">
+              {error}
+            </div>
+          )
         )}
 
         <div ref={bottomRef} />

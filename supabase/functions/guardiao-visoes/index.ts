@@ -135,7 +135,13 @@ Deno.serve(async (req: Request) => {
 
     if (!response.ok) {
       const err = await response.text();
-      console.error("Gemini error:", err);
+      console.error("Gemini error:", response.status, err);
+      if (response.status === 429) {
+        return new Response(JSON.stringify({ error: "RATE_LIMIT" }), {
+          status: 429,
+          headers: { ...CORS_HEADERS, "Content-Type": "application/json" },
+        });
+      }
       return new Response(JSON.stringify({ error: `Gemini ${response.status}: ${err}` }), {
         status: 500,
         headers: { ...CORS_HEADERS, "Content-Type": "application/json" },
