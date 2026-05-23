@@ -6,7 +6,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Sparkles, Calendar, BookHeart, Flame, Plus, Pencil, Trash2, CheckCircle2, Clock } from 'lucide-react';
+import { Sparkles, Calendar, BookHeart, Flame, Plus, Pencil, Trash2, CheckCircle2, Clock, Eye } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { OrganicDivider } from '@/components/ui/organic-divider';
@@ -168,11 +168,75 @@ function DiarioForm({ userId, entry, onClose }: DiarioFormProps) {
 // Entrada do diário (card)
 // -------------------------------------------------------
 
+function EntradaGuardiaoCard({ entry, userId }: { entry: DiarioEntrada; userId: string }) {
+  const [confirmDelete, setConfirmDelete] = useState(false);
+  const deleteEntry = useDeleteDiarioEntrada();
+
+  const handleDelete = async () => {
+    await deleteEntry.mutateAsync({ id: entry.id, userId });
+    toast.success('Entrada removida.');
+    setConfirmDelete(false);
+  };
+
+  const linhas = entry.conteudo.split('\n\n─────\n\n');
+
+  return (
+    <Card className="border-violet-500/20 hover:border-violet-500/40 transition-colors">
+      <CardContent className="p-4">
+        <div className="flex items-start justify-between gap-2 mb-3">
+          <div className="flex items-center gap-2 flex-wrap">
+            <div className="flex items-center gap-1.5 text-violet-600 dark:text-violet-400">
+              <Eye className="w-3.5 h-3.5" />
+              <span className="text-xs font-medium">Guardião das Visões</span>
+            </div>
+            <span className="text-xs text-muted-foreground">{formatDate(entry.data)}</span>
+          </div>
+          <Button size="icon" variant="ghost" className="h-7 w-7 text-muted-foreground hover:text-destructive shrink-0" onClick={() => setConfirmDelete(true)}>
+            <Trash2 className="w-3.5 h-3.5" />
+          </Button>
+        </div>
+
+        <div className="space-y-3">
+          {linhas.map((bloco, i) => {
+            const isGuardiao = bloco.startsWith('🌿 Guardião:');
+            const texto = bloco.replace(/^(🧑 Você:|🌿 Guardião:)\n/, '');
+            return (
+              <div key={i} className={cn('rounded-xl px-3 py-2.5 text-sm leading-relaxed', isGuardiao ? 'bg-violet-500/8 border border-violet-500/15 text-foreground/90' : 'bg-muted/50 text-muted-foreground')}>
+                <p className={cn('text-[10px] font-semibold uppercase tracking-wider mb-1', isGuardiao ? 'text-violet-500' : 'text-muted-foreground/60')}>
+                  {isGuardiao ? '🌿 Guardião' : '🧑 Você'}
+                </p>
+                <p className="whitespace-pre-wrap">{texto}</p>
+              </div>
+            );
+          })}
+        </div>
+
+        <Dialog open={confirmDelete} onOpenChange={setConfirmDelete}>
+          <DialogContent className="max-w-sm">
+            <DialogHeader><DialogTitle>Remover visão do diário?</DialogTitle></DialogHeader>
+            <p className="text-sm text-muted-foreground">Esta ação não pode ser desfeita.</p>
+            <div className="flex gap-2 justify-end pt-2">
+              <Button variant="ghost" onClick={() => setConfirmDelete(false)}>Cancelar</Button>
+              <Button variant="destructive" onClick={handleDelete} disabled={deleteEntry.isPending}>
+                {deleteEntry.isPending ? 'Removendo...' : 'Remover'}
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+      </CardContent>
+    </Card>
+  );
+}
+
 function EntradaCard({ entry, userId }: { entry: DiarioEntrada; userId: string }) {
   const [editing, setEditing] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const deleteEntry = useDeleteDiarioEntrada();
   const humOpt = getHumorOption(entry.humor);
+
+  if (entry.tipo === 'guardiao') {
+    return <EntradaGuardiaoCard entry={entry} userId={userId} />;
+  }
 
   const handleDelete = async () => {
     await deleteEntry.mutateAsync({ id: entry.id, userId });
@@ -248,15 +312,20 @@ function EntradaCard({ entry, userId }: { entry: DiarioEntrada; userId: string }
 const Insights: React.FC = () => {
   const { user } = useAuth();
   const [newEntryOpen, setNewEntryOpen] = useState(false);
+  const [tipoFilter, setTipoFilter] = useState<'todos' | 'diario' | 'guardiao'>('todos');
   const [diarioFilter, setDiarioFilter] = useState<'todos' | HumorType>('todos');
 
   const { data: stats, isLoading: loadingStats } = useJornadaStats(user?.id);
   const { data: timeline, isLoading: loadingTimeline } = useTimelineCerimonias(user?.id);
   const { data: entradas, isLoading: loadingDiario } = useDiarioEntradas(user?.id);
 
-  const entradasFiltradas = diarioFilter === 'todos'
+  const entradasPorTipo = tipoFilter === 'todos'
     ? (entradas ?? [])
-    : (entradas ?? []).filter((e) => e.humor === diarioFilter);
+    : (entradas ?? []).filter((e) => e.tipo === tipoFilter);
+
+  const entradasFiltradas = diarioFilter === 'todos'
+    ? entradasPorTipo
+    : entradasPorTipo.filter((e) => e.humor === diarioFilter);
 
   return (
     <div className="container max-w-2xl mx-auto px-4 py-6 space-y-8">
@@ -419,22 +488,46 @@ const Insights: React.FC = () => {
           </Dialog>
         </div>
 
-        {/* Filtro por humor */}
+        {/* Filtros */}
         {(entradas?.length ?? 0) > 0 && (
-          <div className="mb-4">
-            <Select value={diarioFilter} onValueChange={(v) => setDiarioFilter(v as typeof diarioFilter)}>
-              <SelectTrigger className="w-full sm:w-52">
-                <SelectValue placeholder="Filtrar por estado" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="todos">Todos os registros</SelectItem>
-                {HUMOR_OPTIONS.map((h) => (
-                  <SelectItem key={h.value} value={h.value}>
-                    {h.emoji} {h.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+          <div className="flex flex-col sm:flex-row gap-2 mb-4">
+            {/* Tipo */}
+            <div className="flex rounded-lg border border-border overflow-hidden shrink-0">
+              {([
+                { value: 'todos', label: 'Todos' },
+                { value: 'diario', label: '📓 Diário' },
+                { value: 'guardiao', label: '🌿 Guardião' },
+              ] as const).map((opt) => (
+                <button
+                  key={opt.value}
+                  onClick={() => { setTipoFilter(opt.value); setDiarioFilter('todos'); }}
+                  className={cn(
+                    'flex-1 px-3 py-1.5 text-xs font-medium transition-colors',
+                    tipoFilter === opt.value
+                      ? 'bg-primary text-primary-foreground'
+                      : 'text-muted-foreground hover:bg-muted'
+                  )}
+                >
+                  {opt.label}
+                </button>
+              ))}
+            </div>
+            {/* Humor — só para entradas de diário */}
+            {tipoFilter !== 'guardiao' && (
+              <Select value={diarioFilter} onValueChange={(v) => setDiarioFilter(v as typeof diarioFilter)}>
+                <SelectTrigger className="w-full sm:w-48">
+                  <SelectValue placeholder="Filtrar por estado" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="todos">Todos os estados</SelectItem>
+                  {HUMOR_OPTIONS.map((h) => (
+                    <SelectItem key={h.value} value={h.value}>
+                      {h.emoji} {h.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
           </div>
         )}
 

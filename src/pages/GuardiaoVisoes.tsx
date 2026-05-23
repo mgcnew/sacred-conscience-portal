@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Eye, Send, Sparkles, RotateCcw, ChevronDown, Share2, Link2, MessageSquareText, Lock } from 'lucide-react';
+import { Eye, Send, Sparkles, RotateCcw, ChevronDown, Share2, Link2, MessageSquareText, Lock, BookHeart, Check } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
@@ -10,6 +10,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useTemConsagracao } from '@/hooks/queries/useMyInscriptions';
+import { useCreateDiarioEntrada } from '@/hooks/queries/useInsights';
 import { ROUTES } from '@/constants';
 
 interface Message {
@@ -129,6 +130,28 @@ const GuardiaoVisoes: React.FC = () => {
   };
 
   const [shareOpen, setShareOpen] = useState(false);
+  const [savedToInsights, setSavedToInsights] = useState(false);
+  const createEntrada = useCreateDiarioEntrada();
+
+  const handleSalvarDiario = async () => {
+    if (!user?.id || messages.length <= 1) return;
+    const conversa = messages
+      .filter(m => m !== WELCOME_MESSAGE)
+      .map(m => `${m.role === 'user' ? '🧑 Você' : '🌿 Guardião'}:\n${m.content}`)
+      .join('\n\n─────\n\n');
+    await createEntrada.mutateAsync({
+      userId: user.id,
+      conteudo: conversa,
+      humor: null,
+      data: new Date().toISOString().split('T')[0],
+      tipo: 'guardiao',
+    });
+    setSavedToInsights(true);
+    toast.success('Conversa salva no diário!', {
+      description: 'Acesse em Minha Jornada para revisitar.',
+      action: { label: 'Ver agora', onClick: () => navigate(ROUTES.INSIGHTS) },
+    });
+  };
 
   const handleSharePagina = async () => {
     setShareOpen(false);
@@ -379,6 +402,33 @@ const GuardiaoVisoes: React.FC = () => {
               </button>
             ))}
           </div>
+        </div>
+      )}
+
+      {/* Salvar no diário */}
+      {messages.length > 1 && (
+        <div className="shrink-0 pt-1">
+          <button
+            onClick={handleSalvarDiario}
+            disabled={savedToInsights || createEntrada.isPending}
+            className={cn(
+              'w-full flex items-center gap-2.5 px-4 py-2.5 rounded-xl border transition-all text-xs',
+              savedToInsights
+                ? 'bg-primary/8 border-primary/20 text-primary cursor-default'
+                : 'bg-muted/40 border-border/40 text-muted-foreground hover:bg-muted hover:border-primary/30 hover:text-foreground'
+            )}
+          >
+            {savedToInsights
+              ? <Check className="w-4 h-4 shrink-0 text-primary" />
+              : <BookHeart className="w-4 h-4 shrink-0" />
+            }
+            <span>
+              {savedToInsights
+                ? 'Conversa salva no diário'
+                : createEntrada.isPending ? 'Salvando...' : 'Salvar esta conversa no diário'
+              }
+            </span>
+          </button>
         </div>
       )}
 

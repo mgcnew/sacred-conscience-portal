@@ -129,6 +129,7 @@ interface CreateEntradaPayload {
   humor: HumorType | null;
   data: string;
   cerimonia_id?: string | null;
+  tipo?: 'diario' | 'guardiao';
 }
 
 export const useCreateDiarioEntrada = () => {
@@ -144,6 +145,7 @@ export const useCreateDiarioEntrada = () => {
           humor: payload.humor,
           data: payload.data,
           cerimonia_id: payload.cerimonia_id ?? null,
+          tipo: payload.tipo ?? 'diario',
         })
         .select()
         .single();

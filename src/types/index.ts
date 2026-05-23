@@ -417,6 +417,7 @@ export interface DiarioEntrada {
   cerimonia_id: string | null;
   conteudo: string;
   humor: HumorType | null;
+  tipo: 'diario' | 'guardiao';
   data: string;
   created_at: string;
   updated_at: string;
