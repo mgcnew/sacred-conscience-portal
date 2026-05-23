@@ -2,6 +2,35 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import type { CategoriaFinanceira, TransacaoFinanceira, TransacaoComCategoria } from '@/types';
 
+export interface InscricoesKPIs {
+  total: number;
+  pagos: number;
+  inadimplentes: number;
+  taxa: number;
+}
+
+export const useInscricoesKPIs = () => {
+  return useQuery({
+    queryKey: ['inscricoes-kpis'],
+    queryFn: async (): Promise<InscricoesKPIs> => {
+      const { data, error } = await supabase
+        .from('inscricoes')
+        .select('pago')
+        .or('cancelada.is.null,cancelada.eq.false');
+
+      if (error) throw error;
+
+      const total = data.length;
+      const pagos = data.filter(i => i.pago).length;
+      const inadimplentes = total - pagos;
+      const taxa = total > 0 ? Math.round((pagos / total) * 100) : 0;
+
+      return { total, pagos, inadimplentes, taxa };
+    },
+    staleTime: 1000 * 60 * 5,
+  });
+};
+
 /**
  * Hook para buscar categorias financeiras
  */

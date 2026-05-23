@@ -421,28 +421,28 @@ export const FluxoCaixaTab: React.FC = () => {
   return (
     <div className="space-y-6 pb-24 md:pb-0">
       {/* Resumo Fixo Mobile (Sticky Bottom) */}
-      <div className="fixed bottom-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-sm border-t p-3 md:hidden flex items-center justify-between shadow-[0_-4px_12px_rgba(0,0,0,0.1)]">
+      <div className="fixed bottom-16 left-0 right-0 z-40 bg-background/95 backdrop-blur-md border-t border-border/40 px-4 py-2.5 md:hidden flex items-center justify-between shadow-[0_-2px_16px_rgba(0,0,0,0.08)]">
         <div className="flex flex-col">
-          <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-bold">Saldo Atual</span>
-          <span className={`text-lg font-bold ${(resumo?.saldo || 0) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+          <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-bold">Saldo</span>
+          <span className={`text-base font-black ${(resumo?.saldo || 0) >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-500'}`}>
             {formatarValor(resumo?.saldo || 0)}
           </span>
         </div>
         <div className="flex gap-2">
           <Button
             size="sm"
-            className="bg-primary hover:bg-primary/90 h-11 w-11 p-0 rounded-full shadow-lg shadow-primary/20 flex items-center justify-center"
+            className="bg-primary hover:bg-primary/90 h-10 w-10 p-0 rounded-full shadow-md shadow-primary/20 flex items-center justify-center"
             onClick={() => handleOpenForm('entrada')}
           >
-            <ArrowUpCircle className="w-6 h-6 text-white" />
+            <ArrowUpCircle className="w-5 h-5 text-white" />
           </Button>
-          <Button 
-            size="sm" 
-            variant="destructive" 
-            className="h-11 w-11 p-0 rounded-full shadow-lg shadow-red-500/20 flex items-center justify-center"
+          <Button
+            size="sm"
+            variant="destructive"
+            className="h-10 w-10 p-0 rounded-full shadow-md shadow-red-500/20 flex items-center justify-center"
             onClick={() => handleOpenForm('saida')}
           >
-            <ArrowDownCircle className="w-6 h-6 text-white" />
+            <ArrowDownCircle className="w-5 h-5 text-white" />
           </Button>
         </div>
       </div>
@@ -462,55 +462,45 @@ export const FluxoCaixaTab: React.FC = () => {
 
       {/* Cards de Resumo */}
       <div className="grid gap-3 grid-cols-2 md:grid-cols-3">
-        <Card className="border-border bg-card">
-          <CardHeader className="pb-1 pt-4 px-4">
-            <CardTitle className="text-[10px] md:text-sm font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
-              <ArrowUpCircle className="w-3.5 h-3.5 text-green-600" />
-              Entradas
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="px-4 pb-4">
-            <div className="text-xl md:text-2xl font-black text-green-700 dark:text-green-300">
-              {formatarValor(resumo?.entradas || 0)}
-            </div>
-            {resumo?.entradasMP ? (
-              <p className="text-[10px] text-green-600/80 mt-1 hidden md:block">
-                💳 MP: {formatarValor(resumo.entradasMP)} | ✍️ Manual: {formatarValor(resumo.entradasManuais || 0)}
-              </p>
-            ) : null}
-          </CardContent>
-        </Card>
+        <div className="rounded-2xl border border-emerald-500/20 bg-emerald-500/6 p-4">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Entradas</span>
+            <ArrowUpCircle className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+          </div>
+          <div className="text-xl md:text-2xl font-black text-emerald-700 dark:text-emerald-300">
+            {formatarValor(resumo?.entradas || 0)}
+          </div>
+          {resumo?.entradasMP ? (
+            <p className="text-[10px] text-emerald-600/70 mt-1 hidden md:block">
+              MP: {formatarValor(resumo.entradasMP)} · Manual: {formatarValor(resumo.entradasManuais || 0)}
+            </p>
+          ) : null}
+        </div>
 
-        <Card className="border-border bg-card">
-          <CardHeader className="pb-1 pt-4 px-4">
-            <CardTitle className="text-[10px] md:text-sm font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
-              <ArrowDownCircle className="w-3.5 h-3.5 text-red-500" />
-              Saídas
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="px-4 pb-4">
-            <div className="text-xl md:text-2xl font-black text-red-700 dark:text-red-300">
-              {formatarValor(resumo?.saidas || 0)}
-            </div>
-          </CardContent>
-        </Card>
+        <div className="rounded-2xl border border-red-500/20 bg-red-500/6 p-4">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Saídas</span>
+            <ArrowDownCircle className="w-4 h-4 text-red-500" />
+          </div>
+          <div className="text-xl md:text-2xl font-black text-red-600 dark:text-red-400">
+            {formatarValor(resumo?.saidas || 0)}
+          </div>
+        </div>
 
-        <Card className={`col-span-2 md:col-span-1 border-2 ${(resumo?.saldo || 0) >= 0 ? 'border-primary/30 bg-primary/5' : 'border-destructive/30 bg-destructive/5'}`}>
-          <CardHeader className="pb-1 pt-4 px-4">
-            <CardTitle className="text-[10px] md:text-sm font-bold uppercase tracking-wider flex items-center gap-1.5">
-              <Wallet className="w-3.5 h-3.5" />
-              Saldo Líquido
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="px-4 pb-4 flex items-center justify-between md:block">
-            <div className={`text-2xl font-black ${(resumo?.saldo || 0) >= 0 ? 'text-green-700 dark:text-green-300' : 'text-red-700 dark:text-red-300'}`}>
+        <div className={`col-span-2 md:col-span-1 rounded-2xl border-2 p-4 ${(resumo?.saldo || 0) >= 0 ? 'border-primary/25 bg-primary/6' : 'border-red-500/25 bg-red-500/6'}`}>
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Saldo Líquido</span>
+            <Wallet className="w-4 h-4 text-muted-foreground" />
+          </div>
+          <div className="flex items-end justify-between md:block gap-2">
+            <div className={`text-2xl font-black ${(resumo?.saldo || 0) >= 0 ? 'text-primary' : 'text-red-600 dark:text-red-400'}`}>
               {formatarValor(resumo?.saldo || 0)}
             </div>
-            <Badge variant="outline" className={`md:mt-1 text-[10px] border-none p-0 ${(resumo?.saldo || 0) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-              {(resumo?.saldo || 0) >= 0 ? '✅ Saudável' : '⚠️ Atenção'}
-            </Badge>
-          </CardContent>
-        </Card>
+            <span className={`text-[10px] font-semibold ${(resumo?.saldo || 0) >= 0 ? 'text-emerald-600' : 'text-red-500'}`}>
+              {(resumo?.saldo || 0) >= 0 ? '● Saudável' : '● Atenção'}
+            </span>
+          </div>
+        </div>
       </div>
 
       {/* Ações Rápidas */}
@@ -539,7 +529,7 @@ export const FluxoCaixaTab: React.FC = () => {
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as any)} className="w-full">
         <div className="relative mb-6">
-          <TabsList className="w-full h-auto p-0 bg-transparent border-b rounded-none justify-start overflow-x-auto scrollbar-none flex-nowrap">
+          <TabsList className="w-full h-auto p-0 bg-transparent border-b border-border rounded-none justify-start overflow-x-auto scrollbar-none flex-nowrap gap-0">
             {[
               { value: 'resumo', icon: <BarChart3 className="w-4 h-4 shrink-0" />, label: 'Painel' },
               { value: 'transacoes', icon: <DollarSign className="w-4 h-4 shrink-0" />, label: 'Extrato' },
@@ -549,7 +539,7 @@ export const FluxoCaixaTab: React.FC = () => {
               <TabsTrigger
                 key={tab.value}
                 value={tab.value}
-                className="flex items-center gap-1.5 rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary data-[state=active]:bg-transparent py-3 px-3 md:px-5 text-xs md:text-sm font-bold uppercase tracking-wider transition-all whitespace-nowrap"
+                className="flex items-center gap-1.5 rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none py-3 px-4 md:px-5 text-xs md:text-sm font-semibold text-muted-foreground transition-all whitespace-nowrap -mb-px"
               >
                 {tab.icon}
                 {tab.label}
