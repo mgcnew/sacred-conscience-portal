@@ -122,10 +122,10 @@ const GuardiaoVisoes: React.FC = () => {
 
   const handleShare = async () => {
     const url = `${window.location.origin}/guardiao-visoes`;
-    const text = `🌿 Guardião das Visões — interprete seus sonhos e visões de cerimônia com sabedoria xamânica.\n\nAcesse pelo app Consciência Divinal:`;
+    const text = `🌿 *Guardião das Visões*\n\nSe você viveu visões em cerimônia ou tem sonhos que querem ser compreendidos, temos um espaço sagrado para isso no app Consciência Divinal.\n\nO Guardião das Visões interpreta símbolos, arquétipos e imagens com sabedoria xamânica — de forma acolhedora e gratuita.\n\nAcesse aqui 👇`;
     if (navigator.share) {
       try {
-        await navigator.share({ title: 'Guardião das Visões', text, url });
+        await navigator.share({ title: 'Guardião das Visões — Consciência Divinal', text, url });
       } catch { /* cancelado */ }
     } else {
       await navigator.clipboard.writeText(`${text}\n${url}`);
