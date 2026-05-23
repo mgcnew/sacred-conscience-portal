@@ -63,8 +63,8 @@ const Auth: React.FC = () => {
     }
   }, []);
 
-  // Quando o browser restaura a página do bfcache (usuário cancelou no Google e voltou),
-  // o estado isLoading fica congelado em true — resetamos aqui.
+  // Reseta loading quando o browser restaura a página do bfcache
+  // (usuário cancelou no Google e voltou com o botão Voltar)
   useEffect(() => {
     const handlePageShow = (e: PageTransitionEvent) => {
       if (e.persisted) setIsLoading(false);
@@ -113,7 +113,6 @@ const Auth: React.FC = () => {
         <div className="absolute -top-32 -left-32 w-96 h-96 rounded-full bg-primary/10 dark:bg-primary/8 blur-3xl" />
         <div className="absolute top-1/3 -right-24 w-80 h-80 rounded-full bg-amber-400/8 dark:bg-amber-500/6 blur-3xl" />
         <div className="absolute -bottom-20 left-1/3 w-72 h-72 rounded-full bg-primary/8 dark:bg-primary/6 blur-3xl" />
-        {/* Grade de pontos sutil */}
         <div
           className="absolute inset-0 opacity-[0.03] dark:opacity-[0.04]"
           style={{
@@ -123,92 +122,70 @@ const Auth: React.FC = () => {
         />
       </div>
 
-      <div className="relative w-full max-w-sm space-y-5 animate-fade-in">
+      <div className="relative w-full max-w-sm animate-fade-in">
 
         {/* Logo + Título */}
-        <div className="text-center space-y-2">
-          {/* Glow atrás da logo */}
-          <div className="relative inline-block">
+        <div className="text-center mb-7">
+          <div className="relative inline-block mb-3">
             <div className="absolute inset-0 rounded-full bg-primary/20 blur-2xl scale-110" />
-            <div className="relative w-28 h-28 mx-auto">
+            <div className="relative w-24 h-24 mx-auto">
               <img src="/logo-conciencia.webp" alt="Consciência Divinal" className="w-full h-full object-contain drop-shadow-lg" />
             </div>
           </div>
-          <div className="pt-1">
-            <h1 className="font-display text-2xl font-semibold tracking-wide text-foreground">
-              Consciência Divinal
-            </h1>
-            <p className="text-muted-foreground text-sm mt-0.5">
-              Portal de Medicinas e Cerimônias Sagradas
-            </p>
-          </div>
+          <h1 className="font-display text-2xl font-semibold tracking-wide text-foreground">
+            Consciência Divinal
+          </h1>
+          <p className="text-muted-foreground text-sm mt-0.5">
+            Portal de Medicinas e Cerimônias Sagradas
+          </p>
         </div>
 
         {/* ── VIEW: LOGIN ── */}
         {view === 'login' && (
           <>
-            {/* Frase inspiracional */}
-            <div className="text-center px-2 py-1">
-              <p className="text-[hsl(38,70%,45%)] dark:text-amber-300/80 italic text-[13px] leading-relaxed font-light">
-                "Quem sabe o Criador não trouxe você aqui<br />pra tomar uma xícara de chá conosco"
-              </p>
-            </div>
-
             {/* Card principal */}
             <div className="rounded-2xl border border-border/60 bg-card/90 dark:bg-card/80 backdrop-blur-sm shadow-xl shadow-black/5 dark:shadow-black/20 overflow-hidden">
-              {/* Linha decorativa no topo */}
               <div className="h-0.5 w-full bg-gradient-to-r from-transparent via-primary/50 to-transparent" />
 
-              <div className="p-6 space-y-4">
+              <div className="p-6 space-y-5">
                 <div className="space-y-1 text-center">
                   <h2 className="font-display text-lg font-medium text-foreground">Bem-vindo de volta</h2>
                   <p className="text-muted-foreground text-sm">Entre com sua conta para acessar o portal</p>
                 </div>
 
-                {/* Google button — destaque total */}
+                {/* Google button */}
                 <button
                   type="button"
                   onClick={handleGoogleLogin}
                   disabled={isLoading}
                   className="w-full flex items-center justify-center gap-3 h-12 px-4 rounded-xl bg-white dark:bg-white/95 text-gray-700 font-medium text-sm border border-gray-200 hover:bg-gray-50 hover:shadow-md active:scale-[0.99] transition-all duration-150 shadow-sm disabled:opacity-60 disabled:cursor-not-allowed"
                 >
-                  {isLoading ? <Loader2 className="h-5 w-5 animate-spin text-gray-500" /> : <><GoogleIcon /><span>Continuar com Google</span></>}
+                  {isLoading
+                    ? <Loader2 className="h-5 w-5 animate-spin text-gray-500" />
+                    : <><GoogleIcon /><span>Continuar com Google</span></>
+                  }
                 </button>
 
-                {/* Divisor */}
-                <div className="flex items-center gap-3">
-                  <div className="flex-1 h-px bg-border/60" />
-                  <span className="text-[11px] text-muted-foreground uppercase tracking-widest">Novo por aqui?</span>
-                  <div className="flex-1 h-px bg-border/60" />
-                </div>
-
-                {/* Criar conta */}
-                <button
-                  type="button"
-                  onClick={() => setView('register')}
-                  className="w-full h-10 rounded-xl border border-primary/40 text-primary hover:bg-primary/5 text-sm font-medium transition-colors"
-                >
-                  Criar minha conta
-                </button>
+                {/* Link para criar conta */}
+                <p className="text-center text-sm text-muted-foreground">
+                  Não tem conta?{' '}
+                  <button
+                    type="button"
+                    onClick={() => setView('register')}
+                    className="text-primary font-medium hover:underline underline-offset-2 transition-colors"
+                  >
+                    Criar minha conta
+                  </button>
+                </p>
               </div>
             </div>
 
-            {/* Features */}
-            <div className="flex items-center justify-center gap-2 flex-wrap">
-              {[
-                { emoji: '📋', label: 'Anamnese' },
-                { emoji: '🌿', label: 'Medicinas' },
-                { emoji: '🌙', label: 'Cerimônias' },
-                { emoji: '💬', label: 'Partilhas' },
-              ].map(({ emoji, label }) => (
-                <div key={label} className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-card/70 dark:bg-card/50 border border-border/40 text-xs text-muted-foreground backdrop-blur-sm">
-                  <span>{emoji}</span>
-                  <span>{label}</span>
-                </div>
-              ))}
-            </div>
+            {/* Frase inspiracional — abaixo do card, secundária */}
+            <p className="text-center text-[hsl(38,70%,45%)] dark:text-amber-300/70 italic text-[12px] leading-relaxed font-light mt-5 px-4">
+              "Quem sabe o Criador não trouxe você aqui pra tomar uma xícara de chá conosco"
+            </p>
 
-            <p className="text-center text-[11px] text-muted-foreground/70">
+            <p className="text-center text-[11px] text-muted-foreground/50 mt-3">
               Ao continuar, você concorda com nossos termos de uso e política de privacidade.
             </p>
           </>
@@ -231,7 +208,7 @@ const Auth: React.FC = () => {
                 </button>
                 <div>
                   <h2 className="font-display text-lg font-medium leading-tight">Criar conta</h2>
-                  <p className="text-muted-foreground text-xs mt-0.5">Algumas informações para começar</p>
+                  <p className="text-muted-foreground text-xs mt-0.5">Antes de começar, queremos te conhecer</p>
                 </div>
               </div>
 
@@ -268,17 +245,20 @@ const Auth: React.FC = () => {
                 </div>
               </div>
 
-              {/* Botão */}
+              {/* Botão Google */}
               <button
                 type="button"
                 onClick={handlePreRegister}
                 disabled={isLoading}
                 className="w-full flex items-center justify-center gap-3 h-12 px-4 rounded-xl bg-white dark:bg-white/95 text-gray-700 font-medium text-sm border border-gray-200 hover:bg-gray-50 hover:shadow-md active:scale-[0.99] transition-all duration-150 shadow-sm disabled:opacity-60 disabled:cursor-not-allowed"
               >
-                {isLoading ? <Loader2 className="h-5 w-5 animate-spin text-gray-500" /> : <><GoogleIcon /><span>Continuar com Google</span></>}
+                {isLoading
+                  ? <Loader2 className="h-5 w-5 animate-spin text-gray-500" />
+                  : <><GoogleIcon /><span>Continuar com Google</span></>
+                }
               </button>
 
-              <p className="text-center text-[11px] text-muted-foreground leading-relaxed">
+              <p className="text-center text-[11px] text-muted-foreground/70 leading-relaxed">
                 Essas informações são necessárias para seu cadastro e atendimento personalizado.
               </p>
             </div>
