@@ -191,44 +191,43 @@ const WelcomeModal: React.FC = () => {
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-md bg-zinc-900 border-zinc-800 p-0 overflow-hidden">
-        {/* Header com gradiente */}
-        <div className="relative pt-8 pb-4 px-6 bg-gradient-to-b from-zinc-800/50 to-transparent">
-          {/* Decoração de fundo */}
-          <div className="absolute inset-0 opacity-30">
+      <DialogContent className="sm:max-w-md w-[calc(100%-2rem)] bg-zinc-900 border-zinc-800 p-0 flex flex-col max-h-[90dvh] overflow-hidden">
+        {/* Header com gradiente — fixo */}
+        <div className="relative pt-7 pb-4 px-6 bg-gradient-to-b from-zinc-800/50 to-transparent shrink-0">
+          <div className="absolute inset-0 opacity-30 pointer-events-none">
             <div className="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-32 bg-amber-500/20 rounded-full blur-3xl" />
           </div>
-          
+
           {/* Ícone */}
-          <div className="relative mx-auto mb-4 w-16 h-16 rounded-full bg-gradient-to-br from-amber-500/20 to-amber-600/10 border border-amber-500/30 flex items-center justify-center">
-            <Icon className="w-7 h-7 text-amber-400" />
+          <div className="relative mx-auto mb-3 w-14 h-14 rounded-full bg-gradient-to-br from-amber-500/20 to-amber-600/10 border border-amber-500/30 flex items-center justify-center">
+            <Icon className="w-6 h-6 text-amber-400" />
           </div>
-          
+
           {/* Título */}
           <div className="text-center relative">
-            <h2 className="text-2xl font-display text-white tracking-wide">
+            <h2 className="text-xl font-display text-white tracking-wide">
               {currentStep.title}
             </h2>
-            <p className="text-amber-400/80 text-sm font-light tracking-widest uppercase mt-1">
+            <p className="text-amber-400/80 text-xs font-light tracking-widest uppercase mt-0.5">
               {currentStep.subtitle}
             </p>
           </div>
         </div>
 
-        {/* Conteúdo */}
-        <div className="px-6 pb-4">
+        {/* Conteúdo — scrollável */}
+        <div className="px-6 py-4 overflow-y-auto flex-1">
           {currentStep.content}
         </div>
 
-        {/* Indicadores de progresso */}
-        <div className="flex justify-center gap-2 py-4 border-t border-zinc-800/50">
+        {/* Indicadores de progresso — fixo */}
+        <div className="flex justify-center gap-2 py-3 border-t border-zinc-800/50 shrink-0">
           {steps.map((_, i) => (
             <button
               key={i}
               onClick={() => setStep(i)}
               className={`h-1.5 rounded-full transition-all duration-300 ${
-                i === step 
-                  ? 'bg-amber-500 w-8' 
+                i === step
+                  ? 'bg-amber-500 w-8'
                   : i < step
                     ? 'bg-amber-500/50 w-1.5'
                     : 'bg-zinc-700 w-1.5 hover:bg-zinc-600'
@@ -237,28 +236,28 @@ const WelcomeModal: React.FC = () => {
           ))}
         </div>
 
-        {/* Footer */}
-        <DialogFooter className="flex-row gap-2 sm:justify-between px-6 pb-6 pt-2">
+        {/* Footer — fixo */}
+        <DialogFooter className="flex-row gap-2 sm:justify-between px-6 pb-5 pt-2 shrink-0">
           {step > 0 ? (
-            <Button 
-              variant="ghost" 
+            <Button
+              variant="ghost"
               onClick={() => setStep(s => s - 1)}
               className="text-zinc-400 hover:text-white hover:bg-zinc-800"
             >
               Voltar
             </Button>
           ) : (
-            <Button 
-              variant="ghost" 
+            <Button
+              variant="ghost"
               onClick={handleClose}
               className="text-zinc-500 hover:text-zinc-300 hover:bg-transparent text-sm"
             >
               Pular
             </Button>
           )}
-          
+
           {isLastStep ? (
-            <Button 
+            <Button
               onClick={handleClose}
               className="bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-500 hover:to-amber-600 text-white border-0"
             >
@@ -266,7 +265,7 @@ const WelcomeModal: React.FC = () => {
               <Sparkles className="w-4 h-4 ml-2" />
             </Button>
           ) : (
-            <Button 
+            <Button
               onClick={() => setStep(s => s + 1)}
               className="bg-zinc-800 hover:bg-zinc-700 text-white border border-zinc-700"
             >
