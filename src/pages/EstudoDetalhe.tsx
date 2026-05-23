@@ -265,9 +265,9 @@ const EstudoDetalhe: React.FC = () => {
               </h3>
 
               {comentarios.length > 0 && (
-                <div className="space-y-5">
+                <div className="divide-y divide-border/40">
                   {comentarios.map((c) => (
-                    <div key={c.id} className="flex gap-3 group">
+                    <div key={c.id} className="flex gap-3 group py-4 first:pt-0">
                       <Avatar className="w-8 h-8 shrink-0 mt-0.5">
                         <AvatarImage src={c.profiles?.avatar_url || undefined} />
                         <AvatarFallback className="text-xs bg-primary/10 text-primary">
@@ -275,7 +275,7 @@ const EstudoDetalhe: React.FC = () => {
                         </AvatarFallback>
                       </Avatar>
                       <div className="flex-1 min-w-0">
-                        <div className="flex items-baseline gap-2 mb-1">
+                        <div className="flex items-baseline gap-2 mb-1.5">
                           <span className="font-semibold text-sm text-foreground">
                             {c.profiles?.full_name || 'Usuário'}
                           </span>
@@ -301,7 +301,7 @@ const EstudoDetalhe: React.FC = () => {
               )}
 
               {user ? (
-                <div className="flex gap-3 pt-2">
+                <div className="flex gap-3 pt-4 border-t border-border/40">
                   <Avatar className="w-8 h-8 shrink-0 mt-1">
                     <AvatarFallback className="text-xs bg-primary/10 text-primary">
                       {user.email?.charAt(0).toUpperCase()}
