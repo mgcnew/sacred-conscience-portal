@@ -144,7 +144,7 @@ const EstudoDetalhe: React.FC = () => {
               <img
                 src={material.imagem_url}
                 alt={material.titulo}
-                className="w-full h-56 sm:h-72 object-cover"
+                className="w-full aspect-video object-cover"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-transparent" />
             </div>

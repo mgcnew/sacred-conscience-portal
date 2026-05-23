@@ -89,7 +89,7 @@ const MaterialCard: React.FC<MaterialCardProps> = ({ material, onClick, onEdit, 
           )}
         </div>
       ) : (
-        <div className="relative h-32 bg-gradient-to-br from-primary/10 to-primary/5 flex items-center justify-center">
+        <div className="relative h-48 bg-gradient-to-br from-primary/10 to-primary/5 flex items-center justify-center">
           <span className="text-4xl">{categoria?.icon || '📄'}</span>
           {isRascunho && (
             <Badge variant="outline" className="absolute top-3 left-3">
