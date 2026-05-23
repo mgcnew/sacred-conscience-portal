@@ -5,9 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
-import { Loader2, ArrowLeft, User, Calendar, Mail } from 'lucide-react';
-
-const PRE_REGISTER_KEY = 'pre_register_data';
+import { Loader2, ArrowLeft, Mail } from 'lucide-react';
 
 const GoogleIcon = () => (
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" className="h-5 w-5 shrink-0">
@@ -18,19 +16,13 @@ const GoogleIcon = () => (
   </svg>
 );
 
-const FieldError = ({ message }: { message?: string }) =>
-  message ? <p className="text-xs text-destructive mt-1">{message}</p> : null;
-
 const Auth: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { user, resetPassword, signInWithGoogle } = useAuth();
 
   const [isLoading, setIsLoading] = useState(false);
-  const [view, setView] = useState<'login' | 'register' | 'reset'>('login');
-  const [preNome, setPreNome] = useState('');
-  const [preDataNascimento, setPreDataNascimento] = useState('');
-  const [preErrors, setPreErrors] = useState<Record<string, string>>({});
+  const [view, setView] = useState<'login' | 'reset'>('login');
   const [resetEmail, setResetEmail] = useState('');
 
   const from = (location.state as { from?: { pathname: string } })?.from?.pathname || '/';
@@ -52,17 +44,6 @@ const Auth: React.FC = () => {
     if (user) navigate(from, { replace: true });
   }, [user, navigate, from]);
 
-  useEffect(() => {
-    const saved = localStorage.getItem(PRE_REGISTER_KEY);
-    if (saved) {
-      try {
-        const { nome, dataNascimento } = JSON.parse(saved);
-        if (nome) setPreNome(nome);
-        if (dataNascimento) setPreDataNascimento(dataNascimento);
-      } catch { /* ignore */ }
-    }
-  }, []);
-
   // Reseta loading quando o browser restaura a página do bfcache
   // (usuário cancelou no Google e voltou com o botão Voltar)
   useEffect(() => {
@@ -80,15 +61,6 @@ const Auth: React.FC = () => {
       toast.error('Erro no login com Google', { description: error.message });
       setIsLoading(false);
     }
-  };
-
-  const handlePreRegister = () => {
-    const errors: Record<string, string> = {};
-    if (!preNome || preNome.trim().length < 3) errors.nome = 'Nome deve ter pelo menos 3 caracteres';
-    if (!preDataNascimento) errors.dataNascimento = 'Data de nascimento é obrigatória';
-    if (Object.keys(errors).length > 0) { setPreErrors(errors); return; }
-    localStorage.setItem(PRE_REGISTER_KEY, JSON.stringify({ nome: preNome.trim(), dataNascimento: preDataNascimento }));
-    handleGoogleLogin();
   };
 
   const handleResetPassword = async (e: React.FormEvent) => {
@@ -143,17 +115,15 @@ const Auth: React.FC = () => {
         {/* ── VIEW: LOGIN ── */}
         {view === 'login' && (
           <>
-            {/* Card principal */}
             <div className="rounded-2xl border border-border/60 bg-card/90 dark:bg-card/80 backdrop-blur-sm shadow-xl shadow-black/5 dark:shadow-black/20 overflow-hidden">
               <div className="h-0.5 w-full bg-gradient-to-r from-transparent via-primary/50 to-transparent" />
 
               <div className="p-6 space-y-5">
                 <div className="space-y-1 text-center">
-                  <h2 className="font-display text-lg font-medium text-foreground">Bem-vindo de volta</h2>
+                  <h2 className="font-display text-lg font-medium text-foreground">Bem-vindo(a)</h2>
                   <p className="text-muted-foreground text-sm">Entre com sua conta para acessar o portal</p>
                 </div>
 
-                {/* Google button */}
                 <button
                   type="button"
                   onClick={handleGoogleLogin}
@@ -166,21 +136,18 @@ const Auth: React.FC = () => {
                   }
                 </button>
 
-                {/* Link para criar conta */}
-                <p className="text-center text-sm text-muted-foreground">
-                  Não tem conta?{' '}
+                <p className="text-center text-xs text-muted-foreground/60">
                   <button
                     type="button"
-                    onClick={() => setView('register')}
-                    className="text-primary font-medium hover:underline underline-offset-2 transition-colors"
+                    onClick={() => setView('reset')}
+                    className="hover:text-muted-foreground transition-colors hover:underline underline-offset-2"
                   >
-                    Criar minha conta
+                    Esqueci meu acesso
                   </button>
                 </p>
               </div>
             </div>
 
-            {/* Frase inspiracional — abaixo do card, secundária */}
             <p className="text-center text-[hsl(38,70%,45%)] dark:text-amber-300/70 italic text-[12px] leading-relaxed font-light mt-5 px-4">
               "Quem sabe o Criador não trouxe você aqui pra tomar uma xícara de chá conosco"
             </p>
@@ -189,80 +156,6 @@ const Auth: React.FC = () => {
               Ao continuar, você concorda com nossos termos de uso e política de privacidade.
             </p>
           </>
-        )}
-
-        {/* ── VIEW: CADASTRO ── */}
-        {view === 'register' && (
-          <div className="rounded-2xl border border-border/60 bg-card/90 dark:bg-card/80 backdrop-blur-sm shadow-xl shadow-black/5 dark:shadow-black/20 overflow-hidden">
-            <div className="h-0.5 w-full bg-gradient-to-r from-transparent via-amber-500/50 to-transparent" />
-            <div className="p-6 space-y-5">
-
-              {/* Header com voltar */}
-              <div className="flex items-center gap-3">
-                <button
-                  type="button"
-                  onClick={() => { setView('login'); setPreErrors({}); }}
-                  className="p-1.5 rounded-lg hover:bg-muted transition-colors text-muted-foreground shrink-0"
-                >
-                  <ArrowLeft className="w-4 h-4" />
-                </button>
-                <div>
-                  <h2 className="font-display text-lg font-medium leading-tight">Criar conta</h2>
-                  <p className="text-muted-foreground text-xs mt-0.5">Antes de começar, queremos te conhecer</p>
-                </div>
-              </div>
-
-              {/* Campos */}
-              <div className="space-y-3">
-                <div className="space-y-1.5">
-                  <Label htmlFor="pre-nome" className="text-sm flex items-center gap-1.5 text-foreground/80">
-                    <User className="w-3.5 h-3.5" />Nome Completo
-                  </Label>
-                  <Input
-                    id="pre-nome"
-                    type="text"
-                    placeholder="Seu nome completo"
-                    value={preNome}
-                    autoFocus
-                    onChange={(e) => { setPreNome(e.target.value); setPreErrors(p => ({ ...p, nome: '' })); }}
-                    className={preErrors.nome ? 'border-destructive' : ''}
-                  />
-                  <FieldError message={preErrors.nome} />
-                </div>
-
-                <div className="space-y-1.5">
-                  <Label htmlFor="pre-data" className="text-sm flex items-center gap-1.5 text-foreground/80">
-                    <Calendar className="w-3.5 h-3.5" />Data de Nascimento
-                  </Label>
-                  <Input
-                    id="pre-data"
-                    type="date"
-                    value={preDataNascimento}
-                    onChange={(e) => { setPreDataNascimento(e.target.value); setPreErrors(p => ({ ...p, dataNascimento: '' })); }}
-                    className={preErrors.dataNascimento ? 'border-destructive' : ''}
-                  />
-                  <FieldError message={preErrors.dataNascimento} />
-                </div>
-              </div>
-
-              {/* Botão Google */}
-              <button
-                type="button"
-                onClick={handlePreRegister}
-                disabled={isLoading}
-                className="w-full flex items-center justify-center gap-3 h-12 px-4 rounded-xl bg-white dark:bg-white/95 text-gray-700 font-medium text-sm border border-gray-200 hover:bg-gray-50 hover:shadow-md active:scale-[0.99] transition-all duration-150 shadow-sm disabled:opacity-60 disabled:cursor-not-allowed"
-              >
-                {isLoading
-                  ? <Loader2 className="h-5 w-5 animate-spin text-gray-500" />
-                  : <><GoogleIcon /><span>Continuar com Google</span></>
-                }
-              </button>
-
-              <p className="text-center text-[11px] text-muted-foreground/70 leading-relaxed">
-                Essas informações são necessárias para seu cadastro e atendimento personalizado.
-              </p>
-            </div>
-          </div>
         )}
 
         {/* ── VIEW: RESET SENHA ── */}

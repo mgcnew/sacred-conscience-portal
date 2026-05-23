@@ -1,7 +1,6 @@
 import React from 'react';
 import { Outlet, useNavigate, useLocation, Navigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
-import { supabase } from '@/integrations/supabase/client';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { User, Loader2, Info, HelpCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -11,9 +10,10 @@ import NotificationBell from '@/components/layout/NotificationBell';
 import Sidebar from '@/components/layout/Sidebar';
 import BottomNav from '@/components/layout/BottomNav';
 import { WelcomeModal, InstallPWAPrompt, AnamneseWelcomeModal } from '@/components/shared';
+import CompleteProfileModal from '@/components/shared/CompleteProfileModal';
 import PWAUpdatePrompt from '@/components/shared/PWAUpdatePrompt';
 import { ScrollToTop } from '@/components/ui/scroll-to-top';
-import { useUserAnamnese } from '@/hooks/queries/useProfiles';
+import { useUserAnamnese, useMeuPerfil } from '@/hooks/queries/useProfiles';
 import { useCheckPermissao } from '@/components/auth/PermissionGate';
 
 const SIDEBAR_COLLAPSED_KEY = 'sidebar-collapsed';
@@ -30,12 +30,15 @@ const MainLayout: React.FC = () => {
   const { isSuperAdmin } = useCheckPermissao();
   const navigate = useNavigate();
   const location = useLocation();
-  const [userName, setUserName] = React.useState<string>('');
-  const [userAvatar, setUserAvatar] = React.useState<string | null>(null);
   const [sidebarCollapsed, setSidebarCollapsed] = React.useState(() => {
     const saved = localStorage.getItem(SIDEBAR_COLLAPSED_KEY);
     return saved === 'true';
   });
+
+  const { data: profile, isLoading: isProfileLoading } = useMeuPerfil(user?.id);
+  const userName = profile?.full_name || '';
+  const userAvatar = profile?.avatar_url || null;
+  const profileIncomplete = !isProfileLoading && !!user && (!profile?.full_name || !profile?.birth_date);
 
   // Verificar se usuário tem anamnese preenchida
   const { data: anamnese, isLoading: isLoadingAnamnese } = useUserAnamnese(user?.id);
@@ -46,93 +49,6 @@ const MainLayout: React.FC = () => {
   // Páginas que não requerem anamnese (a própria página de anamnese e auth)
   const isAnamnesePage = location.pathname === ROUTES.ANAMNESE;
   const requiresAnamnese = !isAnamnesePage && !isLoadingAnamnese && !anamnese;
-
-  // Buscar nome e avatar do usuário do perfil e salvar dados do pré-cadastro
-  React.useEffect(() => {
-    const fetchAndUpdateProfile = async () => {
-      if (!user?.id) return;
-      
-      try {
-        // Verificar se há dados de pré-cadastro no localStorage
-        const preRegisterData = localStorage.getItem('pre_register_data');
-        
-        // Primeiro, verificar se o profile já existe
-        const { data: existingProfile } = await supabase
-          .from('profiles')
-          .select('id, full_name, avatar_url')
-          .eq('id', user.id)
-          .maybeSingle();
-        
-        if (preRegisterData) {
-          const { nome, dataNascimento } = JSON.parse(preRegisterData);
-          
-          if (existingProfile) {
-            // Profile existe - atualizar com dados do pré-cadastro (sempre atualiza para garantir)
-            const { error: updateError } = await supabase
-              .from('profiles')
-              .update({
-                full_name: nome,
-                birth_date: dataNascimento,
-              })
-              .eq('id', user.id);
-            
-            if (updateError) {
-              console.error('Erro ao atualizar profile:', updateError);
-            }
-          } else {
-            // Profile não existe - criar novo
-            const { error: insertError } = await supabase
-              .from('profiles')
-              .insert({
-                id: user.id,
-                full_name: nome,
-                birth_date: dataNascimento,
-                created_at: new Date().toISOString(),
-              });
-            
-            if (insertError) {
-              console.error('Erro ao criar profile:', insertError);
-            }
-          }
-          
-          // Limpar dados do localStorage após usar
-          localStorage.removeItem('pre_register_data');
-          setUserName(nome);
-          
-        } else if (!existingProfile) {
-          // Não tem pré-cadastro e não tem profile - criar profile vazio
-          const { error: insertError } = await supabase
-            .from('profiles')
-            .insert({
-              id: user.id,
-              created_at: new Date().toISOString(),
-            });
-          
-          if (insertError) {
-            console.error('Erro ao criar profile vazio:', insertError);
-          }
-        }
-
-        // Buscar dados atualizados do profile
-        const { data } = await supabase
-          .from('profiles')
-          .select('full_name, avatar_url')
-          .eq('id', user.id)
-          .single();
-        
-        if (data?.full_name) {
-          setUserName(data.full_name);
-        }
-        if (data?.avatar_url) {
-          setUserAvatar(data.avatar_url);
-        }
-      } catch (error) {
-        console.error('Error fetching user profile:', error);
-      }
-    };
-
-    fetchAndUpdateProfile();
-  }, [user?.id]);
 
   const handleSignOut = async () => {
     await signOut();
@@ -147,11 +63,20 @@ const MainLayout: React.FC = () => {
     });
   };
 
-  // Se está carregando a verificação de anamnese, mostrar loading
-  if (isLoadingAnamnese && !isAnamnesePage) {
+  // Aguardar carregamento de perfil e anamnese
+  if ((isProfileLoading || isLoadingAnamnese) && !isAnamnesePage) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  // Se perfil incompleto, mostrar modal de completar antes de qualquer redirect
+  if (profileIncomplete) {
+    return (
+      <div className="min-h-screen bg-background">
+        <CompleteProfileModal />
       </div>
     );
   }
