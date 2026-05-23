@@ -167,8 +167,17 @@ const SobreNos: React.FC = () => {
             <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6">
               <div className="shrink-0">
                 <div className="relative">
-                  <div className="w-32 h-32 rounded-full bg-gradient-to-br from-primary/20 to-primary/5 border-4 border-primary/20 flex items-center justify-center shadow-lg">
-                    <User className="w-14 h-14 text-primary/40" />
+                  <div className="w-32 h-32 rounded-full border-4 border-primary/20 shadow-lg overflow-hidden bg-gradient-to-br from-primary/20 to-primary/5">
+                    <img
+                      src="/images/txai-raimundo.webp"
+                      alt="Txai Raimundo Ferreira Lima"
+                      className="w-full h-full object-cover"
+                      onError={(e) => {
+                        e.currentTarget.style.display = 'none';
+                        e.currentTarget.parentElement!.querySelector('.fallback-icon')?.classList.remove('hidden');
+                      }}
+                    />
+                    <User className="fallback-icon hidden w-14 h-14 text-primary/40 absolute inset-0 m-auto" />
                   </div>
                   <div className="absolute -bottom-1 -right-1 w-9 h-9 rounded-full bg-primary flex items-center justify-center shadow-md">
                     <Star className="w-4 h-4 text-primary-foreground fill-current" />
