@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Eye, Send, Sparkles, RotateCcw, ChevronDown } from 'lucide-react';
+import { Eye, Send, Sparkles, RotateCcw, ChevronDown, Share2 } from 'lucide-react';
+import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { cn } from '@/lib/utils';
@@ -119,6 +120,19 @@ const GuardiaoVisoes: React.FC = () => {
     setError(null);
   };
 
+  const handleShare = async () => {
+    const url = `${window.location.origin}/guardiao-visoes`;
+    const text = `🌿 Guardião das Visões — interprete seus sonhos e visões de cerimônia com sabedoria xamânica.\n\nAcesse pelo app Consciência Divinal:`;
+    if (navigator.share) {
+      try {
+        await navigator.share({ title: 'Guardião das Visões', text, url });
+      } catch { /* cancelado */ }
+    } else {
+      await navigator.clipboard.writeText(`${text}\n${url}`);
+      toast.success('Link copiado!');
+    }
+  };
+
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
@@ -145,13 +159,22 @@ const GuardiaoVisoes: React.FC = () => {
             </p>
           </div>
         </div>
-        <button
-          onClick={reset}
-          className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors px-2 py-1.5 rounded-lg hover:bg-muted/50"
-        >
-          <RotateCcw className="w-3.5 h-3.5" />
-          Nova conversa
-        </button>
+        <div className="flex items-center gap-1">
+          <button
+            onClick={handleShare}
+            className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors px-2 py-1.5 rounded-lg hover:bg-muted/50"
+          >
+            <Share2 className="w-3.5 h-3.5" />
+            <span className="hidden sm:inline">Compartilhar</span>
+          </button>
+          <button
+            onClick={reset}
+            className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors px-2 py-1.5 rounded-lg hover:bg-muted/50"
+          >
+            <RotateCcw className="w-3.5 h-3.5" />
+            <span className="hidden sm:inline">Nova conversa</span>
+          </button>
+        </div>
       </div>
 
       {/* Disclaimer */}
