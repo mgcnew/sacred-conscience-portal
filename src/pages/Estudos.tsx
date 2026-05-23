@@ -1,15 +1,16 @@
 import { useState, useMemo, useRef } from 'react';
-import { BookOpen, Filter, Sparkles, Plus, Loader2, Upload } from 'lucide-react';
+import { BookOpen, Sparkles, Plus, Loader2, Upload } from 'lucide-react';
 import { SearchInput } from '@/components/ui/search-input';
 import { toast } from 'sonner';
 import { VirtuosoGrid } from 'react-virtuoso';
-import { PageHeader, PageContainer } from '@/components/shared';
+import { PageContainer } from '@/components/shared';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import { AdminFab } from '@/components/ui/admin-fab';
+import { cn } from '@/lib/utils';
 import {
   Select,
   SelectContent,
@@ -281,53 +282,93 @@ const Estudos: React.FC = () => {
 
   const isPending = createMaterial.isPending || updateMaterial.isPending;
 
+  const totalMateriais = materiais?.filter(m => m.publicado || podeGerenciar).length ?? 0;
+
   return (
     <PageContainer maxWidth="xl">
+
+      {/* Hero header */}
       <FadeIn>
-        <PageHeader
-          icon={BookOpen}
-          title="Estudos"
-          description="Materiais para integração e aprofundamento pós-consagração."
-        />
+        <div className="relative overflow-hidden rounded-2xl mb-6 bg-gradient-to-br from-sky-500/12 via-primary/6 to-transparent border border-primary/15 px-5 py-6">
+          <div className="absolute top-0 right-0 w-40 h-40 rounded-full bg-sky-400/10 blur-3xl pointer-events-none" />
+          <div className="relative flex items-start justify-between gap-3">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-primary/15 border border-primary/20 flex items-center justify-center shrink-0">
+                <BookOpen className="w-5 h-5 text-primary" />
+              </div>
+              <div>
+                <h1 className="font-display text-xl font-bold text-foreground leading-tight">Estudos</h1>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  Conhecimento para aprofundar sua jornada e integrar cada vivência
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center gap-3 shrink-0">
+              {!isLoading && totalMateriais > 0 && (
+                <div className="text-right hidden sm:block">
+                  <p className="text-2xl font-black text-primary leading-none">{totalMateriais}</p>
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">materiais</p>
+                </div>
+              )}
+              {podeGerenciar && (
+                <Button
+                  onClick={handleOpenCreate}
+                  size="sm"
+                  className="hidden lg:inline-flex items-center gap-2"
+                >
+                  <Plus className="w-4 h-4" />
+                  Novo Material
+                </Button>
+              )}
+            </div>
+          </div>
+        </div>
       </FadeIn>
 
-      {/* FAB para criar material */}
+      {/* FAB mobile para criar material */}
       {podeGerenciar && (
         <AdminFab
-          actions={[
-            {
-              icon: Plus,
-              label: 'Novo Material',
-              onClick: handleOpenCreate,
-            },
-          ]}
+          className="lg:hidden"
+          actions={[{ icon: Plus, label: 'Novo Material', onClick: handleOpenCreate }]}
         />
       )}
 
-      {/* Filtros */}
+      {/* Busca + Pills de categoria */}
       <FadeIn delay={80}>
-      <div className="flex flex-col sm:flex-row gap-3 mb-6">
-        <SearchInput
-          placeholder="Buscar materiais..."
-          value={searchTerm}
-          onChange={setSearchTerm}
-          containerClassName="flex-1"
-        />
-        <Select value={selectedCategoria} onValueChange={setSelectedCategoria}>
-          <SelectTrigger className="w-full sm:w-[180px]">
-            <Filter className="w-4 h-4 mr-2" />
-            <SelectValue placeholder="Categoria" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="todas">Todas</SelectItem>
+        <div className="mb-6 space-y-3">
+          <SearchInput
+            placeholder="Buscar materiais..."
+            value={searchTerm}
+            onChange={setSearchTerm}
+          />
+          <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-none -mx-1 px-1">
+            <button
+              onClick={() => setSelectedCategoria('todas')}
+              className={cn(
+                'flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap border transition-all shrink-0',
+                selectedCategoria === 'todas'
+                  ? 'bg-primary text-primary-foreground border-primary shadow-sm'
+                  : 'bg-muted/60 text-muted-foreground border-transparent hover:bg-muted hover:text-foreground'
+              )}
+            >
+              ✨ Todos
+            </button>
             {CATEGORIAS_MATERIAIS.map((cat) => (
-              <SelectItem key={cat.value} value={cat.value}>
+              <button
+                key={cat.value}
+                onClick={() => setSelectedCategoria(cat.value)}
+                className={cn(
+                  'flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap border transition-all shrink-0',
+                  selectedCategoria === cat.value
+                    ? 'bg-primary text-primary-foreground border-primary shadow-sm'
+                    : 'bg-muted/60 text-muted-foreground border-transparent hover:bg-muted hover:text-foreground'
+                )}
+              >
                 {cat.icon} {cat.label}
-              </SelectItem>
+              </button>
             ))}
-          </SelectContent>
-        </Select>
-      </div>
+          </div>
+        </div>
       </FadeIn>
 
       {/* Loading com skeletons otimizados */}
