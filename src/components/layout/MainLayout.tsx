@@ -10,11 +10,10 @@ import { ROUTES } from '@/constants';
 import NotificationBell from '@/components/layout/NotificationBell';
 import Sidebar from '@/components/layout/Sidebar';
 import BottomNav from '@/components/layout/BottomNav';
-import { WelcomeModal, InstallPWAPrompt, OnboardingTutorial, AnamneseWelcomeModal } from '@/components/shared';
+import { WelcomeModal, InstallPWAPrompt, AnamneseWelcomeModal } from '@/components/shared';
 import PWAUpdatePrompt from '@/components/shared/PWAUpdatePrompt';
 import { ScrollToTop } from '@/components/ui/scroll-to-top';
 import { useUserAnamnese } from '@/hooks/queries/useProfiles';
-import { useOnboarding } from '@/hooks/useOnboarding';
 import { useCheckPermissao } from '@/components/auth/PermissionGate';
 
 const SIDEBAR_COLLAPSED_KEY = 'sidebar-collapsed';
@@ -40,9 +39,6 @@ const MainLayout: React.FC = () => {
 
   // Verificar se usuário tem anamnese preenchida
   const { data: anamnese, isLoading: isLoadingAnamnese } = useUserAnamnese(user?.id);
-  
-  // Tutorial onboarding
-  const { showTutorial, completeOnboarding, closeTutorial } = useOnboarding();
   
   // Páginas sem footer nem scroll externo (ex: chats)
   const isChatPage = location.pathname === ROUTES.GUARDIAO_VISOES;
@@ -171,13 +167,6 @@ const MainLayout: React.FC = () => {
       <WelcomeModal />
       <AnamneseWelcomeModal />
       <InstallPWAPrompt />
-      <OnboardingTutorial
-        isAdmin={isAdmin}
-        isOpen={showTutorial}
-        onClose={closeTutorial}
-        onComplete={completeOnboarding}
-      />
-      
       {/* Desktop Sidebar */}
       <div className="hidden lg:block">
         <Sidebar

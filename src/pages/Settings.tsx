@@ -10,13 +10,12 @@ import { Switch } from '@/components/ui/switch';
 import { Separator } from '@/components/ui/separator';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { toast } from 'sonner';
-import { User, Moon, Sun, Bell, Shield, LogOut, Loader2, Save, Settings as SettingsIcon, Volume2, Camera, HelpCircle, BookOpen, RotateCcw, Share2, Check, ImagePlus } from 'lucide-react';
+import { User, Moon, Sun, Bell, Shield, LogOut, Loader2, Save, Settings as SettingsIcon, Volume2, Camera, HelpCircle, Share2, Check, ImagePlus } from 'lucide-react';
 import { APP_CONFIG } from '@/config/app';
-import { PageHeader, PageContainer, OnboardingTutorial } from '@/components/shared';
+import { PageHeader, PageContainer } from '@/components/shared';
 import { useTheme } from '@/components/theme-provider';
 import { useNotificationContext } from '@/contexts/NotificationContext';
 import { LogoutConfirmDialog } from '@/components/ui/confirm-dialog';
-import { useOnboarding } from '@/hooks/useOnboarding';
 import { useIsMobile } from '@/hooks/use-mobile';
 
 // Profile Tab Component
@@ -462,14 +461,13 @@ const SecurityTab = memo(({ user, signOut }: { user: any; signOut: () => void })
 SecurityTab.displayName = 'SecurityTab';
 
 // Help Tab Component
-const HelpTab = memo(({ onOpenTutorial }: { onOpenTutorial: () => void }) => {
+const HelpTab = memo(() => {
   const [copied, setCopied] = useState(false);
-  
+
   const appUrl = `https://${APP_CONFIG.domain}`;
   const shareText = `Conheça o ${APP_CONFIG.name}! ${APP_CONFIG.tagline}`;
 
   const handleShare = useCallback(async () => {
-    // Tenta usar a Web Share API (disponível em mobile e alguns browsers)
     if (navigator.share) {
       try {
         await navigator.share({
@@ -479,12 +477,10 @@ const HelpTab = memo(({ onOpenTutorial }: { onOpenTutorial: () => void }) => {
         });
         return;
       } catch (err) {
-        // Usuário cancelou ou erro - fallback para copiar
         if ((err as Error).name === 'AbortError') return;
       }
     }
-    
-    // Fallback: copiar para área de transferência
+
     try {
       await navigator.clipboard.writeText(`${shareText}\n${appUrl}`);
       setCopied(true);
@@ -500,28 +496,11 @@ const HelpTab = memo(({ onOpenTutorial }: { onOpenTutorial: () => void }) => {
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <HelpCircle className="w-5 h-5" />
-          Ajuda e Tutorial
+          Ajuda
         </CardTitle>
-        <CardDescription>Aprenda a usar o portal e tire suas dúvidas.</CardDescription>
+        <CardDescription>Tire suas dúvidas e compartilhe o portal.</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 p-4 rounded-lg border border-border bg-primary/5">
-          <div className="space-y-1 min-w-0 flex-1">
-            <div className="flex items-center gap-2">
-              <BookOpen className="w-4 h-4 text-primary shrink-0" />
-              <p className="text-sm font-medium">Tutorial do Portal</p>
-            </div>
-            <p className="text-sm text-muted-foreground">
-              Reveja o tutorial de introdução às funcionalidades do sistema.
-            </p>
-          </div>
-          <Button onClick={onOpenTutorial} className="w-full md:w-auto shrink-0">
-            <RotateCcw className="w-4 h-4 mr-2" />
-            Rever Tutorial
-          </Button>
-        </div>
-
-        <Separator />
 
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 p-4 rounded-lg border border-border bg-green-500/5">
           <div className="space-y-1 min-w-0 flex-1">
@@ -585,10 +564,6 @@ const Settings: React.FC = () => {
   const [whatsappNotif, setWhatsappNotif] = useState(true);
   const [activeTab, setActiveTab] = useState('profile');
   
-  // Tutorial
-  const [showTutorialLocal, setShowTutorialLocal] = useState(false);
-  const { completeOnboarding } = useOnboarding();
-
   useEffect(() => {
     const getProfile = async () => {
       if (!user) return;
@@ -716,22 +691,12 @@ const Settings: React.FC = () => {
             </TabsContent>
 
             <TabsContent value="help" className="mt-0 animate-fade-in-up">
-              <HelpTab onOpenTutorial={() => setShowTutorialLocal(true)} />
+              <HelpTab />
             </TabsContent>
           </div>
         </div>
       </Tabs>
 
-      {/* Tutorial Modal */}
-      <OnboardingTutorial
-        isAdmin={isAdmin}
-        isOpen={showTutorialLocal}
-        onClose={() => setShowTutorialLocal(false)}
-        onComplete={() => {
-          setShowTutorialLocal(false);
-          completeOnboarding();
-        }}
-      />
     </PageContainer>
   );
 };
