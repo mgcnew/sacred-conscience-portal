@@ -63,6 +63,16 @@ const Auth: React.FC = () => {
     }
   }, []);
 
+  // Quando o browser restaura a página do bfcache (usuário cancelou no Google e voltou),
+  // o estado isLoading fica congelado em true — resetamos aqui.
+  useEffect(() => {
+    const handlePageShow = (e: PageTransitionEvent) => {
+      if (e.persisted) setIsLoading(false);
+    };
+    window.addEventListener('pageshow', handlePageShow);
+    return () => window.removeEventListener('pageshow', handlePageShow);
+  }, []);
+
   const handleGoogleLogin = async () => {
     setIsLoading(true);
     const { error } = await signInWithGoogle();
@@ -162,7 +172,7 @@ const Auth: React.FC = () => {
                   disabled={isLoading}
                   className="w-full flex items-center justify-center gap-3 h-12 px-4 rounded-xl bg-white dark:bg-white/95 text-gray-700 font-medium text-sm border border-gray-200 hover:bg-gray-50 hover:shadow-md active:scale-[0.99] transition-all duration-150 shadow-sm disabled:opacity-60 disabled:cursor-not-allowed"
                 >
-                  {isLoading ? <Loader2 className="h-5 w-5 animate-spin text-gray-500" /> : <><GoogleIcon /><span>Entrar com Google</span></>}
+                  {isLoading ? <Loader2 className="h-5 w-5 animate-spin text-gray-500" /> : <><GoogleIcon /><span>Continuar com Google</span></>}
                 </button>
 
                 {/* Divisor */}
