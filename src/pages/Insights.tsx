@@ -6,7 +6,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Sparkles, Calendar, BookHeart, Flame, Plus, Pencil, Trash2, CheckCircle2, Clock, Eye } from 'lucide-react';
+import { Sparkles, Calendar, BookHeart, Flame, Plus, Pencil, Trash2, CheckCircle2, Clock, Eye, Share2 } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { OrganicDivider } from '@/components/ui/organic-divider';
@@ -469,7 +469,26 @@ const Insights: React.FC = () => {
       <FadeIn delay={80}>
       <section>
         <div className="flex items-center justify-between mb-4">
-          <h2 className="font-display text-base font-semibold text-foreground">Diário Pessoal</h2>
+          <div className="flex items-center gap-2">
+            <h2 className="font-display text-base font-semibold text-foreground">Diário Pessoal</h2>
+            <button
+              onClick={async () => {
+                const texto = `📓 *Diário Pessoal — Consciência Divinal*\n\nVocê sabia que no app Consciência Divinal temos um diário pessoal e completamente privado?\n\nÉ um espaço só seu — ninguém além de você tem acesso ao que escreve.\n\nLá você pode registrar intenções, reflexões e tudo que deseja meditar e levar para a próxima cerimônia. Uma forma de chegar mais preparado(a) e presente.\n\nVenha trilhar sua jornada conosco 🌿`;
+                const url = window.location.origin;
+                if (navigator.share) {
+                  try { await navigator.share({ title: 'Diário Pessoal — Consciência Divinal', text: texto, url }); } catch { /* cancelado */ }
+                } else {
+                  await navigator.clipboard.writeText(`${texto}\n\n${url}`);
+                  toast.success('Texto copiado!');
+                }
+              }}
+              className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors px-2 py-1 rounded-lg hover:bg-muted/50"
+              title="Compartilhar o diário"
+            >
+              <Share2 className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">Compartilhar</span>
+            </button>
+          </div>
           <Dialog open={newEntryOpen} onOpenChange={setNewEntryOpen}>
             <DialogTrigger asChild>
               <Button size="sm" className="gap-1.5">
