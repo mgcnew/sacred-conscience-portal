@@ -174,7 +174,7 @@ BEGIN
       'depoimento',
       'Nova Partilha para Aprovar',
       user_name || ' enviou uma partilha aguardando aprovação.',
-      '/admin'
+      '/partilhas?moderar=1'
     );
   END LOOP;
   

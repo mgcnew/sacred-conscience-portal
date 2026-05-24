@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
@@ -446,6 +447,15 @@ const Depoimentos: React.FC = () => {
     const isMobile = useIsMobile();
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [isModeracaoOpen, setIsModeracaoOpen] = useState(false);
+    const [searchParams, setSearchParams] = useSearchParams();
+
+    // Abre modal de moderação automaticamente ao navegar via notificação (?moderar=1)
+    useEffect(() => {
+      if (canModerate && searchParams.get('moderar') === '1') {
+        setIsModeracaoOpen(true);
+        setSearchParams({}, { replace: true });
+      }
+    }, [canModerate, searchParams]);
     const [texto, setTexto] = useState('');
     const [cerimoniaId, setCerimoniaId] = useState<string>('livre');
     const [autorizaInstagram, setAutorizaInstagram] = useState(false);
