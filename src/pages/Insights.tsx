@@ -474,7 +474,7 @@ const Insights: React.FC = () => {
             <button
               onClick={async () => {
                 const texto = `📓 *Diário Pessoal — Consciência Divinal*\n\nVocê sabia que no app Consciência Divinal temos um diário pessoal e completamente privado?\n\nÉ um espaço só seu — ninguém além de você tem acesso ao que escreve.\n\nLá você pode registrar intenções, reflexões e tudo que deseja meditar e levar para a próxima cerimônia. Uma forma de chegar mais preparado(a) e presente.\n\nVenha trilhar sua jornada conosco 🌿`;
-                const url = window.location.origin;
+                const url = `${window.location.origin}/insights`;
                 if (navigator.share) {
                   try { await navigator.share({ title: 'Diário Pessoal — Consciência Divinal', text: texto, url }); } catch { /* cancelado */ }
                 } else {
