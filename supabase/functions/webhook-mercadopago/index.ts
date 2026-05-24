@@ -6,6 +6,39 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+async function verifyMpSignature(req: Request, rawBody: string): Promise<boolean> {
+  const webhookSecret = Deno.env.get("MP_WEBHOOK_SECRET");
+  // Se o secret não estiver configurado, pula a verificação (compatibilidade)
+  if (!webhookSecret) return true;
+
+  const xSignature = req.headers.get("x-signature");
+  const xRequestId = req.headers.get("x-request-id");
+  if (!xSignature) return false;
+
+  // Formato: ts=<timestamp>,v1=<hash>
+  const parts = Object.fromEntries(xSignature.split(",").map((p) => p.split("=")));
+  const ts = parts["ts"];
+  const v1 = parts["v1"];
+  if (!ts || !v1) return false;
+
+  // Reconstruir a string de assinatura conforme documentação do MP
+  const url = new URL(req.url);
+  const dataId = new URLSearchParams(url.search).get("data.id") ?? "";
+  const manifest = `id:${dataId};request-id:${xRequestId ?? ""};ts:${ts};`;
+
+  const key = await crypto.subtle.importKey(
+    "raw",
+    new TextEncoder().encode(webhookSecret),
+    { name: "HMAC", hash: "SHA-256" },
+    false,
+    ["sign"]
+  );
+  const sig = await crypto.subtle.sign("HMAC", key, new TextEncoder().encode(manifest));
+  const expected = Array.from(new Uint8Array(sig)).map((b) => b.toString(16).padStart(2, "0")).join("");
+
+  return expected === v1;
+}
+
 serve(async (req) => {
   // Handle CORS preflight
   if (req.method === "OPTIONS") {
@@ -23,8 +56,21 @@ serve(async (req) => {
 
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
+    // Ler body como texto para verificação de assinatura
+    const rawBody = await req.text();
+
+    // Verificar assinatura do Mercado Pago (quando MP_WEBHOOK_SECRET estiver configurado)
+    const signatureValid = await verifyMpSignature(req, rawBody);
+    if (!signatureValid) {
+      console.warn("Webhook com assinatura inválida rejeitado");
+      return new Response(JSON.stringify({ error: "Invalid signature" }), {
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     // Pegar dados do webhook
-    const body = await req.json();
+    const body = JSON.parse(rawBody);
     console.log("Webhook recebido:", JSON.stringify(body));
 
     // Mercado Pago envia diferentes tipos de notificação
@@ -77,15 +123,24 @@ serve(async (req) => {
 
       // Se aprovado, processar conforme o tipo
       if (status === "approved") {
-        // Buscar o pagamento completo
+        // Buscar o pagamento completo — verificar que existe e não foi processado ainda
         const { data: pagamento } = await supabase
           .from("pagamentos")
-          .select("id, inscricao_id, produto_id, user_id, tipo")
+          .select("id, inscricao_id, produto_id, user_id, tipo, mp_status")
           .eq("mp_external_reference", external_reference)
+          .neq("mp_status", "approved") // evita duplo processamento
           .single();
 
-        if (pagamento) {
-          // Se for cerimônia, marcar inscrição como paga
+        if (!pagamento) {
+          console.log("Pagamento não encontrado ou já processado:", external_reference);
+          return new Response(JSON.stringify({ success: true }), {
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+            status: 200,
+          });
+        }
+
+        // Se for cerimônia, marcar inscrição como paga
+        {
           if (pagamento.inscricao_id) {
             const { error: inscricaoError } = await supabase
               .from("inscricoes")
