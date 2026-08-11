@@ -318,24 +318,28 @@ const Index: React.FC = () => {
             <section>
               <h2 className="font-display text-lg font-bold mb-3 px-0.5">Explore o Templo</h2>
               <div className="grid grid-cols-2 gap-3">
+                {/* Uma das quatro cores do logo por atalho. O card fica sobre
+                    superfície sólida com anel colorido, para ter contorno
+                    definido nos dois temas — um tinte fraco desaparecia no
+                    fundo escuro. */}
                 {([
-                  { label: 'Cursos', desc: 'Expanda seus conhecimentos', icon: GraduationCap, route: ROUTES.CURSOS, tint: 'bg-primary/8', color: 'text-primary' },
-                  { label: 'Guardião', desc: 'Interprete suas visões', icon: Eye, route: ROUTES.GUARDIAO_VISOES, tint: 'bg-sacred-gold/10', color: 'text-sacred-gold' },
-                  { label: 'Medicinas', desc: 'Conheça as plantas', icon: Leaf, route: ROUTES.MEDICINAS, tint: 'bg-primary/8', color: 'text-primary' },
-                  { label: 'Estudos', desc: 'Pós-consagração', icon: BookOpen, route: ROUTES.ESTUDOS, tint: 'bg-sacred-gold/10', color: 'text-sacred-gold' },
-                ] as const).map(({ label, desc, icon: Icon, route, tint, color }) => (
+                  { label: 'Cursos', desc: 'Expanda seus conhecimentos', icon: GraduationCap, route: ROUTES.CURSOS, tint: 'bg-earth/10 ring-earth/25', chip: 'bg-earth/15', color: 'text-earth' },
+                  { label: 'Guardião', desc: 'Interprete suas visões', icon: Eye, route: ROUTES.GUARDIAO_VISOES, tint: 'bg-sacred-gold/10 ring-sacred-gold/25', chip: 'bg-sacred-gold/15', color: 'text-sacred-gold' },
+                  { label: 'Medicinas', desc: 'Conheça as plantas', icon: Leaf, route: ROUTES.MEDICINAS, tint: 'bg-primary/10 ring-primary/25', chip: 'bg-primary/15', color: 'text-primary' },
+                  { label: 'Estudos', desc: 'Pós-consagração', icon: BookOpen, route: ROUTES.ESTUDOS, tint: 'bg-river/10 ring-river/25', chip: 'bg-river/15', color: 'text-river' },
+                ] as const).map(({ label, desc, icon: Icon, route, tint, chip, color }) => (
                   <Card
                     key={label}
-                    className={`overflow-hidden cursor-pointer border-none shadow-sm ${tint} active:scale-95 transition-transform`}
+                    className={`overflow-hidden cursor-pointer border-none shadow-sm ring-1 ${tint} active:scale-95 transition-transform`}
                     onClick={() => navigate(route)}
                   >
-                    <CardContent className="p-4 flex flex-col items-center text-center gap-2">
-                      <div className="w-10 h-10 rounded-full bg-background flex items-center justify-center shadow-sm">
-                        <Icon className={`w-5 h-5 ${color}`} />
+                    <CardContent className="p-3.5 flex flex-col gap-2.5">
+                      <div className={`w-9 h-9 rounded-xl ${chip} flex items-center justify-center`}>
+                        <Icon className={`w-[18px] h-[18px] ${color}`} />
                       </div>
                       <div>
-                        <h3 className="font-bold text-sm">{label}</h3>
-                        <p className="text-[10px] text-muted-foreground leading-tight mt-0.5">{desc}</p>
+                        <h3 className="font-bold text-sm leading-tight">{label}</h3>
+                        <p className="text-xs text-muted-foreground leading-snug mt-0.5">{desc}</p>
                       </div>
                     </CardContent>
                   </Card>
