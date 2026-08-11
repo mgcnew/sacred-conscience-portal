@@ -448,14 +448,6 @@ const Depoimentos: React.FC = () => {
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [isModeracaoOpen, setIsModeracaoOpen] = useState(false);
     const [searchParams, setSearchParams] = useSearchParams();
-
-    // Abre modal de moderação automaticamente ao navegar via notificação (?moderar=1)
-    useEffect(() => {
-      if (canModerate && searchParams.get('moderar') === '1') {
-        setIsModeracaoOpen(true);
-        setSearchParams({}, { replace: true });
-      }
-    }, [canModerate, searchParams]);
     const [texto, setTexto] = useState('');
     const [cerimoniaId, setCerimoniaId] = useState<string>('livre');
     const [autorizaInstagram, setAutorizaInstagram] = useState(false);
@@ -506,6 +498,17 @@ const Depoimentos: React.FC = () => {
     // Contagem de pendentes para badge (apenas para moderadores)
     const { data: pendentesCount } = useDepoimentosPendentes();
     const numeroPendentes = canModerate ? (pendentesCount?.length ?? 0) : 0;
+
+    // Abre modal de moderação automaticamente ao navegar via notificação (?moderar=1).
+    // Precisa vir depois de canModerate: ler a variável antes da declaração
+    // (inclusive no array de dependências, avaliado durante o render) lança
+    // ReferenceError e derruba a página inteira.
+    useEffect(() => {
+      if (canModerate && searchParams.get('moderar') === '1') {
+        setIsModeracaoOpen(true);
+        setSearchParams({}, { replace: true });
+      }
+    }, [canModerate, searchParams, setSearchParams]);
 
     // Mutation para criar depoimento
     const createMutation = useMutation({
