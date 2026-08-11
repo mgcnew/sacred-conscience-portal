@@ -39,6 +39,7 @@ import {
 import { HistoricoConsagracoesDialog } from '@/components/admin/HistoricoConsagracoesDialog';
 import { ConsagradorActions, BloqueadoBadge } from '@/components/admin/ConsagradorActions';
 import ParticipantesList from '@/components/admin/ParticipantesList';
+import ListaEsperaAdmin from '@/components/admin/ListaEsperaAdmin';
 import { CursosTab } from '@/components/admin/CursosTab';
 import { LogsTab } from '@/components/admin/LogsTab';
 import { TaxasMPTab } from '@/components/admin/TaxasMPTab';
@@ -632,14 +633,22 @@ const Admin: React.FC = () => {
     }
   };
 
-  // Helper to count inscriptions per ceremony
+  // Helper to count inscriptions per ceremony.
+  // Exclui canceladas: são desistências e a vaga volta a ficar livre.
+  // Sem isso a cerimônia aparecia lotada mesmo com vaga aberta.
   const getInscritosCount = (cerimoniaId: string) => {
-    return inscricoes?.filter(i => i.cerimonia_id === cerimoniaId).length || 0;
+    return inscricoes?.filter(i => i.cerimonia_id === cerimoniaId && !i.cancelada).length || 0;
   };
 
   // Helper to get paid count
   const getPagosCount = (cerimoniaId: string) => {
-    return inscricoes?.filter(i => i.cerimonia_id === cerimoniaId && i.pago).length || 0;
+    return inscricoes?.filter(i => i.cerimonia_id === cerimoniaId && i.pago && !i.cancelada).length || 0;
+  };
+
+  // Vagas ainda livres. null = cerimônia sem limite de vagas.
+  const getVagasLivres = (cerimoniaId: string, vagas: number | null) => {
+    if (vagas === null || vagas === undefined) return null;
+    return Math.max(0, vagas - getInscritosCount(cerimoniaId));
   };
 
   const hasContraindicacao = (anamnese: Anamnese) => {
@@ -2121,6 +2130,11 @@ const Admin: React.FC = () => {
                               pagosCount={pagos}
                               totalCount={inscritos}
                             />
+                            <ListaEsperaAdmin
+                              cerimoniaId={cerimonia.id}
+                              cerimoniaNome={cerimonia.nome || cerimonia.medicina_principal || 'Cerimônia'}
+                              vagasLivres={getVagasLivres(cerimonia.id, cerimonia.vagas)}
+                            />
                           </CollapsibleContent>
                         </Collapsible>
                       );
@@ -2210,6 +2224,11 @@ const Admin: React.FC = () => {
                                   })}
                                   pagosCount={pagos}
                                   totalCount={inscritos}
+                                />
+                                <ListaEsperaAdmin
+                                  cerimoniaId={cerimonia.id}
+                                  cerimoniaNome={cerimonia.nome || cerimonia.medicina_principal || 'Cerimônia'}
+                                  vagasLivres={getVagasLivres(cerimonia.id, cerimonia.vagas)}
                                 />
                               </div>
                             </CollapsibleContent>
