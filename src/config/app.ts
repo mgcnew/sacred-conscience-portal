@@ -16,8 +16,11 @@ export const APP_CONFIG = {
   tagline: 'Cerimônias com medicinas sagradas, cura espiritual e despertar da consciência',
   
   // Cores do tema (usadas no PWA manifest e meta tags)
-  themeColor: '#7c3aed', // Roxo principal
-  backgroundColor: '#ffffff', // Branco — alinhado com o fundo do ícone PWA
+  // Só alimentam o manifest do PWA: theme_color pinta a barra de status quando o
+  // app roda instalado, background_color é o fundo da splash do Android.
+  // Ambos seguem o forest-night do index.html para não haver piscada de cor na abertura.
+  themeColor: '#0e1613',
+  backgroundColor: '#0e1613',
   
   // Contatos
   contacts: {
