@@ -391,6 +391,22 @@
   background: hsl(var(--sacred-gold));
 }
 
+/* Título centralizado não leva o filete: ele ficaria encostado na margem,
+   solto e desligado do texto. Cobre tanto o caso do próprio título quanto
+   o de um ancestral que centraliza. */
+:root .text-center h2.font-display,
+:root h2.font-display.text-center,
+:root .text-center .section-title,
+:root .section-title.text-center {
+  padding-left: 0;
+}
+:root .text-center h2.font-display::before,
+:root h2.font-display.text-center::before,
+:root .text-center .section-title::before,
+:root .section-title.text-center::before {
+  content: none;
+}
+
 /* Divisores — filete chapado com nó de ouro ao centro,
    eco da moldura ornamental do logo */
 :root hr {
