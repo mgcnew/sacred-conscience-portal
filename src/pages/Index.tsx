@@ -93,7 +93,7 @@ const Index: React.FC = () => {
   const quickActions = [
     { label: 'Eventos', icon: CalendarDays, route: ROUTES.CERIMONIAS, color: 'text-primary', bg: 'bg-primary/10' },
     { label: 'Galeria', icon: Image, route: ROUTES.GALERIA, color: 'text-blue-500', bg: 'bg-blue-500/10' },
-    { label: 'Partilhas', icon: Users, route: ROUTES.PARTILHAS, color: 'text-purple-500', bg: 'bg-purple-500/10' },
+    { label: 'Partilhas', icon: Users, route: ROUTES.PARTILHAS, color: 'text-primary', bg: 'bg-primary/10' },
     { label: 'Loja', icon: ShoppingBag, route: ROUTES.LOJA, color: 'text-amber-600', bg: 'bg-amber-500/10' },
   ];
 
@@ -392,12 +392,12 @@ const Index: React.FC = () => {
 
             {/* Sua jornada */}
             {inscriptions.length > 0 && (
-              <div className="rounded-xl bg-primary/8 border border-purple-500/15 p-4">
+              <div className="rounded-xl bg-primary/8 border border-primary/15 p-4">
                 <div className="flex items-center gap-2 mb-3">
-                  <Sparkles className="w-4 h-4 text-purple-500" />
+                  <Sparkles className="w-4 h-4 text-primary" />
                   <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Sua Jornada</p>
                 </div>
-                <p className="text-2xl font-bold text-purple-600 dark:text-purple-400 leading-none">
+                <p className="text-2xl font-bold text-primary dark:text-primary leading-none">
                   {inscriptions.length}
                 </p>
                 <p className="text-xs text-muted-foreground mt-0.5">

@@ -58,6 +58,20 @@
     --forest: 148 68% 27%;
     --forest-light: 148 35% 93%;
 
+    /* --- CATEGÓRICOS: as quatro cores do logo ---
+       Para distinguir seções (categorias do FAQ, áreas do portal) sem
+       recorrer a um arco-íris genérico. Cada uma sai da imagem do templo:
+       a copa da árvore, a pirâmide ao sol, a pedra e a gema.
+       Junto com --forest e --sacred-gold, formam o conjunto de quatro. */
+    --earth: 24 48% 38%;
+    --river: 190 46% 34%;
+    /* Tinta sobre esses fundos chapados. O ouro é claro nos dois temas,
+       então sempre pede tinta escura; terra e rio escurecem no claro e
+       clareiam no escuro, e a tinta acompanha. */
+    --sacred-gold-foreground: 160 28% 11%;
+    --earth-foreground: 0 0% 100%;
+    --river-foreground: 0 0% 100%;
+
     /* --- SEMÂNTICOS: estado, não marca ---
        Comunicam sucesso/aviso/informação/erro. Ficam próximos da paleta
        do templo mas distinguíveis do --primary, para que um badge
@@ -130,6 +144,14 @@
     --sacred-gold-light: 48 80% 18%;
     --forest: 148 70% 48%;
     --forest-light: 148 35% 16%;
+
+    /* Categóricos no escuro: mais claros para manter contraste na mata.
+       Como clareiam, a tinta sobre eles inverte para escura. */
+    --earth: 26 55% 62%;
+    --river: 188 48% 58%;
+    --sacred-gold-foreground: 160 25% 8%;
+    --earth-foreground: 160 25% 8%;
+    --river-foreground: 160 25% 8%;
 
     /* Semânticos no escuro: mais claros e menos saturados para
        manter contraste sobre o fundo da mata sem vibrar. */

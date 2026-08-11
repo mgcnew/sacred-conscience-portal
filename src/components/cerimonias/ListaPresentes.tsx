@@ -330,10 +330,10 @@ const ListaPresentes: React.FC = () => {
           </Card>
           <Card className="p-3">
             <div className="flex items-center gap-2">
-              <Pill className="w-4 h-4 text-purple-500" />
+              <Pill className="w-4 h-4 text-primary" />
               <div>
                 <p className="text-xs text-muted-foreground">Medicamentos</p>
-                <p className="text-lg font-bold text-purple-600">{stats.usaMedicamentos}</p>
+                <p className="text-lg font-bold text-primary">{stats.usaMedicamentos}</p>
               </div>
             </div>
           </Card>
@@ -423,7 +423,7 @@ const ListaPresentes: React.FC = () => {
                           </Badge>
                         )}
                         {inscrito.anamnese?.uso_medicamentos && (
-                          <Badge variant="outline" className="text-xs bg-primary/12 dark:bg-primary/20 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400">
+                          <Badge variant="outline" className="text-xs bg-primary/12 dark:bg-primary/20 text-primary dark:text-primary">
                             <Pill className="w-3 h-3 mr-1" />
                             Medicamentos
                           </Badge>
@@ -517,7 +517,7 @@ const ListaPresentes: React.FC = () => {
                           <div className="flex-1">
                             <p className="text-xs font-medium text-muted-foreground mb-1">Medicamentos em uso</p>
                             {inscrito.anamnese.uso_medicamentos ? (
-                              <p className="text-xs bg-purple-50 dark:bg-purple-950/30 p-2 rounded text-purple-700 dark:text-purple-300">
+                              <p className="text-xs bg-primary dark:bg-primary/30 p-2 rounded text-primary dark:text-primary">
                                 {inscrito.anamnese.uso_medicamentos}
                               </p>
                             ) : (
@@ -549,7 +549,7 @@ const ListaPresentes: React.FC = () => {
                       )}
 
                       {/* Autorização de Imagem */}
-                      <div className={`flex items-center gap-2 p-2 rounded ${inscrito.anamnese?.aceite_uso_imagem ? 'bg-green-50 dark:bg-green-950/30' : 'bg-amber-50 dark:bg-amber-950/30'}`}>
+                      <div className={`flex items-center gap-2 p-2 rounded ${inscrito.anamnese?.aceite_uso_imagem ? 'bg-success-subtle' : 'bg-warning-subtle'}`}>
                         {inscrito.anamnese?.aceite_uso_imagem ? (
                           <>
                             <Camera className="w-4 h-4 text-green-600 dark:text-green-400" />

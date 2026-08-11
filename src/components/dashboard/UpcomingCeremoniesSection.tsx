@@ -27,7 +27,7 @@ const medicinaBadgeClass = (medicina: string | null) => {
     return 'bg-blue-100 text-blue-700 dark:bg-blue-950/40 dark:text-blue-400';
   if (m.includes('kambô') || m.includes('kambo'))
     return 'bg-amber-100 text-amber-700 dark:bg-amber-950/40 dark:text-amber-400';
-  return 'bg-primary/12 dark:bg-primary/20 text-purple-700 dark:bg-purple-950/40 dark:text-purple-400';
+  return 'bg-primary/12 dark:bg-primary/20 text-primary dark:text-primary';
 };
 
 export function UpcomingCeremoniesSection({

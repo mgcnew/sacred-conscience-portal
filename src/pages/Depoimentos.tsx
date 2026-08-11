@@ -225,7 +225,7 @@ function ShareExperienceModal({
                 </p>
             </div>
 
-            <div className="flex items-start space-x-3 p-3 rounded-lg bg-primary/10 border border-purple-200 dark:border-purple-800">
+            <div className="flex items-start space-x-3 p-3 rounded-lg bg-primary/10 border border-primary dark:border-primary">
                 <Checkbox
                     id="autoriza-instagram"
                     checked={autorizaInstagram}

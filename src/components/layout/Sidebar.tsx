@@ -15,20 +15,20 @@ import { ROUTES } from '@/constants';
 
 // Mapa de cores por rota — espelhado do BottomNav
 const NAV_COLORS: Record<string, { icon: string; bg: string; hover: string; text: string }> = {
-  [ROUTES.HOME]:          { icon: 'text-primary',     bg: 'bg-primary/10',     hover: 'hover:bg-primary/15',     text: 'text-primary' },
-  [ROUTES.CERIMONIAS]:    { icon: 'text-emerald-500', bg: 'bg-emerald-500/10', hover: 'hover:bg-emerald-500/15', text: 'text-emerald-600 dark:text-emerald-400' },
-  [ROUTES.GALERIA]:       { icon: 'text-blue-500',    bg: 'bg-blue-500/10',    hover: 'hover:bg-blue-500/15',    text: 'text-blue-600 dark:text-blue-400' },
-  [ROUTES.ANAMNESE]:      { icon: 'text-rose-500',    bg: 'bg-rose-500/10',    hover: 'hover:bg-rose-500/15',    text: 'text-rose-600 dark:text-rose-400' },
-  [ROUTES.INSIGHTS]:      { icon: 'text-violet-500',  bg: 'bg-violet-500/10',  hover: 'hover:bg-violet-500/15',  text: 'text-violet-600 dark:text-violet-400' },
-  [ROUTES.MEDICINAS]:     { icon: 'text-green-600',   bg: 'bg-green-600/10',   hover: 'hover:bg-green-600/15',   text: 'text-green-700 dark:text-green-400' },
-  [ROUTES.ESTUDOS]:       { icon: 'text-sky-500',     bg: 'bg-sky-500/10',     hover: 'hover:bg-sky-500/15',     text: 'text-sky-600 dark:text-sky-400' },
-  [ROUTES.CURSOS]:        { icon: 'text-indigo-500',  bg: 'bg-indigo-500/10',  hover: 'hover:bg-indigo-500/15',  text: 'text-indigo-600 dark:text-indigo-400' },
-  [ROUTES.BIBLIOTECA]:    { icon: 'text-purple-500',  bg: 'bg-purple-500/10',  hover: 'hover:bg-purple-500/15',  text: 'text-purple-600 dark:text-purple-400' },
-  [ROUTES.PARTILHAS]:     { icon: 'text-pink-500',    bg: 'bg-pink-500/10',    hover: 'hover:bg-pink-500/15',    text: 'text-pink-600 dark:text-pink-400' },
-  [ROUTES.LOJA]:          { icon: 'text-amber-600',   bg: 'bg-amber-500/10',   hover: 'hover:bg-amber-500/15',   text: 'text-amber-700 dark:text-amber-400' },
-  [ROUTES.CONFIGURACOES]: { icon: 'text-slate-500',   bg: 'bg-slate-500/10',   hover: 'hover:bg-slate-500/15',   text: 'text-slate-600 dark:text-slate-400' },
-  [ROUTES.ADMIN]:         { icon: 'text-red-500',     bg: 'bg-red-500/10',     hover: 'hover:bg-red-500/15',     text: 'text-red-600 dark:text-red-400' },
-  [ROUTES.FINANCEIRO]:    { icon: 'text-teal-500',    bg: 'bg-teal-500/10',    hover: 'hover:bg-teal-500/15',    text: 'text-teal-600 dark:text-teal-400' },
+  [ROUTES.HOME]:           { icon: 'text-primary', bg: 'bg-primary/10', hover: 'hover:bg-primary/15', text: 'text-primary' },
+  [ROUTES.CERIMONIAS]:     { icon: 'text-sacred-gold', bg: 'bg-sacred-gold/10', hover: 'hover:bg-sacred-gold/15', text: 'text-sacred-gold' },
+  [ROUTES.GALERIA]:        { icon: 'text-sacred-gold', bg: 'bg-sacred-gold/10', hover: 'hover:bg-sacred-gold/15', text: 'text-sacred-gold' },
+  [ROUTES.ANAMNESE]:       { icon: 'text-primary', bg: 'bg-primary/10', hover: 'hover:bg-primary/15', text: 'text-primary' },
+  [ROUTES.INSIGHTS]:       { icon: 'text-primary', bg: 'bg-primary/10', hover: 'hover:bg-primary/15', text: 'text-primary' },
+  [ROUTES.MEDICINAS]:      { icon: 'text-river', bg: 'bg-river/10', hover: 'hover:bg-river/15', text: 'text-river' },
+  [ROUTES.ESTUDOS]:        { icon: 'text-river', bg: 'bg-river/10', hover: 'hover:bg-river/15', text: 'text-river' },
+  [ROUTES.CURSOS]:         { icon: 'text-sacred-gold', bg: 'bg-sacred-gold/10', hover: 'hover:bg-sacred-gold/15', text: 'text-sacred-gold' },
+  [ROUTES.BIBLIOTECA]:     { icon: 'text-river', bg: 'bg-river/10', hover: 'hover:bg-river/15', text: 'text-river' },
+  [ROUTES.PARTILHAS]:      { icon: 'text-sacred-gold', bg: 'bg-sacred-gold/10', hover: 'hover:bg-sacred-gold/15', text: 'text-sacred-gold' },
+  [ROUTES.LOJA]:           { icon: 'text-earth', bg: 'bg-earth/10', hover: 'hover:bg-earth/15', text: 'text-earth' },
+  [ROUTES.CONFIGURACOES]:  { icon: 'text-earth', bg: 'bg-earth/10', hover: 'hover:bg-earth/15', text: 'text-earth' },
+  [ROUTES.ADMIN]:          { icon: 'text-earth', bg: 'bg-earth/10', hover: 'hover:bg-earth/15', text: 'text-earth' },
+  [ROUTES.FINANCEIRO]:     { icon: 'text-earth', bg: 'bg-earth/10', hover: 'hover:bg-earth/15', text: 'text-earth' },
 };
 
 const DEFAULT_COLOR = { icon: 'text-primary', bg: 'bg-primary/10', hover: 'hover:bg-primary/15', text: 'text-primary' };
@@ -59,7 +59,7 @@ const NavButton: React.FC<{
         isActive
           ? cn(c.bg, c.text, 'font-medium', c.hover)
           : isHighlight
-            ? 'text-red-600 hover:text-red-700 hover:bg-red-50 dark:bg-red-500/10 dark:hover:bg-red-950/30'
+            ? 'text-destructive hover:bg-destructive/10'
             : 'text-muted-foreground hover:text-foreground hover:bg-accent'
       )}
       onClick={onClick}
@@ -67,7 +67,7 @@ const NavButton: React.FC<{
       <item.icon
         className={cn(
           'w-5 h-5 shrink-0 transition-colors',
-          isActive ? c.icon : isHighlight ? 'text-red-500' : 'text-muted-foreground'
+          isActive ? c.icon : isHighlight ? 'text-destructive' : 'text-muted-foreground'
         )}
       />
       {!collapsed && <span className="truncate">{item.label}</span>}

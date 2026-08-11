@@ -82,10 +82,20 @@ export default {
         sacred: {
           gold: "hsl(var(--sacred-gold))",
           "gold-light": "hsl(var(--sacred-gold-light))",
+          "gold-foreground": "hsl(var(--sacred-gold-foreground))",
         },
         forest: {
           DEFAULT: "hsl(var(--forest))",
           light: "hsl(var(--forest-light))",
+        },
+        // Categóricos do logo — usados junto com forest e sacred-gold
+        earth: {
+          DEFAULT: "hsl(var(--earth))",
+          foreground: "hsl(var(--earth-foreground))",
+        },
+        river: {
+          DEFAULT: "hsl(var(--river))",
+          foreground: "hsl(var(--river-foreground))",
         },
         cream: "hsl(var(--cream))",
         "warm-white": "hsl(var(--warm-white))",

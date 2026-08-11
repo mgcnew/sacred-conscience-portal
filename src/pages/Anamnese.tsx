@@ -1097,7 +1097,7 @@ const Anamnese: React.FC = () => {
               </div>
             </AccordionSection>
 
-            <AccordionSection id="experiencia" icon={Sparkles} title="Experiência Espiritual" iconBg="bg-primary/12 dark:bg-primary/20 dark:bg-primary/12" iconColor="text-primary">
+            <AccordionSection id="experiencia" icon={Sparkles} title="Experiência Espiritual" iconBg="bg-primary/12 dark:bg-primary/20" iconColor="text-primary">
               <div className="pt-3">
                 <InfoItem label="Já participou de cerimônias" value={formData.ja_consagrou} />
                 {formData.ja_consagrou && (
@@ -1954,7 +1954,7 @@ const Anamnese: React.FC = () => {
             <>
               <CardHeader>
                 <CardTitle className="font-display text-xl flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-xl bg-primary/12 dark:bg-primary/20 dark:bg-primary/12 flex items-center justify-center shrink-0">
+                  <div className="w-9 h-9 rounded-xl bg-primary/12 dark:bg-primary/20 flex items-center justify-center shrink-0">
                     <Sparkles className="w-5 h-5 text-primary" />
                   </div>
                   Experiência Espiritual

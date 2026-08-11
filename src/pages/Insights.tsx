@@ -29,11 +29,11 @@ import { PageHeader } from '@/components/shared';
 // -------------------------------------------------------
 
 const HUMOR_OPTIONS: { value: HumorType; emoji: string; label: string; color: string }[] = [
-  { value: 'ótimo', emoji: '✨', label: 'Ótimo', color: 'text-emerald-600 bg-emerald-50 dark:bg-emerald-950/40' },
-  { value: 'bem', emoji: '😊', label: 'Bem', color: 'text-blue-600 bg-blue-50 dark:bg-blue-950/40' },
-  { value: 'neutro', emoji: '😐', label: 'Neutro', color: 'text-amber-600 bg-amber-50 dark:bg-amber-950/40' },
-  { value: 'difícil', emoji: '😔', label: 'Difícil', color: 'text-orange-600 bg-orange-50 dark:bg-orange-950/40' },
-  { value: 'intenso', emoji: '🌊', label: 'Intenso', color: 'text-purple-600 bg-purple-50 dark:bg-purple-950/40' },
+  { value: 'ótimo', emoji: '✨', label: 'Ótimo', color: 'text-success bg-success-subtle' },
+  { value: 'bem', emoji: '😊', label: 'Bem', color: 'text-info bg-info-subtle' },
+  { value: 'neutro', emoji: '😐', label: 'Neutro', color: 'text-muted-foreground bg-muted' },
+  { value: 'difícil', emoji: '😔', label: 'Difícil', color: 'text-warning bg-warning-subtle' },
+  { value: 'intenso', emoji: '🌊', label: 'Intenso', color: 'text-river bg-river/10' },
 ];
 
 function getHumorOption(humor: HumorType | null) {
@@ -182,11 +182,11 @@ function EntradaGuardiaoCard({ entry, userId }: { entry: DiarioEntrada; userId: 
   const linhas = entry.conteudo.split('\n\n─────\n\n');
 
   return (
-    <Card className="border-violet-500/20 hover:border-violet-500/40 transition-colors">
+    <Card className="border-sacred-gold/20 hover:border-sacred-gold/40 transition-colors">
       <CardContent className="p-4">
         <div className="flex items-start justify-between gap-2 mb-3">
           <div className="flex items-center gap-2 flex-wrap">
-            <div className="flex items-center gap-1.5 text-violet-600 dark:text-violet-400">
+            <div className="flex items-center gap-1.5 text-sacred-gold dark:text-sacred-gold">
               <Eye className="w-3.5 h-3.5" />
               <span className="text-xs font-medium">Guardião das Visões</span>
             </div>
@@ -202,8 +202,8 @@ function EntradaGuardiaoCard({ entry, userId }: { entry: DiarioEntrada; userId: 
             const isGuardiao = bloco.startsWith('🌿 Guardião:');
             const texto = bloco.replace(/^(🧑 Você:|🌿 Guardião:)\n/, '');
             return (
-              <div key={i} className={cn('rounded-xl px-3 py-2.5 text-sm leading-relaxed', isGuardiao ? 'bg-violet-500/8 border border-violet-500/15 text-foreground/90' : 'bg-muted/50 text-muted-foreground')}>
-                <p className={cn('text-[10px] font-semibold uppercase tracking-wider mb-1', isGuardiao ? 'text-violet-500' : 'text-muted-foreground/60')}>
+              <div key={i} className={cn('rounded-xl px-3 py-2.5 text-sm leading-relaxed', isGuardiao ? 'bg-sacred-gold/8 border border-sacred-gold/15 text-foreground/90' : 'bg-muted/50 text-muted-foreground')}>
+                <p className={cn('text-[10px] font-semibold uppercase tracking-wider mb-1', isGuardiao ? 'text-sacred-gold' : 'text-muted-foreground/60')}>
                   {isGuardiao ? '🌿 Guardião' : '🧑 Você'}
                 </p>
                 <p className="whitespace-pre-wrap">{texto}</p>
@@ -365,7 +365,7 @@ const Insights: React.FC = () => {
               label="Medicinas"
               value={stats?.medicinasExperimentadas.length ?? 0}
               sub="experienciadas"
-              iconClass="bg-primary/12 dark:bg-primary/20 dark:bg-purple-950/40 text-purple-500"
+              iconClass="bg-primary/12 dark:bg-primary/20 text-sacred-gold"
             />
             <StatCard
               icon={Calendar}

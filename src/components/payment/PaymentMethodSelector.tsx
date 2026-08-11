@@ -28,7 +28,7 @@ const formatCurrency = (centavos: number): string => {
 const getIcon = (forma: string) => {
   if (forma === 'pix') return <Smartphone className="w-5 h-5 text-green-500" />;
   if (forma === 'debito') return <CreditCard className="w-5 h-5 text-blue-500" />;
-  return <CreditCard className="w-5 h-5 text-purple-500" />;
+  return <CreditCard className="w-5 h-5 text-primary" />;
 };
 
 export const PaymentMethodSelector: React.FC<PaymentMethodSelectorProps> = ({

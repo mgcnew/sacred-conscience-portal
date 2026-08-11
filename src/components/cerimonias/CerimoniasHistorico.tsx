@@ -72,7 +72,7 @@ function medicinaBadgeClass(medicina: string | null): string {
   if (m.includes('ayahuasca') || m.includes('daime')) return 'bg-primary/10 text-primary border-primary/20';
   if (m.includes('kambo')) return 'bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-300 dark:border-amber-500/40/30';
   if (m.includes('sananga')) return 'bg-blue-500/10 text-blue-700 dark:text-blue-400 border-blue-300 dark:border-blue-500/40/30';
-  if (m.includes('rapé') || m.includes('rape')) return 'bg-purple-500/10 text-purple-700 dark:text-purple-400 border-primary/40 dark:border-primary/50/30';
+  if (m.includes('rapé') || m.includes('rape')) return 'bg-primary/10 text-primary dark:text-primary border-primary/40 dark:border-primary/50/30';
   return 'bg-muted text-muted-foreground border-border';
 }
 
@@ -242,7 +242,7 @@ const AdminHistorico: React.FC<{ userId?: string }> = () => {
       <div className="grid grid-cols-3 gap-3">
         <StatCard value={globalStats.totalCerimonias} label="Cerimônias realizadas" icon={Calendar} />
         <StatCard value={globalStats.totalParticipacoes} label="Participações totais" icon={Users} color="text-amber-600" />
-        <StatCard value={globalStats.participantesUnicos} label="Participantes únicos" icon={Sparkles} color="text-purple-600" />
+        <StatCard value={globalStats.participantesUnicos} label="Participantes únicos" icon={Sparkles} color="text-primary" />
       </div>
 
       {/* Filters */}
@@ -510,7 +510,7 @@ const UserHistorico: React.FC<{
               : '-'}
             label="Primeira"
             icon={Sparkles}
-            color="text-purple-600"
+            color="text-primary"
           />
         </div>
       )}

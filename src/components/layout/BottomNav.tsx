@@ -14,27 +14,27 @@ import { getAllNavItems } from '@/constants/navigation';
 
 // Mapa de cores por rota — icon (ativo), bg (pílula ativa), dot (indicador)
 const NAV_COLORS: Record<string, { icon: string; bg: string; dot: string; label: string }> = {
-  [ROUTES.HOME]:          { icon: 'text-primary',     bg: 'bg-primary/12',     dot: 'bg-primary',     label: 'text-primary' },
-  [ROUTES.CERIMONIAS]:    { icon: 'text-emerald-500', bg: 'bg-emerald-500/12', dot: 'bg-emerald-500', label: 'text-emerald-600 dark:text-emerald-400' },
-  [ROUTES.GALERIA]:       { icon: 'text-blue-500',    bg: 'bg-blue-500/12',    dot: 'bg-blue-500',    label: 'text-blue-600 dark:text-blue-400' },
-  [ROUTES.ANAMNESE]:      { icon: 'text-rose-500',    bg: 'bg-rose-500/12',    dot: 'bg-rose-500',    label: 'text-rose-600 dark:text-rose-400' },
-  [ROUTES.INSIGHTS]:      { icon: 'text-violet-500',  bg: 'bg-violet-500/12',  dot: 'bg-violet-500',  label: 'text-violet-600 dark:text-violet-400' },
-  [ROUTES.MEDICINAS]:     { icon: 'text-green-600',   bg: 'bg-green-600/12',   dot: 'bg-green-600',   label: 'text-green-700 dark:text-green-400' },
-  [ROUTES.ESTUDOS]:       { icon: 'text-sky-500',     bg: 'bg-sky-500/12',     dot: 'bg-sky-500',     label: 'text-sky-600 dark:text-sky-400' },
-  [ROUTES.CURSOS]:        { icon: 'text-indigo-500',  bg: 'bg-indigo-500/12',  dot: 'bg-indigo-500',  label: 'text-indigo-600 dark:text-indigo-400' },
-  [ROUTES.BIBLIOTECA]:    { icon: 'text-purple-500',  bg: 'bg-purple-500/12',  dot: 'bg-purple-500',  label: 'text-purple-600 dark:text-purple-400' },
-  [ROUTES.PARTILHAS]:     { icon: 'text-pink-500',    bg: 'bg-pink-500/12',    dot: 'bg-pink-500',    label: 'text-pink-600 dark:text-pink-400' },
-  [ROUTES.LOJA]:          { icon: 'text-amber-600',   bg: 'bg-amber-500/12',   dot: 'bg-amber-500',   label: 'text-amber-700 dark:text-amber-400' },
-  [ROUTES.CONFIGURACOES]: { icon: 'text-slate-500',   bg: 'bg-slate-500/12',   dot: 'bg-slate-500',   label: 'text-slate-600 dark:text-slate-400' },
-  [ROUTES.ADMIN]:         { icon: 'text-red-500',     bg: 'bg-red-500/12',     dot: 'bg-red-500',     label: 'text-red-600 dark:text-red-400' },
-  [ROUTES.FINANCEIRO]:    { icon: 'text-teal-500',    bg: 'bg-teal-500/12',    dot: 'bg-teal-500',    label: 'text-teal-600 dark:text-teal-400' },
+  [ROUTES.HOME]:           { icon: 'text-primary', bg: 'bg-primary/12', dot: 'bg-primary', label: 'text-primary' },
+  [ROUTES.CERIMONIAS]:     { icon: 'text-sacred-gold', bg: 'bg-sacred-gold/12', dot: 'bg-sacred-gold', label: 'text-sacred-gold' },
+  [ROUTES.GALERIA]:        { icon: 'text-sacred-gold', bg: 'bg-sacred-gold/12', dot: 'bg-sacred-gold', label: 'text-sacred-gold' },
+  [ROUTES.ANAMNESE]:       { icon: 'text-primary', bg: 'bg-primary/12', dot: 'bg-primary', label: 'text-primary' },
+  [ROUTES.INSIGHTS]:       { icon: 'text-primary', bg: 'bg-primary/12', dot: 'bg-primary', label: 'text-primary' },
+  [ROUTES.MEDICINAS]:      { icon: 'text-river', bg: 'bg-river/12', dot: 'bg-river', label: 'text-river' },
+  [ROUTES.ESTUDOS]:        { icon: 'text-river', bg: 'bg-river/12', dot: 'bg-river', label: 'text-river' },
+  [ROUTES.CURSOS]:         { icon: 'text-sacred-gold', bg: 'bg-sacred-gold/12', dot: 'bg-sacred-gold', label: 'text-sacred-gold' },
+  [ROUTES.BIBLIOTECA]:     { icon: 'text-river', bg: 'bg-river/12', dot: 'bg-river', label: 'text-river' },
+  [ROUTES.PARTILHAS]:      { icon: 'text-sacred-gold', bg: 'bg-sacred-gold/12', dot: 'bg-sacred-gold', label: 'text-sacred-gold' },
+  [ROUTES.LOJA]:           { icon: 'text-earth', bg: 'bg-earth/12', dot: 'bg-earth', label: 'text-earth' },
+  [ROUTES.CONFIGURACOES]:  { icon: 'text-earth', bg: 'bg-earth/12', dot: 'bg-earth', label: 'text-earth' },
+  [ROUTES.ADMIN]:          { icon: 'text-earth', bg: 'bg-earth/12', dot: 'bg-earth', label: 'text-earth' },
+  [ROUTES.FINANCEIRO]:     { icon: 'text-earth', bg: 'bg-earth/12', dot: 'bg-earth', label: 'text-earth' },
 };
 
 const DEFAULT_COLOR = { icon: 'text-primary', bg: 'bg-primary/12', dot: 'bg-primary', label: 'text-primary' };
 const getNavColor = (path: string) => NAV_COLORS[path] ?? DEFAULT_COLOR;
 
 // Cor fixa para o botão "Mais" quando algum item do drawer está ativo
-const MORE_ACTIVE_COLOR = { icon: 'text-violet-500', bg: 'bg-violet-500/12', dot: 'bg-violet-500', label: 'text-violet-600 dark:text-violet-400' };
+const MORE_ACTIVE_COLOR = { icon: 'text-primary', bg: 'bg-primary/12', dot: 'bg-primary', label: 'text-primary' };
 
 const MAIN_TABS = [
   { icon: Home, label: 'Início', path: ROUTES.HOME },
@@ -211,7 +211,7 @@ const BottomNav: React.FC<BottomNavProps> = ({ isAdmin, isSuperAdmin, onSignOut 
               {/* Emergency */}
               <button
                 onClick={handleEmergency}
-                className="flex-1 flex items-center justify-center gap-2 px-3 py-3 rounded-xl bg-red-500/10 text-red-600 dark:text-red-400 active:bg-red-500/20 transition-colors"
+                className="flex-1 flex items-center justify-center gap-2 px-3 py-3 rounded-xl bg-destructive/10 text-destructive active:bg-destructive/20 transition-colors"
               >
                 <Heart className="w-5 h-5 fill-current" />
                 <span className="font-medium text-sm">Emergência</span>

@@ -20,11 +20,11 @@ const faqCategories = [
     title: 'Preparação',
     emoji: '🌿',
     color: {
-      pill: 'bg-sky-500/10 text-sky-600 dark:text-sky-400 border-sky-500/20',
-      pillActive: 'bg-sky-500 text-white border-sky-500',
-      icon: 'bg-sky-500/10 text-sky-600 dark:text-sky-400',
-      card: 'border-sky-500/20',
-      accent: 'bg-sky-500/5',
+      pill: 'bg-forest/10 text-forest border-forest/20',
+      pillActive: 'bg-forest text-white border-forest',
+      icon: 'bg-forest/10 text-forest',
+      card: 'border-forest/20',
+      accent: 'bg-forest/5',
     },
     items: [
       {
@@ -49,11 +49,11 @@ const faqCategories = [
     title: 'Cerimônia',
     emoji: '🕯️',
     color: {
-      pill: 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20',
-      pillActive: 'bg-emerald-500 text-white border-emerald-500',
-      icon: 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400',
-      card: 'border-emerald-500/20',
-      accent: 'bg-emerald-500/5',
+      pill: 'bg-sacred-gold/10 text-sacred-gold border-sacred-gold/20',
+      pillActive: 'bg-sacred-gold text-sacred-gold-foreground border-sacred-gold',
+      icon: 'bg-sacred-gold/10 text-sacred-gold',
+      card: 'border-sacred-gold/20',
+      accent: 'bg-sacred-gold/5',
     },
     items: [
       {
@@ -78,11 +78,11 @@ const faqCategories = [
     title: 'Segurança',
     emoji: '🛡️',
     color: {
-      pill: 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20',
-      pillActive: 'bg-amber-500 text-white border-amber-500',
-      icon: 'bg-amber-500/10 text-amber-600 dark:text-amber-400',
-      card: 'border-amber-500/20',
-      accent: 'bg-amber-500/5',
+      pill: 'bg-earth/10 text-earth border-earth/20',
+      pillActive: 'bg-earth text-earth-foreground border-earth',
+      icon: 'bg-earth/10 text-earth',
+      card: 'border-earth/20',
+      accent: 'bg-earth/5',
     },
     items: [
       {
@@ -107,11 +107,11 @@ const faqCategories = [
     title: 'Integração',
     emoji: '🌱',
     color: {
-      pill: 'bg-violet-500/10 text-violet-600 dark:text-violet-400 border-violet-500/20',
-      pillActive: 'bg-violet-500 text-white border-violet-500',
-      icon: 'bg-violet-500/10 text-violet-600 dark:text-violet-400',
-      card: 'border-violet-500/20',
-      accent: 'bg-violet-500/5',
+      pill: 'bg-river/10 text-river border-river/20',
+      pillActive: 'bg-river text-river-foreground border-river',
+      icon: 'bg-river/10 text-river',
+      card: 'border-river/20',
+      accent: 'bg-river/5',
     },
     items: [
       {
@@ -279,8 +279,8 @@ const FAQ: React.FC = () => {
 
       {/* Aviso de segurança */}
       <FadeIn>
-      <div className="mt-6 flex items-start gap-3 p-4 rounded-2xl bg-amber-500/8 border border-amber-500/20">
-        <AlertTriangle className="w-5 h-5 text-amber-500 shrink-0 mt-0.5" />
+      <div className="mt-6 flex items-start gap-3 p-4 rounded-2xl bg-warning-subtle border border-warning/25">
+        <AlertTriangle className="w-5 h-5 text-warning shrink-0 mt-0.5" />
         <div>
           <p className="text-sm font-semibold text-foreground mb-0.5">Informação médica obrigatória</p>
           <p className="text-xs text-muted-foreground leading-relaxed">
