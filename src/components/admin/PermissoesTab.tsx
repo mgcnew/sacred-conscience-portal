@@ -25,17 +25,17 @@ import type { Profile } from '@/types';
 const CATEGORIAS_OCULTAS: string[] = [];
 
 const categoriaConfig: Record<string, { icon: React.ReactNode; color: string; label: string }> = {
-  consagradores: { icon: <Users className="w-3.5 h-3.5" />, color: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400', label: 'Consagradores' },
-  cerimonias:    { icon: <Settings className="w-3.5 h-3.5" />, color: 'bg-primary/12 dark:bg-primary/20 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400', label: 'Cerimônias' },
-  financeiro:    { icon: <Key className="w-3.5 h-3.5" />, color: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400', label: 'Financeiro' },
-  depoimentos:   { icon: <Settings className="w-3.5 h-3.5" />, color: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400', label: 'Depoimentos' },
+  consagradores: { icon: <Users className="w-3.5 h-3.5" />, color: 'bg-info-subtle text-info dark:bg-info-subtle dark:text-info', label: 'Consagradores' },
+  cerimonias:    { icon: <Settings className="w-3.5 h-3.5" />, color: 'bg-primary/12 dark:bg-primary/20 text-primary dark:bg-primary/12 dark:text-primary', label: 'Cerimônias' },
+  financeiro:    { icon: <Key className="w-3.5 h-3.5" />, color: 'bg-success-subtle text-success dark:bg-success-subtle dark:text-success', label: 'Financeiro' },
+  depoimentos:   { icon: <Settings className="w-3.5 h-3.5" />, color: 'bg-warning-subtle text-warning dark:bg-warning-subtle dark:text-warning', label: 'Depoimentos' },
   loja:          { icon: <Settings className="w-3.5 h-3.5" />, color: 'bg-pink-100 text-pink-700 dark:bg-pink-900/30 dark:text-pink-400', label: 'Loja' },
-  sistema:       { icon: <Shield className="w-3.5 h-3.5" />, color: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400', label: 'Sistema' },
+  sistema:       { icon: <Shield className="w-3.5 h-3.5" />, color: 'bg-destructive-subtle text-destructive dark:bg-destructive-subtle dark:text-destructive', label: 'Sistema' },
 };
 
 const roleBadge: Record<string, { label: string; className: string }> = {
-  admin:       { label: 'Admin', className: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400' },
-  guardiao:    { label: 'Guardião', className: 'bg-primary/12 dark:bg-primary/20 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400' },
+  admin:       { label: 'Admin', className: 'bg-destructive-subtle text-destructive dark:bg-destructive-subtle dark:text-destructive' },
+  guardiao:    { label: 'Guardião', className: 'bg-primary/12 dark:bg-primary/20 text-primary dark:bg-primary/12 dark:text-primary' },
   consagrador: { label: 'Membro', className: 'bg-muted text-muted-foreground' },
 };
 

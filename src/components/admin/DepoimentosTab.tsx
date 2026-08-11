@@ -61,7 +61,7 @@ export const DepoimentosTab = memo(({
         ) : depoimentosPendentes && depoimentosPendentes.length > 0 ? (
           <div className="space-y-4">
             {depoimentosPendentes.map((depoimento) => (
-              <Card key={depoimento.id} className="border-amber-200 bg-amber-50/30 dark:bg-amber-950/20 dark:border-amber-900">
+              <Card key={depoimento.id} className="border-warning/30 bg-warning-subtle dark:border-warning">
                 <CardContent className="pt-4">
                   <div className="flex flex-col md:flex-row gap-4">
                     <div className="flex-1 space-y-3">
@@ -103,7 +103,7 @@ export const DepoimentosTab = memo(({
                     <div className="flex flex-row md:flex-col gap-2 justify-end shrink-0 w-full md:w-auto">
                       <LoadingButton
                         size="sm"
-                        className="bg-green-600 hover:bg-green-700 flex-1 md:flex-none"
+                        className="bg-success hover:bg-success flex-1 md:flex-none"
                         onClick={() => approveDepoimentoMutation.mutate(depoimento.id)}
                         loading={approveDepoimentoMutation.isPending}
                         loadingText="..."

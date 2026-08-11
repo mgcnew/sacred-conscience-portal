@@ -455,11 +455,11 @@ export const CursosTab: React.FC = () => {
                         </p>
                       </div>
                       {inscricao.cursos_eventos?.gratuito ? (
-                        <Badge className="bg-green-100 dark:bg-green-500/15 text-green-800 text-xs shrink-0">Gratuito</Badge>
+                        <Badge className="bg-success-subtle text-success text-xs shrink-0">Gratuito</Badge>
                       ) : inscricao.pago ? (
-                        <Badge className="bg-green-100 dark:bg-green-500/15 text-green-800 text-xs shrink-0">Pago</Badge>
+                        <Badge className="bg-success-subtle text-success text-xs shrink-0">Pago</Badge>
                       ) : (
-                        <Badge variant="outline" className="text-amber-600 border-amber-300 dark:border-amber-500/40 text-xs shrink-0">
+                        <Badge variant="outline" className="text-warning border-warning/30 dark:border-warning/40 text-xs shrink-0">
                           Pendente
                         </Badge>
                       )}
@@ -513,7 +513,7 @@ export const CursosTab: React.FC = () => {
                       </TableCell>
                       <TableCell>
                         {inscricao.cursos_eventos?.gratuito ? (
-                          <Badge className="bg-green-100 dark:bg-green-500/15 text-green-800">N/A</Badge>
+                          <Badge className="bg-success-subtle text-success">N/A</Badge>
                         ) : (
                           <Switch
                             checked={inscricao.pago}

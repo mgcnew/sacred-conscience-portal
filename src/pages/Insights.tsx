@@ -22,6 +22,7 @@ import type { DiarioEntrada, HumorType } from '@/types';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import FadeIn from '@/components/ui/FadeIn';
+import { PageHeader } from '@/components/shared';
 
 // -------------------------------------------------------
 // Constantes
@@ -331,15 +332,13 @@ const Insights: React.FC = () => {
     <div className="container max-w-2xl mx-auto px-4 py-6 space-y-8">
       {/* Header */}
       <FadeIn>
-      <div className="flex items-start gap-3">
-        <div className="w-10 h-10 rounded-2xl bg-primary/10 flex items-center justify-center shrink-0">
-          <Sparkles className="w-5 h-5 text-primary" />
-        </div>
-        <div>
-          <h1 className="text-xl font-display font-semibold text-foreground">Minha Jornada</h1>
-          <p className="text-sm text-muted-foreground">Sua história com as medicinas sagradas</p>
-        </div>
-      </div>
+      <PageHeader
+        size="compact"
+        icon={Sparkles}
+        title="Minha Jornada"
+        description="Sua história com as medicinas sagradas"
+        className="mb-0"
+      />
       </FadeIn>
 
       {/* ── Estatísticas ── */}

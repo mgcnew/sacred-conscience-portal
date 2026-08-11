@@ -58,6 +58,25 @@
     --forest: 148 68% 27%;
     --forest-light: 148 35% 93%;
 
+    /* --- SEMÂNTICOS: estado, não marca ---
+       Comunicam sucesso/aviso/informação/erro. Ficam próximos da paleta
+       do templo mas distinguíveis do --primary, para que um badge
+       "Confirmado" não se confunda com um botão de ação.
+       O erro usa --destructive, já definido acima. */
+    --success: 142 58% 32%;
+    --success-foreground: 0 0% 100%;
+    --success-subtle: 142 45% 92%;
+
+    --warning: 32 88% 42%;
+    --warning-foreground: 0 0% 100%;
+    --warning-subtle: 38 90% 92%;
+
+    --info: 205 62% 38%;
+    --info-foreground: 0 0% 100%;
+    --info-subtle: 205 55% 93%;
+
+    --destructive-subtle: 2 70% 94%;
+
     /* Sidebar */
     --sidebar-background: 38 40% 89%;
     --sidebar-foreground: 160 30% 10%;
@@ -111,6 +130,22 @@
     --sacred-gold-light: 48 80% 18%;
     --forest: 148 70% 48%;
     --forest-light: 148 35% 16%;
+
+    /* Semânticos no escuro: mais claros e menos saturados para
+       manter contraste sobre o fundo da mata sem vibrar. */
+    --success: 142 55% 52%;
+    --success-foreground: 160 25% 8%;
+    --success-subtle: 142 40% 16%;
+
+    --warning: 38 88% 58%;
+    --warning-foreground: 160 25% 8%;
+    --warning-subtle: 36 55% 17%;
+
+    --info: 205 65% 60%;
+    --info-foreground: 160 25% 8%;
+    --info-subtle: 205 45% 18%;
+
+    --destructive-subtle: 2 45% 19%;
 
     /* Sidebar Dark */
     --sidebar-background: 160 22% 7%;

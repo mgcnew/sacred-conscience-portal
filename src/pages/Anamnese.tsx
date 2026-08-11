@@ -739,8 +739,8 @@ const Anamnese: React.FC = () => {
 
             {/* Linha guia */}
             <div className="absolute bottom-[30%] left-[5%] right-[5%] pointer-events-none">
-              <div className="border-b-2 border-dashed border-slate-300 dark:border-border" />
-              <p className="text-[10px] text-slate-300 dark:text-muted-foreground mt-1 select-none">Assine acima desta linha</p>
+              <div className="border-b-2 border-dashed border-border" />
+              <p className="text-[10px] text-muted-foreground mt-1 select-none">Assine acima desta linha</p>
             </div>
 
             <SignatureCanvas
@@ -839,7 +839,7 @@ const Anamnese: React.FC = () => {
         <p className="text-xs text-muted-foreground">{label}</p>
         <p className="font-medium text-sm">
           {typeof value === 'boolean' ? (
-            <span className={value ? 'text-green-600 dark:text-green-400' : 'text-muted-foreground'}>
+            <span className={value ? 'text-success' : 'text-muted-foreground'}>
               {value ? '✓ Sim' : 'Não'}
             </span>
           ) : (value || '-')}
@@ -930,7 +930,7 @@ const Anamnese: React.FC = () => {
                         {formData.nome_completo?.charAt(0)?.toUpperCase() || <User className="w-6 h-6" />}
                       </AvatarFallback>
                     </Avatar>
-                    <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-green-500 rounded-full border-2 border-background flex items-center justify-center">
+                    <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-success rounded-full border-2 border-background flex items-center justify-center">
                       <Check className="w-2.5 h-2.5 text-white" />
                     </div>
                   </div>
@@ -939,12 +939,12 @@ const Anamnese: React.FC = () => {
                       {formData.nome_completo || 'Participante'}
                     </h2>
                     <div className="flex items-center gap-1.5 flex-wrap mt-1">
-                      <Badge variant="outline" className="h-5 text-[10px] bg-green-50 text-green-700 dark:bg-green-950/40 dark:text-green-400 border-green-200 dark:border-green-700">
+                      <Badge variant="outline" className="h-5 text-[10px] bg-success-subtle text-success dark:bg-success-subtle dark:text-success border-success/30 dark:border-success">
                         <CheckCircle2 className="w-3 h-3 mr-1" />
                         Ficha completa
                       </Badge>
                       {hasContraindicacoes && (
-                        <Badge variant="outline" className="h-5 text-[10px] bg-amber-50 text-amber-700 dark:bg-amber-950/40 dark:text-amber-400 border-amber-200 dark:border-amber-500/30">
+                        <Badge variant="outline" className="h-5 text-[10px] bg-warning-subtle text-warning dark:bg-warning-subtle dark:text-warning border-warning/30">
                           <AlertTriangle className="w-3 h-3 mr-1" />
                           Atenção
                         </Badge>
@@ -973,38 +973,38 @@ const Anamnese: React.FC = () => {
 
             {/* Resumo visual */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-              <div className={cn('p-3 rounded-xl border', hasContraindicacoes ? 'bg-amber-50 dark:bg-amber-950/30 border-amber-200 dark:border-amber-800' : 'bg-green-50 dark:bg-green-950/30 border-green-200 dark:border-green-800')}>
-                <Heart className={cn('w-4 h-4 mb-1.5', hasContraindicacoes ? 'text-amber-500' : 'text-green-500')} />
+              <div className={cn('p-3 rounded-xl border', hasContraindicacoes ? 'bg-warning-subtle border-warning/30 dark:border-warning' : 'bg-success-subtle border-success/30 dark:border-success')}>
+                <Heart className={cn('w-4 h-4 mb-1.5', hasContraindicacoes ? 'text-warning' : 'text-success')} />
                 <p className="text-[10px] text-muted-foreground leading-none mb-0.5">Saúde</p>
-                <p className={cn('text-sm font-semibold', hasContraindicacoes ? 'text-amber-700 dark:text-amber-400' : 'text-green-700 dark:text-green-400')}>
+                <p className={cn('text-sm font-semibold', hasContraindicacoes ? 'text-warning' : 'text-success')}>
                   {hasContraindicacoes ? 'Atenção' : 'OK'}
                 </p>
               </div>
-              <div className={cn('p-3 rounded-xl border', formData.sem_vicios ? 'bg-green-50 dark:bg-green-950/30 border-green-200 dark:border-green-800' : 'bg-blue-50 dark:bg-blue-950/30 border-blue-200 dark:border-blue-800')}>
-                <Pill className={cn('w-4 h-4 mb-1.5', formData.sem_vicios ? 'text-green-500' : 'text-blue-500')} />
+              <div className={cn('p-3 rounded-xl border', formData.sem_vicios ? 'bg-success-subtle border-success/30 dark:border-success' : 'bg-info-subtle border-info/30 dark:border-info')}>
+                <Pill className={cn('w-4 h-4 mb-1.5', formData.sem_vicios ? 'text-success' : 'text-info')} />
                 <p className="text-[10px] text-muted-foreground leading-none mb-0.5">Substâncias</p>
-                <p className={cn('text-sm font-semibold', formData.sem_vicios ? 'text-green-700 dark:text-green-400' : 'text-blue-700 dark:text-blue-400')}>
+                <p className={cn('text-sm font-semibold', formData.sem_vicios ? 'text-success' : 'text-info')}>
                   {formData.sem_vicios ? 'Nenhuma' : 'Declarado'}
                 </p>
               </div>
-              <div className={cn('p-3 rounded-xl border', formData.ja_consagrou ? 'bg-purple-50 dark:bg-purple-950/30 border-purple-200 dark:border-purple-800' : 'bg-muted/50 border-border')}>
-                <Sparkles className={cn('w-4 h-4 mb-1.5', formData.ja_consagrou ? 'text-purple-500' : 'text-muted-foreground')} />
+              <div className={cn('p-3 rounded-xl border', formData.ja_consagrou ? 'bg-primary/12 border-primary/30 dark:border-primary' : 'bg-muted/50 border-border')}>
+                <Sparkles className={cn('w-4 h-4 mb-1.5', formData.ja_consagrou ? 'text-primary' : 'text-muted-foreground')} />
                 <p className="text-[10px] text-muted-foreground leading-none mb-0.5">Experiência</p>
-                <p className={cn('text-sm font-semibold', formData.ja_consagrou ? 'text-purple-700 dark:text-purple-400' : 'text-muted-foreground')}>
+                <p className={cn('text-sm font-semibold', formData.ja_consagrou ? 'text-primary' : 'text-muted-foreground')}>
                   {formData.ja_consagrou ? 'Experiente' : '1ª vez'}
                 </p>
               </div>
-              <div className={cn('p-3 rounded-xl border', formData.aceite_permanencia ? 'bg-green-50 dark:bg-green-950/30 border-green-200 dark:border-green-800' : 'bg-red-50 dark:bg-red-950/30 border-red-200 dark:border-red-800')}>
-                <FileText className={cn('w-4 h-4 mb-1.5', formData.aceite_permanencia ? 'text-green-500' : 'text-red-500')} />
+              <div className={cn('p-3 rounded-xl border', formData.aceite_permanencia ? 'bg-success-subtle border-success/30 dark:border-success' : 'bg-destructive-subtle border-destructive/30 dark:border-destructive')}>
+                <FileText className={cn('w-4 h-4 mb-1.5', formData.aceite_permanencia ? 'text-success' : 'text-destructive')} />
                 <p className="text-[10px] text-muted-foreground leading-none mb-0.5">Termos</p>
-                <p className={cn('text-sm font-semibold', formData.aceite_permanencia ? 'text-green-700 dark:text-green-400' : 'text-red-700 dark:text-red-400')}>
+                <p className={cn('text-sm font-semibold', formData.aceite_permanencia ? 'text-success' : 'text-destructive')}>
                   {formData.aceite_permanencia ? 'Aceitos' : 'Pendente'}
                 </p>
               </div>
             </div>
 
             {/* Seções accordion */}
-            <AccordionSection id="dados" icon={User} title="Dados Pessoais" iconBg="bg-blue-100 dark:bg-blue-950/40" iconColor="text-blue-600 dark:text-blue-400">
+            <AccordionSection id="dados" icon={User} title="Dados Pessoais" iconBg="bg-info-subtle" iconColor="text-info">
               <div className="pt-3">
                 <InfoItem label="Nome Completo" value={formData.nome_completo} icon={User} />
                 <InfoItem label="Data de Nascimento" value={formatDate(formData.data_nascimento)} icon={Calendar} />
@@ -1030,7 +1030,7 @@ const Anamnese: React.FC = () => {
             </AccordionSection>
 
             {(documentoFrenteUrl || documentoVersoUrl) && (
-              <AccordionSection id="documento" icon={IdCard} title="Fotos do Documento" iconBg="bg-slate-100 dark:bg-slate-800/60" iconColor="text-slate-600 dark:text-slate-400">
+              <AccordionSection id="documento" icon={IdCard} title="Fotos do Documento" iconBg="bg-muted" iconColor="text-muted-foreground">
                 <div className="pt-3 grid grid-cols-2 gap-3">
                   {documentoFrenteUrl && (
                     <div className="space-y-1">
@@ -1052,10 +1052,10 @@ const Anamnese: React.FC = () => {
               </AccordionSection>
             )}
 
-            <AccordionSection id="saude" icon={Heart} title="Histórico de Saúde" iconBg="bg-red-100 dark:bg-red-950/40" iconColor="text-red-600 dark:text-red-400">
+            <AccordionSection id="saude" icon={Heart} title="Histórico de Saúde" iconBg="bg-destructive-subtle" iconColor="text-destructive">
               <div className="pt-3">
                 {formData.sem_doencas ? (
-                  <p className="text-green-600 dark:text-green-400 font-medium text-sm py-1 flex items-center gap-2">
+                  <p className="text-success font-medium text-sm py-1 flex items-center gap-2">
                     <CheckCircle2 className="w-4 h-4" />
                     Não possui doenças ou condições de saúde
                   </p>
@@ -1079,10 +1079,10 @@ const Anamnese: React.FC = () => {
               </div>
             </AccordionSection>
 
-            <AccordionSection id="substancias" icon={Pill} title="Uso de Substâncias" iconBg="bg-orange-100 dark:bg-orange-950/40" iconColor="text-orange-600 dark:text-orange-400">
+            <AccordionSection id="substancias" icon={Pill} title="Uso de Substâncias" iconBg="bg-warning-subtle" iconColor="text-warning">
               <div className="pt-3">
                 {formData.sem_vicios ? (
-                  <p className="text-green-600 dark:text-green-400 font-medium text-sm py-1 flex items-center gap-2">
+                  <p className="text-success font-medium text-sm py-1 flex items-center gap-2">
                     <CheckCircle2 className="w-4 h-4" />
                     Não faz uso de substâncias
                   </p>
@@ -1097,7 +1097,7 @@ const Anamnese: React.FC = () => {
               </div>
             </AccordionSection>
 
-            <AccordionSection id="experiencia" icon={Sparkles} title="Experiência Espiritual" iconBg="bg-primary/12 dark:bg-primary/20 dark:bg-purple-950/40" iconColor="text-purple-600 dark:text-purple-400">
+            <AccordionSection id="experiencia" icon={Sparkles} title="Experiência Espiritual" iconBg="bg-primary/12 dark:bg-primary/20 dark:bg-primary/12" iconColor="text-primary">
               <div className="pt-3">
                 <InfoItem label="Já participou de cerimônias" value={formData.ja_consagrou} />
                 {formData.ja_consagrou && (
@@ -1111,7 +1111,7 @@ const Anamnese: React.FC = () => {
               </div>
             </AccordionSection>
 
-            <AccordionSection id="termos" icon={CheckCircle2} title="Termos e Assinatura" iconBg="bg-green-100 dark:bg-green-950/40" iconColor="text-green-600 dark:text-green-400">
+            <AccordionSection id="termos" icon={CheckCircle2} title="Termos e Assinatura" iconBg="bg-success-subtle" iconColor="text-success">
               <div className="pt-3 space-y-2">
                 {[
                   { key: 'aceite_contraindicacoes', label: 'Contraindicações aceitas', value: formData.aceite_contraindicacoes },
@@ -1119,12 +1119,12 @@ const Anamnese: React.FC = () => {
                   { key: 'aceite_termo_responsabilidade', label: 'Termo de responsabilidade aceito', value: formData.aceite_termo_responsabilidade },
                   { key: 'aceite_permanencia', label: 'Permanência no templo aceita', value: formData.aceite_permanencia },
                 ].map(item => (
-                  <div key={item.key} className={cn('flex items-center gap-2 text-sm', item.value ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400')}>
+                  <div key={item.key} className={cn('flex items-center gap-2 text-sm', item.value ? 'text-success' : 'text-destructive')}>
                     {item.value ? <CheckCircle2 className="w-4 h-4 shrink-0" /> : <X className="w-4 h-4 shrink-0" />}
                     <span>{item.label}</span>
                   </div>
                 ))}
-                <div className={cn('flex items-center gap-2 text-sm', formData.aceite_uso_imagem ? 'text-amber-600 dark:text-amber-400' : 'text-muted-foreground')}>
+                <div className={cn('flex items-center gap-2 text-sm', formData.aceite_uso_imagem ? 'text-warning' : 'text-muted-foreground')}>
                   <Camera className="w-4 h-4 shrink-0" />
                   <span>Uso de imagem {formData.aceite_uso_imagem ? 'autorizado' : 'não autorizado'}</span>
                 </div>
@@ -1133,7 +1133,7 @@ const Anamnese: React.FC = () => {
                     <p className="text-xs text-muted-foreground mb-2">Assinado digitalmente:</p>
                     <div className="bg-white rounded-lg border p-3 flex flex-col items-center">
                       <img src={formData.assinatura} alt="Assinatura" className="max-h-20 object-contain" />
-                      <p className="text-[10px] text-slate-400 font-mono uppercase mt-2 border-t border-slate-100 dark:border-border pt-2 w-full text-center">
+                      <p className="text-[10px] text-muted-foreground font-mono uppercase mt-2 border-t border-border pt-2 w-full text-center">
                         ID: {user?.id.substring(0, 8)} | {new Date().toLocaleDateString('pt-BR')}
                       </p>
                     </div>
@@ -1156,14 +1156,14 @@ const Anamnese: React.FC = () => {
         <div className="container max-w-2xl mx-auto">
           {/* Aviso de obrigatoriedade para novos usuários */}
         {viewMode === 'new' && !existingAnamnese && (
-          <div className="mb-6 p-4 rounded-xl bg-amber-500/10 border border-amber-500/30 animate-fade-in">
+          <div className="mb-6 p-4 rounded-xl bg-warning-subtle border border-warning/30 animate-fade-in">
             <div className="flex items-start gap-3">
-              <AlertTriangle className="w-6 h-6 text-amber-500 flex-shrink-0 mt-0.5" />
+              <AlertTriangle className="w-6 h-6 text-warning flex-shrink-0 mt-0.5" />
               <div className="space-y-2">
-                <h3 className="font-semibold text-amber-700 dark:text-amber-400">
+                <h3 className="font-semibold text-warning">
                   Preenchimento Obrigatório
                 </h3>
-                <p className="text-sm text-amber-600 dark:text-amber-300/80">
+                <p className="text-sm text-warning">
                   Para ter acesso completo ao aplicativo, é necessário preencher sua ficha de anamnese. 
                   Isso nos permite oferecer um <strong>atendimento personalizado</strong> e garantir sua 
                   <strong> segurança</strong> durante as cerimônias.
@@ -1214,7 +1214,7 @@ const Anamnese: React.FC = () => {
           </div>
           <div className="flex gap-1 items-center">
             {lastSaved && (
-              <Cloud className="w-3 h-3 text-green-500 mr-1" />
+              <Cloud className="w-3 h-3 text-success mr-1" />
             )}
             {steps.map((s) => (
               <div
@@ -1269,7 +1269,7 @@ const Anamnese: React.FC = () => {
         {lastSaved && (
           <div className="hidden sm:flex justify-center mb-3">
             <span className="text-xs text-muted-foreground flex items-center gap-1">
-              <Cloud className="w-3 h-3 text-green-500" />
+              <Cloud className="w-3 h-3 text-success" />
               Rascunho salvo automaticamente
             </span>
           </div>
@@ -1296,8 +1296,8 @@ const Anamnese: React.FC = () => {
             <>
               <CardHeader>
                 <CardTitle className="font-display text-xl flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-xl bg-blue-100 dark:bg-blue-950/40 flex items-center justify-center shrink-0">
-                    <User className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                  <div className="w-9 h-9 rounded-xl bg-info-subtle flex items-center justify-center shrink-0">
+                    <User className="w-5 h-5 text-info" />
                   </div>
                   Dados Pessoais
                 </CardTitle>
@@ -1614,7 +1614,7 @@ const Anamnese: React.FC = () => {
                         id="como_conheceu"
                         value={formData.como_conheceu}
                         onChange={(e) => updateField('como_conheceu', e.target.value)}
-                        className={`w-full h-10 px-3 rounded-md border bg-background text-sm ${errors.como_conheceu ? 'border-red-500' : 'border-input'}`}
+                        className={`w-full h-10 px-3 rounded-md border bg-background text-sm ${errors.como_conheceu ? 'border-destructive' : 'border-input'}`}
                       >
                         <option value="">Selecione...</option>
                         <option value="indicacao">Indicação de amigo/conhecido</option>
@@ -1626,7 +1626,7 @@ const Anamnese: React.FC = () => {
                         <option value="outro">Outro</option>
                       </select>
                       {errors.como_conheceu && (
-                        <p className="text-xs text-red-500">{errors.como_conheceu}</p>
+                        <p className="text-xs text-destructive">{errors.como_conheceu}</p>
                       )}
                     </div>
 
@@ -1652,8 +1652,8 @@ const Anamnese: React.FC = () => {
             <>
               <CardHeader>
                 <CardTitle className="font-display text-xl flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-xl bg-red-100 dark:bg-red-950/40 flex items-center justify-center shrink-0">
-                    <Heart className="w-5 h-5 text-red-600 dark:text-red-400" />
+                  <div className="w-9 h-9 rounded-xl bg-destructive-subtle flex items-center justify-center shrink-0">
+                    <Heart className="w-5 h-5 text-destructive" />
                   </div>
                   Histórico de Saúde
                 </CardTitle>
@@ -1827,8 +1827,8 @@ const Anamnese: React.FC = () => {
             <>
               <CardHeader>
                 <CardTitle className="font-display text-xl flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-xl bg-orange-100 dark:bg-orange-950/40 flex items-center justify-center shrink-0">
-                    <Pill className="w-5 h-5 text-orange-600 dark:text-orange-400" />
+                  <div className="w-9 h-9 rounded-xl bg-warning-subtle flex items-center justify-center shrink-0">
+                    <Pill className="w-5 h-5 text-warning" />
                   </div>
                   Uso de Substâncias
                 </CardTitle>
@@ -1954,8 +1954,8 @@ const Anamnese: React.FC = () => {
             <>
               <CardHeader>
                 <CardTitle className="font-display text-xl flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-xl bg-primary/12 dark:bg-primary/20 dark:bg-purple-950/40 flex items-center justify-center shrink-0">
-                    <Sparkles className="w-5 h-5 text-purple-600 dark:text-purple-400" />
+                  <div className="w-9 h-9 rounded-xl bg-primary/12 dark:bg-primary/20 dark:bg-primary/12 flex items-center justify-center shrink-0">
+                    <Sparkles className="w-5 h-5 text-primary" />
                   </div>
                   Experiência Espiritual
                 </CardTitle>
@@ -1974,17 +1974,17 @@ const Anamnese: React.FC = () => {
                   }}
                   className={`w-full flex items-center gap-3 p-4 rounded-xl border-2 text-left transition-all ${
                     formData.ja_consagrou
-                      ? 'bg-purple-50 dark:bg-purple-950/30 border-purple-500'
+                      ? 'bg-primary/12 border-primary'
                       : 'bg-background border-border hover:border-primary/40 dark:border-primary/50 text-muted-foreground'
                   }`}
                 >
                   <div className={`w-5 h-5 rounded-full border-2 flex-shrink-0 flex items-center justify-center transition-all ${
-                    formData.ja_consagrou ? 'bg-purple-500 border-purple-500' : 'border-muted-foreground'
+                    formData.ja_consagrou ? 'bg-primary border-primary' : 'border-muted-foreground'
                   }`}>
                     {formData.ja_consagrou && <Check className="w-3 h-3 text-white" />}
                   </div>
                   <div>
-                    <p className={`font-medium text-sm ${formData.ja_consagrou ? 'text-purple-700 dark:text-purple-300' : ''}`}>
+                    <p className={`font-medium text-sm ${formData.ja_consagrou ? 'text-primary' : ''}`}>
                       Já participei de cerimônias
                     </p>
                     <p className="text-xs text-muted-foreground">Ayahuasca ou outras medicinas sagradas</p>
@@ -1992,7 +1992,7 @@ const Anamnese: React.FC = () => {
                 </button>
 
                 {formData.ja_consagrou && (
-                  <div className="space-y-4 border-l-2 border-purple-200 dark:border-purple-800 pl-4 ml-2 animate-fade-in">
+                  <div className="space-y-4 border-l-2 border-primary/30 dark:border-primary pl-4 ml-2 animate-fade-in">
                     <div className="space-y-2">
                       <Label htmlFor="quantas_vezes">Quantas vezes aproximadamente?</Label>
                       <Input
@@ -2052,8 +2052,8 @@ const Anamnese: React.FC = () => {
             <>
               <CardHeader>
                 <CardTitle className="font-display text-xl flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-xl bg-green-100 dark:bg-green-950/40 flex items-center justify-center shrink-0">
-                    <CheckCircle2 className="w-5 h-5 text-green-600 dark:text-green-400" />
+                  <div className="w-9 h-9 rounded-xl bg-success-subtle flex items-center justify-center shrink-0">
+                    <CheckCircle2 className="w-5 h-5 text-success" />
                   </div>
                   Termos e Consentimento
                 </CardTitle>
@@ -2121,19 +2121,19 @@ const Anamnese: React.FC = () => {
                         onClick={() => updateField(term.field, !isChecked)}
                         className={`w-full flex items-start gap-3 p-4 rounded-xl border-2 text-left transition-all ${
                           isChecked
-                            ? 'bg-green-50/80 dark:bg-green-950/20 border-green-500'
+                            ? 'bg-success-subtle border-success'
                             : term.error
                             ? 'border-destructive bg-destructive/5'
-                            : 'border-border hover:border-green-300 dark:border-green-500/40 bg-background'
+                            : 'border-border hover:border-success/30 dark:border-success/40 bg-background'
                         }`}
                       >
                         <div className={`mt-0.5 w-5 h-5 rounded-full border-2 flex-shrink-0 flex items-center justify-center transition-all ${
-                          isChecked ? 'bg-green-500 border-green-500' : term.error ? 'border-destructive' : 'border-muted-foreground/40'
+                          isChecked ? 'bg-success border-success' : term.error ? 'border-destructive' : 'border-muted-foreground/40'
                         }`}>
                           {isChecked && <Check className="w-3 h-3 text-white" />}
                         </div>
                         <div className="flex-1 min-w-0">
-                          <p className={`text-sm font-semibold mb-0.5 flex items-center gap-1.5 ${isChecked ? 'text-green-700 dark:text-green-400' : 'text-foreground'}`}>
+                          <p className={`text-sm font-semibold mb-0.5 flex items-center gap-1.5 ${isChecked ? 'text-success' : 'text-foreground'}`}>
                             <Icon className="w-3.5 h-3.5 flex-shrink-0" />
                             {term.title}
                           </p>
@@ -2148,18 +2148,18 @@ const Anamnese: React.FC = () => {
                 {/* Autorização de Uso de Imagem — opcional, tom diferente */}
                 <div className={`flex items-start gap-3 p-4 rounded-xl border-2 cursor-pointer transition-all ${
                   formData.aceite_uso_imagem
-                    ? 'border-amber-400 bg-amber-50/60 dark:bg-amber-950/20'
-                    : 'border-border hover:border-amber-300 dark:border-amber-500/40 bg-background'
+                    ? 'border-warning bg-warning-subtle'
+                    : 'border-border hover:border-warning/30 dark:border-warning/40 bg-background'
                 }`}
                   onClick={() => updateField('aceite_uso_imagem', !formData.aceite_uso_imagem)}
                 >
                   <div className={`mt-0.5 w-5 h-5 rounded-full border-2 flex-shrink-0 flex items-center justify-center transition-all ${
-                    formData.aceite_uso_imagem ? 'bg-amber-500 border-amber-500' : 'border-muted-foreground/40'
+                    formData.aceite_uso_imagem ? 'bg-warning border-warning' : 'border-muted-foreground/40'
                   }`}>
                     {formData.aceite_uso_imagem && <Check className="w-3 h-3 text-white" />}
                   </div>
                   <div className="flex-1">
-                    <p className={`text-sm font-semibold mb-0.5 flex items-center gap-1.5 ${formData.aceite_uso_imagem ? 'text-amber-700 dark:text-amber-400' : 'text-foreground'}`}>
+                    <p className={`text-sm font-semibold mb-0.5 flex items-center gap-1.5 ${formData.aceite_uso_imagem ? 'text-warning' : 'text-foreground'}`}>
                       <Camera className="w-3.5 h-3.5 flex-shrink-0" />
                       Autorização de Uso de Imagem <span className="text-xs font-normal text-muted-foreground ml-1">(opcional)</span>
                     </p>
@@ -2180,8 +2180,8 @@ const Anamnese: React.FC = () => {
             <>
               <CardHeader>
                 <CardTitle className="font-display text-xl flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-xl bg-emerald-100 dark:bg-emerald-950/40 flex items-center justify-center shrink-0">
-                    <CheckCircle2 className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+                  <div className="w-9 h-9 rounded-xl bg-success-subtle flex items-center justify-center shrink-0">
+                    <CheckCircle2 className="w-5 h-5 text-success" />
                   </div>
                   Confirmação e Assinatura
                 </CardTitle>
@@ -2229,8 +2229,8 @@ const Anamnese: React.FC = () => {
                           alt="Sua assinatura"
                           className="max-h-32 object-contain"
                         />
-                        <div className="mt-2 w-full border-t border-slate-100 dark:border-border pt-2 text-center">
-                          <p className="text-[10px] text-slate-400 font-mono uppercase">
+                        <div className="mt-2 w-full border-t border-border pt-2 text-center">
+                          <p className="text-[10px] text-muted-foreground font-mono uppercase">
                             Assinado digitalmente em {new Date().toLocaleDateString('pt-BR')}
                           </p>
                         </div>
@@ -2322,7 +2322,7 @@ const ContraindicacaoModal = ({
   <Dialog open={open} onOpenChange={onClose}>
     <DialogContent className="sm:max-w-md">
       <DialogHeader>
-        <DialogTitle className="flex items-center gap-2 text-amber-600">
+        <DialogTitle className="flex items-center gap-2 text-warning">
           <AlertTriangle className="w-5 h-5" />
           Atenção: Contraindicações Identificadas
         </DialogTitle>
@@ -2337,8 +2337,8 @@ const ContraindicacaoModal = ({
           <strong> contraindicações</strong> para participação nas cerimônias.
         </p>
         
-        <div className="p-4 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-lg">
-          <p className="text-sm text-amber-800 dark:text-amber-200">
+        <div className="p-4 bg-warning-subtle border border-warning/30 dark:border-warning rounded-lg">
+          <p className="text-sm text-warning">
             <strong>Importante:</strong> Antes de se inscrever em qualquer cerimônia, 
             é necessário conversar com nosso líder facilitador <strong>Raimundo Ferreira Lima</strong> 
             para avaliar sua situação e garantir sua segurança.
@@ -2355,7 +2355,7 @@ const ContraindicacaoModal = ({
           Entendi
         </Button>
         <Button 
-          className="gap-2 bg-green-600 hover:bg-green-700"
+          className="gap-2 bg-success hover:bg-success"
           onClick={() => window.open(whatsappUrl, '_blank')}
         >
           <MessageCircle className="w-4 h-4" />

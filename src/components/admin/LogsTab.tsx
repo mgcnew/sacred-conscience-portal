@@ -111,38 +111,38 @@ const ENTITY_ICONS: Record<string, React.ReactNode> = {
 };
 
 const ACTION_COLORS: Record<string, string> = {
-  inscricao_cerimonia_criado: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400',
-  inscricao_cerimonia_excluido: 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400',
-  pagamento_criado: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400',
-  pagamento_atualizado: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400',
-  cerimonia_criado: 'bg-primary/12 dark:bg-primary/20 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400',
-  cerimonia_atualizado: 'bg-primary/12 dark:bg-primary/20 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400',
-  cerimonia_excluido: 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400',
-  depoimento_criado: 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400',
-  depoimento_atualizado: 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400',
+  inscricao_cerimonia_criado: 'bg-success-subtle text-success dark:bg-success-subtle dark:text-success',
+  inscricao_cerimonia_excluido: 'bg-destructive-subtle text-destructive dark:bg-destructive-subtle dark:text-destructive',
+  pagamento_criado: 'bg-info-subtle text-info dark:bg-info-subtle dark:text-info',
+  pagamento_atualizado: 'bg-info-subtle text-info dark:bg-info-subtle dark:text-info',
+  cerimonia_criado: 'bg-primary/12 dark:bg-primary/20 text-primary dark:bg-primary/12 dark:text-primary',
+  cerimonia_atualizado: 'bg-primary/12 dark:bg-primary/20 text-primary dark:bg-primary/12 dark:text-primary',
+  cerimonia_excluido: 'bg-destructive-subtle text-destructive dark:bg-destructive-subtle dark:text-destructive',
+  depoimento_criado: 'bg-warning-subtle text-warning dark:bg-warning-subtle dark:text-warning',
+  depoimento_atualizado: 'bg-warning-subtle text-warning dark:bg-warning-subtle dark:text-warning',
   anamnese_criado: 'bg-teal-100 text-teal-800 dark:bg-teal-900/30 dark:text-teal-400',
   anamnese_atualizado: 'bg-teal-100 text-teal-800 dark:bg-teal-900/30 dark:text-teal-400',
   produto_criado: 'bg-indigo-100 text-indigo-800 dark:bg-indigo-900/30 dark:text-indigo-400',
   produto_atualizado: 'bg-indigo-100 text-indigo-800 dark:bg-indigo-900/30 dark:text-indigo-400',
-  produto_excluido: 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400',
-  curso_criado: 'bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-400',
-  curso_atualizado: 'bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-400',
-  curso_excluido: 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400',
-  inscricao_curso_criado: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400',
-  inscricao_curso_excluido: 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400',
-  usuario_criado: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400',
-  usuario_atualizado: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400',
-  lista_espera_criado: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400',
-  lista_espera_excluido: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400',
+  produto_excluido: 'bg-destructive-subtle text-destructive dark:bg-destructive-subtle dark:text-destructive',
+  curso_criado: 'bg-warning-subtle text-warning dark:bg-warning-subtle dark:text-warning',
+  curso_atualizado: 'bg-warning-subtle text-warning dark:bg-warning-subtle dark:text-warning',
+  curso_excluido: 'bg-destructive-subtle text-destructive dark:bg-destructive-subtle dark:text-destructive',
+  inscricao_curso_criado: 'bg-success-subtle text-success dark:bg-success-subtle dark:text-success',
+  inscricao_curso_excluido: 'bg-destructive-subtle text-destructive dark:bg-destructive-subtle dark:text-destructive',
+  usuario_criado: 'bg-success-subtle text-success dark:bg-success-subtle dark:text-success',
+  usuario_atualizado: 'bg-success-subtle text-success dark:bg-success-subtle dark:text-success',
+  lista_espera_criado: 'bg-warning-subtle text-warning dark:bg-warning-subtle dark:text-warning',
+  lista_espera_excluido: 'bg-warning-subtle text-warning dark:bg-warning-subtle dark:text-warning',
   galeria_criado: 'bg-pink-100 text-pink-800 dark:bg-pink-900/30 dark:text-pink-400',
-  galeria_excluido: 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400',
+  galeria_excluido: 'bg-destructive-subtle text-destructive dark:bg-destructive-subtle dark:text-destructive',
   permissao_concedida: 'bg-cyan-100 text-cyan-800 dark:bg-cyan-900/30 dark:text-cyan-400',
-  permissao_revogada: 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400',
+  permissao_revogada: 'bg-destructive-subtle text-destructive dark:bg-destructive-subtle dark:text-destructive',
   transacao_criada: 'bg-lime-100 text-lime-800 dark:bg-lime-900/30 dark:text-lime-400',
   transacao_atualizada: 'bg-lime-100 text-lime-800 dark:bg-lime-900/30 dark:text-lime-400',
-  transacao_excluida: 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400',
+  transacao_excluida: 'bg-destructive-subtle text-destructive dark:bg-destructive-subtle dark:text-destructive',
   role_atribuido: 'bg-cyan-100 text-cyan-800 dark:bg-cyan-900/30 dark:text-cyan-400',
-  role_removido: 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400',
+  role_removido: 'bg-destructive-subtle text-destructive dark:bg-destructive-subtle dark:text-destructive',
 };
 
 const formatFriendlyMessage = (action: string, details: Record<string, unknown>): string => {
@@ -254,7 +254,7 @@ const LogItem = memo(({ log }: { log: ActivityLog }) => {
   const [expanded, setExpanded] = useState(false);
 
   const actionLabel = ACTION_LABELS[log.action] || log.action;
-  const actionColor = ACTION_COLORS[log.action] || 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300';
+  const actionColor = ACTION_COLORS[log.action] || 'bg-muted text-muted-foreground dark:bg-muted dark:text-muted-foreground';
   const entityIcon = ENTITY_ICONS[log.entity_type] || <Activity className="w-4 h-4" />;
   const details = log.details as Record<string, unknown>;
   const userName = (details?.nome_completo ?? details?.full_name ?? details?.nome ?? 'Usuário') as string;

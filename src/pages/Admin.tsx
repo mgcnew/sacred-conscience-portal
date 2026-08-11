@@ -627,7 +627,7 @@ const Admin: React.FC = () => {
   const getRoleBadgeClass = (role: string): string => {
     switch (role) {
       case 'admin': return 'bg-primary text-primary-foreground';
-      case 'guardiao': return 'bg-amber-500 text-white';
+      case 'guardiao': return 'bg-warning text-white';
       default: return 'bg-muted text-muted-foreground';
     }
   };
@@ -756,7 +756,7 @@ const Admin: React.FC = () => {
                       <div className="flex items-center justify-between w-full gap-3">
                         <span className="text-sm font-medium">{tab.label}</span>
                         {tab.badge > 0 && (
-                          <span className="px-1.5 py-0.5 rounded-full bg-amber-500 text-white text-[10px] font-black shrink-0">
+                          <span className="px-1.5 py-0.5 rounded-full bg-warning text-white text-[10px] font-black shrink-0">
                             {tab.badge}
                           </span>
                         )}
@@ -798,8 +798,8 @@ const Admin: React.FC = () => {
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                   {[
                     { label: 'Total de Membros', value: total, icon: Users, color: 'text-primary', bg: 'bg-primary/10' },
-                    { label: 'Com Ficha', value: comFicha, icon: CheckCircle2, color: 'text-green-600', bg: 'bg-green-50 dark:bg-green-950/30' },
-                    { label: 'Sem Ficha', value: semFicha, icon: FileText, color: 'text-amber-600', bg: 'bg-amber-50 dark:bg-amber-950/30' },
+                    { label: 'Com Ficha', value: comFicha, icon: CheckCircle2, color: 'text-success', bg: 'bg-success-subtle' },
+                    { label: 'Sem Ficha', value: semFicha, icon: FileText, color: 'text-warning', bg: 'bg-warning-subtle' },
                     { label: 'Bloqueados', value: bloqueados, icon: XCircle, color: 'text-destructive', bg: 'bg-destructive/10' },
                   ].map(({ label, value, icon: Icon, color, bg }) => (
                     <Card key={label} className="border-border/50">
@@ -1040,7 +1040,7 @@ const Admin: React.FC = () => {
                             <TableCell>
                               {ficha ? (
                                 <div className="flex items-center gap-2">
-                                  <Badge variant="outline" className="bg-green-50 dark:bg-green-500/10 text-green-700 border-green-200 dark:border-green-500/30">OK</Badge>
+                                  <Badge variant="outline" className="bg-success-subtle text-success border-success/30">OK</Badge>
                                   {alerta && (
                                     <Badge variant="destructive" className="flex gap-1 items-center">
                                       <AlertTriangle className="w-3 h-3" /> Atenção
@@ -1133,7 +1133,7 @@ const Admin: React.FC = () => {
                                               const condicoes = getCondicoesRelatadas(selectedAnamnese);
                                               if (selectedAnamnese.sem_doencas === true || condicoes.length === 0) {
                                                 return (
-                                                  <div className="flex items-center gap-2 text-sm text-green-600 bg-green-50 dark:bg-green-950/30 p-2 rounded">
+                                                  <div className="flex items-center gap-2 text-sm text-success bg-success-subtle p-2 rounded">
                                                     <CheckCircle2 className="w-4 h-4" />
                                                     <span>Nenhuma condição relatada</span>
                                                   </div>
@@ -1198,7 +1198,7 @@ const Admin: React.FC = () => {
                                           <div>
                                             <h4 className="font-medium text-sm mb-2 text-primary">Condições de Saúde</h4>
                                             {selectedAnamnese.sem_doencas === true ? (
-                                              <p className="text-sm text-green-600">Declarou não possuir nenhuma condição de saúde</p>
+                                              <p className="text-sm text-success">Declarou não possuir nenhuma condição de saúde</p>
                                             ) : (
                                               <div className="grid grid-cols-2 gap-1 text-sm">
                                                 {[
@@ -1215,8 +1215,8 @@ const Admin: React.FC = () => {
                                                 ].map(({ key, label }) => (
                                                   <div key={key} className="flex items-center gap-2">
                                                     {(selectedAnamnese as unknown as Record<string, unknown>)[key] === true 
-                                                      ? <XCircle className="w-3 h-3 text-red-500" /> 
-                                                      : <CheckCircle2 className="w-3 h-3 text-green-500" />}
+                                                      ? <XCircle className="w-3 h-3 text-destructive" /> 
+                                                      : <CheckCircle2 className="w-3 h-3 text-success" />}
                                                     <span>{label}</span>
                                                   </div>
                                                 ))}
@@ -1258,7 +1258,7 @@ const Admin: React.FC = () => {
                                           <div>
                                             <h4 className="font-medium text-sm mb-2 text-primary">Uso de Substâncias</h4>
                                             {selectedAnamnese.sem_vicios === true ? (
-                                              <p className="text-sm text-green-600">Declarou não fazer uso de substâncias</p>
+                                              <p className="text-sm text-success">Declarou não fazer uso de substâncias</p>
                                             ) : (
                                               <div className="text-sm">
                                                 {(() => {
@@ -1307,19 +1307,19 @@ const Admin: React.FC = () => {
                                           <div>
                                             <h4 className="font-medium text-sm mb-2 text-primary">Autorizações e Termos</h4>
                                             <div className="grid grid-cols-2 gap-2 text-sm">
-                                              <div className={`flex items-center gap-2 p-2 rounded ${selectedAnamnese.aceite_uso_imagem ? 'bg-green-50 dark:bg-green-950/30 text-green-700 dark:text-green-400' : 'bg-amber-50 dark:bg-amber-950/30 text-amber-700 dark:text-amber-400'}`}>
+                                              <div className={`flex items-center gap-2 p-2 rounded ${selectedAnamnese.aceite_uso_imagem ? 'bg-success-subtle text-success' : 'bg-warning-subtle text-warning'}`}>
                                                 {selectedAnamnese.aceite_uso_imagem ? <CheckCircle2 className="w-4 h-4" /> : <XCircle className="w-4 h-4" />}
                                                 <span>Uso de imagem {selectedAnamnese.aceite_uso_imagem ? 'autorizado' : 'não autorizado'}</span>
                                               </div>
-                                              <div className={`flex items-center gap-2 p-2 rounded ${selectedAnamnese.aceite_permanencia ? 'bg-green-50 dark:bg-green-950/30 text-green-700 dark:text-green-400' : 'bg-red-50 dark:bg-red-950/30 text-red-700 dark:text-red-400'}`}>
+                                              <div className={`flex items-center gap-2 p-2 rounded ${selectedAnamnese.aceite_permanencia ? 'bg-success-subtle text-success' : 'bg-destructive-subtle text-destructive'}`}>
                                                 {selectedAnamnese.aceite_permanencia ? <CheckCircle2 className="w-4 h-4" /> : <XCircle className="w-4 h-4" />}
                                                 <span>Permanência no templo {selectedAnamnese.aceite_permanencia ? 'aceita' : 'não aceita'}</span>
                                               </div>
-                                              <div className={`flex items-center gap-2 p-2 rounded ${selectedAnamnese.aceite_livre_vontade ? 'bg-green-50 dark:bg-green-950/30 text-green-700 dark:text-green-400' : 'bg-red-50 dark:bg-red-950/30 text-red-700 dark:text-red-400'}`}>
+                                              <div className={`flex items-center gap-2 p-2 rounded ${selectedAnamnese.aceite_livre_vontade ? 'bg-success-subtle text-success' : 'bg-destructive-subtle text-destructive'}`}>
                                                 {selectedAnamnese.aceite_livre_vontade ? <CheckCircle2 className="w-4 h-4" /> : <XCircle className="w-4 h-4" />}
                                                 <span>Livre vontade {selectedAnamnese.aceite_livre_vontade ? 'confirmada' : 'não confirmada'}</span>
                                               </div>
-                                              <div className={`flex items-center gap-2 p-2 rounded ${selectedAnamnese.aceite_termo_responsabilidade ? 'bg-green-50 dark:bg-green-950/30 text-green-700 dark:text-green-400' : 'bg-red-50 dark:bg-red-950/30 text-red-700 dark:text-red-400'}`}>
+                                              <div className={`flex items-center gap-2 p-2 rounded ${selectedAnamnese.aceite_termo_responsabilidade ? 'bg-success-subtle text-success' : 'bg-destructive-subtle text-destructive'}`}>
                                                 {selectedAnamnese.aceite_termo_responsabilidade ? <CheckCircle2 className="w-4 h-4" /> : <XCircle className="w-4 h-4" />}
                                                 <span>Termo de responsabilidade {selectedAnamnese.aceite_termo_responsabilidade ? 'aceito' : 'não aceito'}</span>
                                               </div>
@@ -1433,7 +1433,7 @@ const Admin: React.FC = () => {
                           </MobileCardRow>
                           <MobileCardRow label="Ficha">
                             {ficha ? (
-                              <Badge variant="outline" className="bg-green-50 dark:bg-green-500/10 text-green-700 border-green-200 dark:border-green-500/30 text-xs">OK</Badge>
+                              <Badge variant="outline" className="bg-success-subtle text-success border-success/30 text-xs">OK</Badge>
                             ) : (
                               <Badge variant="secondary" className="text-xs">Pendente</Badge>
                             )}
@@ -1523,7 +1523,7 @@ const Admin: React.FC = () => {
                                       const condicoes = getCondicoesRelatadas(detalhesDrawerAnamnese);
                                       if (detalhesDrawerAnamnese.sem_doencas === true || condicoes.length === 0) {
                                         return (
-                                          <div className="flex items-center gap-2 text-sm text-green-600 bg-green-50 dark:bg-green-950/30 p-2 rounded">
+                                          <div className="flex items-center gap-2 text-sm text-success bg-success-subtle p-2 rounded">
                                             <CheckCircle2 className="w-4 h-4" />
                                             <span>Nenhuma condição relatada</span>
                                           </div>
@@ -1573,7 +1573,7 @@ const Admin: React.FC = () => {
                                   <div className="border rounded-lg p-3">
                                     <h4 className="font-medium text-xs text-primary uppercase tracking-wide mb-2">Condições de Saúde</h4>
                                     {detalhesDrawerAnamnese.sem_doencas === true ? (
-                                      <p className="text-xs text-green-600">Declarou não possuir nenhuma condição</p>
+                                      <p className="text-xs text-success">Declarou não possuir nenhuma condição</p>
                                     ) : (
                                       <div className="grid grid-cols-2 gap-1 text-xs">
                                         {[
@@ -1585,8 +1585,8 @@ const Admin: React.FC = () => {
                                         ].map(({ key, label }) => (
                                           <div key={key} className="flex items-center gap-1">
                                             {(detalhesDrawerAnamnese as unknown as Record<string, unknown>)[key] === true 
-                                              ? <XCircle className="w-3 h-3 text-red-500 shrink-0" /> 
-                                              : <CheckCircle2 className="w-3 h-3 text-green-500 shrink-0" />}
+                                              ? <XCircle className="w-3 h-3 text-destructive shrink-0" /> 
+                                              : <CheckCircle2 className="w-3 h-3 text-success shrink-0" />}
                                             <span className="truncate">{label}</span>
                                           </div>
                                         ))}
@@ -1615,19 +1615,19 @@ const Admin: React.FC = () => {
                                   <div className="border rounded-lg p-3">
                                     <h4 className="font-medium text-xs text-primary uppercase tracking-wide mb-2">Autorizações</h4>
                                     <div className="grid grid-cols-1 gap-1 text-xs">
-                                      <div className={`flex items-center gap-2 p-1.5 rounded ${detalhesDrawerAnamnese.aceite_uso_imagem ? 'bg-green-50 dark:bg-green-950/30 text-green-700 dark:text-green-400' : 'bg-amber-50 dark:bg-amber-950/30 text-amber-700 dark:text-amber-400'}`}>
+                                      <div className={`flex items-center gap-2 p-1.5 rounded ${detalhesDrawerAnamnese.aceite_uso_imagem ? 'bg-success-subtle text-success' : 'bg-warning-subtle text-warning'}`}>
                                         {detalhesDrawerAnamnese.aceite_uso_imagem ? <CheckCircle2 className="w-3 h-3 shrink-0" /> : <XCircle className="w-3 h-3 shrink-0" />}
                                         <span>Uso de imagem {detalhesDrawerAnamnese.aceite_uso_imagem ? 'autorizado' : 'não autorizado'}</span>
                                       </div>
-                                      <div className={`flex items-center gap-2 p-1.5 rounded ${detalhesDrawerAnamnese.aceite_permanencia ? 'bg-green-50 dark:bg-green-950/30 text-green-700 dark:text-green-400' : 'bg-red-50 dark:bg-red-950/30 text-red-700 dark:text-red-400'}`}>
+                                      <div className={`flex items-center gap-2 p-1.5 rounded ${detalhesDrawerAnamnese.aceite_permanencia ? 'bg-success-subtle text-success' : 'bg-destructive-subtle text-destructive'}`}>
                                         {detalhesDrawerAnamnese.aceite_permanencia ? <CheckCircle2 className="w-3 h-3 shrink-0" /> : <XCircle className="w-3 h-3 shrink-0" />}
                                         <span>Permanência {detalhesDrawerAnamnese.aceite_permanencia ? 'aceita' : 'não aceita'}</span>
                                       </div>
-                                      <div className={`flex items-center gap-2 p-1.5 rounded ${detalhesDrawerAnamnese.aceite_livre_vontade ? 'bg-green-50 dark:bg-green-950/30 text-green-700 dark:text-green-400' : 'bg-red-50 dark:bg-red-950/30 text-red-700 dark:text-red-400'}`}>
+                                      <div className={`flex items-center gap-2 p-1.5 rounded ${detalhesDrawerAnamnese.aceite_livre_vontade ? 'bg-success-subtle text-success' : 'bg-destructive-subtle text-destructive'}`}>
                                         {detalhesDrawerAnamnese.aceite_livre_vontade ? <CheckCircle2 className="w-3 h-3 shrink-0" /> : <XCircle className="w-3 h-3 shrink-0" />}
                                         <span>Livre vontade {detalhesDrawerAnamnese.aceite_livre_vontade ? 'confirmada' : 'não confirmada'}</span>
                                       </div>
-                                      <div className={`flex items-center gap-2 p-1.5 rounded ${detalhesDrawerAnamnese.aceite_termo_responsabilidade ? 'bg-green-50 dark:bg-green-950/30 text-green-700 dark:text-green-400' : 'bg-red-50 dark:bg-red-950/30 text-red-700 dark:text-red-400'}`}>
+                                      <div className={`flex items-center gap-2 p-1.5 rounded ${detalhesDrawerAnamnese.aceite_termo_responsabilidade ? 'bg-success-subtle text-success' : 'bg-destructive-subtle text-destructive'}`}>
                                         {detalhesDrawerAnamnese.aceite_termo_responsabilidade ? <CheckCircle2 className="w-3 h-3 shrink-0" /> : <XCircle className="w-3 h-3 shrink-0" />}
                                         <span>Termo {detalhesDrawerAnamnese.aceite_termo_responsabilidade ? 'aceito' : 'não aceito'}</span>
                                       </div>
@@ -1727,9 +1727,9 @@ const Admin: React.FC = () => {
                 <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
                   {[
                     { label: 'Inscritos', value: ativas.length, icon: Users, color: 'text-primary', bg: 'bg-primary/10', sub: vagas ? `${vagas - ativas.length} vagas livres` : undefined },
-                    { label: 'Pagos', value: pagas.length, icon: CheckCircle2, color: 'text-green-600', bg: 'bg-green-50 dark:bg-green-950/30', sub: undefined },
-                    { label: 'Pendentes', value: pendentes.length, icon: AlertTriangle, color: 'text-amber-600', bg: 'bg-amber-50 dark:bg-amber-950/30', sub: undefined },
-                    { label: 'Presentes', value: presentes.length, icon: Calendar, color: 'text-blue-600', bg: 'bg-blue-50 dark:bg-blue-950/30', sub: ativas.length > 0 ? `${Math.round((presentes.length / ativas.length) * 100)}%` : undefined },
+                    { label: 'Pagos', value: pagas.length, icon: CheckCircle2, color: 'text-success', bg: 'bg-success-subtle', sub: undefined },
+                    { label: 'Pendentes', value: pendentes.length, icon: AlertTriangle, color: 'text-warning', bg: 'bg-warning-subtle', sub: undefined },
+                    { label: 'Presentes', value: presentes.length, icon: Calendar, color: 'text-info', bg: 'bg-info-subtle', sub: ativas.length > 0 ? `${Math.round((presentes.length / ativas.length) * 100)}%` : undefined },
                     { label: 'Cancelados', value: todasInscricoes.filter(i => i.cancelada).length, icon: XCircle, color: 'text-destructive', bg: 'bg-destructive/10', sub: undefined },
                   ].map(({ label, value, icon: Icon, color, bg, sub }) => (
                     <Card key={label} className="border-border/50">
@@ -1781,9 +1781,9 @@ const Admin: React.FC = () => {
                   .sort((a, b) => (a.profiles?.full_name || '').localeCompare(b.profiles?.full_name || '', 'pt'));
                 return (
                   <CardContent className="p-4 border-t">
-                    <div className="mb-4 p-3 rounded-lg bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800">
-                      <p className="text-sm text-blue-700 dark:text-blue-300 font-medium">Modo de presença ativo</p>
-                      <p className="text-xs text-blue-600 dark:text-blue-400 mt-0.5">Toque no nome para marcar ou desmarcar a presença. Ordenado por nome.</p>
+                    <div className="mb-4 p-3 rounded-lg bg-info-subtle border border-info/30 dark:border-info">
+                      <p className="text-sm text-info font-medium">Modo de presença ativo</p>
+                      <p className="text-xs text-info mt-0.5">Toque no nome para marcar ou desmarcar a presença. Ordenado por nome.</p>
                     </div>
                     <div className="space-y-2">
                       {inscritos.map((inscricao) => {
@@ -1797,14 +1797,14 @@ const Admin: React.FC = () => {
                             className={cn(
                               'w-full flex items-center justify-between gap-3 px-4 py-3 rounded-xl border-2 transition-all text-left',
                               presente
-                                ? 'border-green-400 bg-green-50 dark:bg-green-950/40 dark:border-green-600'
+                                ? 'border-success bg-success-subtle dark:border-success'
                                 : 'border-border bg-card hover:bg-muted/50',
                               loading && 'opacity-50 cursor-not-allowed'
                             )}
                           >
                             <div className="flex items-center gap-3 min-w-0">
                               <Avatar className="w-9 h-9 shrink-0">
-                                <AvatarFallback className={cn('text-sm', presente ? 'bg-green-200 text-green-800 dark:bg-green-800 dark:text-green-100' : 'bg-muted text-muted-foreground')}>
+                                <AvatarFallback className={cn('text-sm', presente ? 'bg-success-subtle text-success dark:bg-success-subtle dark:text-success' : 'bg-muted text-muted-foreground')}>
                                   {inscricao.profiles?.full_name?.charAt(0)?.toUpperCase() || '?'}
                                 </AvatarFallback>
                               </Avatar>
@@ -1817,7 +1817,7 @@ const Admin: React.FC = () => {
                               {loading ? (
                                 <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
                               ) : presente ? (
-                                <div className="flex items-center gap-1.5 text-green-600 dark:text-green-400">
+                                <div className="flex items-center gap-1.5 text-success">
                                   <CheckCircle2 className="w-5 h-5" />
                                   <span className="text-xs font-medium hidden sm:inline">Presente</span>
                                 </div>
@@ -1892,7 +1892,7 @@ const Admin: React.FC = () => {
                                     className={cn(
                                       'inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium transition-colors',
                                       inscricao.presenca_confirmada
-                                        ? 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300 hover:bg-green-200'
+                                        ? 'bg-success-subtle text-success dark:bg-success-subtle dark:text-success hover:bg-success-subtle'
                                         : 'bg-muted text-muted-foreground hover:bg-muted/80'
                                     )}
                                   >
@@ -1919,11 +1919,11 @@ const Admin: React.FC = () => {
                                   />
                                 )}
                                 {inscricao.pago ? (
-                                  <Badge className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100">
+                                  <Badge className="bg-success-subtle text-success dark:bg-success-subtle dark:text-success">
                                     <DollarSign className="w-3 h-3 mr-1" /> Pago
                                   </Badge>
                                 ) : (
-                                  <Badge variant="outline" className="text-amber-600 border-amber-300 dark:border-amber-500/40">Pendente</Badge>
+                                  <Badge variant="outline" className="text-warning border-warning/30 dark:border-warning/40">Pendente</Badge>
                                 )}
                               </div>
                             )}
@@ -1949,11 +1949,11 @@ const Admin: React.FC = () => {
                               {inscricao.cancelada && <Badge variant="destructive" className="text-xs">Cancelado</Badge>}
                             </div>
                             {!inscricao.cancelada && (inscricao.pago ? (
-                              <Badge className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100 text-xs">
+                              <Badge className="bg-success-subtle text-success dark:bg-success-subtle dark:text-success text-xs">
                                 <DollarSign className="w-3 h-3 mr-1" /> Pago
                               </Badge>
                             ) : (
-                              <Badge variant="outline" className="text-amber-600 border-amber-300 dark:border-amber-500/40 text-xs">Pendente</Badge>
+                              <Badge variant="outline" className="text-warning border-warning/30 dark:border-warning/40 text-xs">Pendente</Badge>
                             ))}
                           </div>
                         </MobileCardHeader>
@@ -2002,7 +2002,7 @@ const Admin: React.FC = () => {
                                     className={cn(
                                       'flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium transition-colors',
                                       inscricao.presenca_confirmada
-                                        ? 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300'
+                                        ? 'bg-success-subtle text-success dark:bg-success-subtle dark:text-success'
                                         : 'bg-muted text-muted-foreground'
                                     )}
                                   >
@@ -2097,7 +2097,7 @@ const Admin: React.FC = () => {
                                   {isPast ? (
                                     <Badge variant="secondary">Realizada</Badge>
                                   ) : (
-                                    <Badge className="bg-green-600">Agendada</Badge>
+                                    <Badge className="bg-success">Agendada</Badge>
                                   )}
                                 </div>
                                 {isExpanded ? (
@@ -2170,7 +2170,7 @@ const Admin: React.FC = () => {
                                       {isPast ? (
                                         <Badge variant="secondary" className="text-xs">Realizada</Badge>
                                       ) : (
-                                        <Badge className="bg-green-600 text-xs">Agendada</Badge>
+                                        <Badge className="bg-success text-xs">Agendada</Badge>
                                       )}
                                       {isExpanded ? (
                                         <ChevronUp className="w-4 h-4 text-muted-foreground" />

@@ -9,9 +9,31 @@ interface PageHeaderProps {
   iconClassName?: string;
   iconContainerClassName?: string;
   centered?: boolean;
+  /**
+   * 'default' — páginas de leitura e navegação (Cerimônias, Galeria, Loja).
+   * 'compact' — telas densas de aplicativo, com abas ou muita informação
+   * acima da dobra (Admin, Insights, Guardião), onde um título grande
+   * empurraria o conteúdo para fora da tela.
+   */
+  size?: 'default' | 'compact';
   children?: React.ReactNode;
   className?: string;
 }
+
+const SIZES = {
+  default: {
+    title: 'text-3xl md:text-4xl',
+    gap: 'mb-8',
+    box: 'w-12 h-12 rounded-xl',
+    icon: 'w-6 h-6',
+  },
+  compact: {
+    title: 'text-xl md:text-2xl',
+    gap: 'mb-5',
+    box: 'w-10 h-10 rounded-2xl',
+    icon: 'w-5 h-5',
+  },
+} as const;
 
 /**
  * Componente reutilizável para headers de página
@@ -24,9 +46,11 @@ const PageHeader: React.FC<PageHeaderProps> = ({
   iconClassName,
   iconContainerClassName,
   centered = false,
+  size = 'default',
   children,
   className,
 }) => {
+  const s = SIZES[size];
   if (centered) {
     return (
       <div className={cn('text-center mb-8 md:mb-12 animate-fade-in', className)}>
@@ -56,7 +80,8 @@ const PageHeader: React.FC<PageHeaderProps> = ({
   return (
     <div
       className={cn(
-        'flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8 animate-fade-in',
+        'flex flex-col md:flex-row md:items-center md:justify-between gap-4 animate-fade-in',
+        s.gap,
         className
       )}
     >
@@ -64,15 +89,16 @@ const PageHeader: React.FC<PageHeaderProps> = ({
         {Icon && (
           <div
             className={cn(
-              'w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center shrink-0',
+              s.box,
+              'bg-primary/10 flex items-center justify-center shrink-0',
               iconContainerClassName
             )}
           >
-            <Icon className={cn('w-6 h-6 text-primary', iconClassName)} />
+            <Icon className={cn(s.icon, 'text-primary', iconClassName)} />
           </div>
         )}
         <div>
-          <h1 className="font-display text-3xl md:text-4xl font-medium text-foreground">
+          <h1 className={cn('font-display font-medium text-foreground', s.title)}>
             {title}
           </h1>
           {description && (

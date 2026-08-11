@@ -424,7 +424,7 @@ export const FluxoCaixaTab: React.FC = () => {
       <div className="fixed bottom-16 left-0 right-0 z-40 bg-background/95 backdrop-blur-md border-t border-border/40 px-4 py-2.5 md:hidden flex items-center justify-between shadow-[0_-2px_16px_rgba(0,0,0,0.08)]">
         <div className="flex flex-col">
           <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-bold">Saldo</span>
-          <span className={`text-base font-black ${(resumo?.saldo || 0) >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-500'}`}>
+          <span className={`text-base font-black ${(resumo?.saldo || 0) >= 0 ? 'text-success' : 'text-destructive'}`}>
             {formatarValor(resumo?.saldo || 0)}
           </span>
         </div>
@@ -449,11 +449,11 @@ export const FluxoCaixaTab: React.FC = () => {
 
       {/* Alerta de Saldo Baixo */}
       {mostrarAlertaSaldo && (
-        <div className="p-4 rounded-xl bg-red-100 dark:bg-red-900/30 border border-red-300 dark:border-red-500/40 flex items-center gap-3 animate-in fade-in slide-in-from-top-2 duration-300">
-          <AlertTriangle className="w-6 h-6 text-red-600 shrink-0" />
+        <div className="p-4 rounded-xl bg-destructive-subtle border border-destructive/30 dark:border-destructive/40 flex items-center gap-3 animate-in fade-in slide-in-from-top-2 duration-300">
+          <AlertTriangle className="w-6 h-6 text-destructive shrink-0" />
           <div>
-            <p className="font-bold text-red-800 dark:text-red-200">Atenção: Saldo Baixo!</p>
-            <p className="text-sm text-red-700 dark:text-red-300">
+            <p className="font-bold text-destructive">Atenção: Saldo Baixo!</p>
+            <p className="text-sm text-destructive">
               Limite: {formatarValor(alertaSaldoBaixo?.valor_limite || 0)}
             </p>
           </div>
@@ -462,41 +462,41 @@ export const FluxoCaixaTab: React.FC = () => {
 
       {/* Cards de Resumo */}
       <div className="grid gap-3 grid-cols-2 md:grid-cols-3">
-        <div className="rounded-2xl border border-emerald-500/20 bg-emerald-500/6 p-4">
+        <div className="rounded-2xl border border-success/20 bg-success-subtle p-4">
           <div className="flex items-center justify-between mb-2">
             <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Entradas</span>
-            <ArrowUpCircle className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+            <ArrowUpCircle className="w-4 h-4 text-success" />
           </div>
-          <div className="text-xl md:text-2xl font-black text-emerald-700 dark:text-emerald-300">
+          <div className="text-xl md:text-2xl font-black text-success">
             {formatarValor(resumo?.entradas || 0)}
           </div>
           {resumo?.entradasMP ? (
-            <p className="text-[10px] text-emerald-600/70 mt-1 hidden md:block">
+            <p className="text-[10px] text-success mt-1 hidden md:block">
               MP: {formatarValor(resumo.entradasMP)} · Manual: {formatarValor(resumo.entradasManuais || 0)}
             </p>
           ) : null}
         </div>
 
-        <div className="rounded-2xl border border-red-500/20 bg-red-500/6 p-4">
+        <div className="rounded-2xl border border-destructive/20 bg-destructive-subtle p-4">
           <div className="flex items-center justify-between mb-2">
             <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Saídas</span>
-            <ArrowDownCircle className="w-4 h-4 text-red-500" />
+            <ArrowDownCircle className="w-4 h-4 text-destructive" />
           </div>
-          <div className="text-xl md:text-2xl font-black text-red-600 dark:text-red-400">
+          <div className="text-xl md:text-2xl font-black text-destructive">
             {formatarValor(resumo?.saidas || 0)}
           </div>
         </div>
 
-        <div className={`col-span-2 md:col-span-1 rounded-2xl border-2 p-4 ${(resumo?.saldo || 0) >= 0 ? 'border-primary/25 bg-primary/6' : 'border-red-500/25 bg-red-500/6'}`}>
+        <div className={`col-span-2 md:col-span-1 rounded-2xl border-2 p-4 ${(resumo?.saldo || 0) >= 0 ? 'border-primary/25 bg-primary/6' : 'border-destructive/25 bg-destructive-subtle'}`}>
           <div className="flex items-center justify-between mb-2">
             <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Saldo Líquido</span>
             <Wallet className="w-4 h-4 text-muted-foreground" />
           </div>
           <div className="flex items-end justify-between md:block gap-2">
-            <div className={`text-2xl font-black ${(resumo?.saldo || 0) >= 0 ? 'text-primary' : 'text-red-600 dark:text-red-400'}`}>
+            <div className={`text-2xl font-black ${(resumo?.saldo || 0) >= 0 ? 'text-primary' : 'text-destructive'}`}>
               {formatarValor(resumo?.saldo || 0)}
             </div>
-            <span className={`text-[10px] font-semibold ${(resumo?.saldo || 0) >= 0 ? 'text-emerald-600' : 'text-red-500'}`}>
+            <span className={`text-[10px] font-semibold ${(resumo?.saldo || 0) >= 0 ? 'text-success' : 'text-destructive'}`}>
               {(resumo?.saldo || 0) >= 0 ? '● Saudável' : '● Atenção'}
             </span>
           </div>
@@ -570,10 +570,10 @@ export const FluxoCaixaTab: React.FC = () => {
                     </div>
                     <p className="text-[10px] uppercase tracking-tighter text-muted-foreground mb-1 font-bold">Mês Atual ({MESES[hoje.getMonth()]})</p>
                     <div className="space-y-1">
-                      <p className="text-2xl font-black text-green-600">
+                      <p className="text-2xl font-black text-success">
                         {formatarValor(dadosMensais[hoje.getMonth()]?.entradas || 0)}
                       </p>
-                      <p className="text-xs font-medium text-red-500 flex items-center justify-center gap-1">
+                      <p className="text-xs font-medium text-destructive flex items-center justify-center gap-1">
                         <ArrowDownCircle className="w-3 h-3" />
                         {formatarValor(dadosMensais[hoje.getMonth()]?.saidas || 0)}
                       </p>
@@ -588,10 +588,10 @@ export const FluxoCaixaTab: React.FC = () => {
                   <div className="text-center p-4 rounded-2xl bg-muted/30 border border-dashed relative overflow-hidden">
                     <p className="text-[10px] uppercase tracking-tighter text-muted-foreground mb-1 font-bold">Mês Anterior ({MESES[hoje.getMonth() === 0 ? 11 : hoje.getMonth() - 1]})</p>
                     <div className="space-y-1 opacity-70">
-                      <p className="text-xl font-bold text-green-600/80">
+                      <p className="text-xl font-bold text-success">
                         {formatarValor(dadosMensais[hoje.getMonth() === 0 ? 11 : hoje.getMonth() - 1]?.entradas || 0)}
                       </p>
-                      <p className="text-xs font-medium text-red-500/80">
+                      <p className="text-xs font-medium text-destructive">
                         -{formatarValor(dadosMensais[hoje.getMonth() === 0 ? 11 : hoje.getMonth() - 1]?.saidas || 0)}
                       </p>
                     </div>
@@ -623,12 +623,12 @@ export const FluxoCaixaTab: React.FC = () => {
                   <div key={i} className="flex-1 flex flex-col items-center gap-1 min-w-0">
                     <div className="w-full flex gap-0.5 h-48 items-end">
                       <div
-                        className="flex-1 bg-green-500 rounded-t transition-all hover:bg-green-400"
+                        className="flex-1 bg-success rounded-t transition-all hover:bg-success"
                         style={{ height: `${(mes.entradas / maxValorMensal) * 100}%`, minHeight: mes.entradas > 0 ? '4px' : '0' }}
                         title={`Entradas ${MESES[i]}: ${formatarValor(mes.entradas)}`}
                       />
                       <div
-                        className="flex-1 bg-red-500 rounded-t transition-all hover:bg-red-400"
+                        className="flex-1 bg-destructive rounded-t transition-all hover:bg-destructive"
                         style={{ height: `${(mes.saidas / maxValorMensal) * 100}%`, minHeight: mes.saidas > 0 ? '4px' : '0' }}
                         title={`Saídas ${MESES[i]}: ${formatarValor(mes.saidas)}`}
                       />
@@ -641,11 +641,11 @@ export const FluxoCaixaTab: React.FC = () => {
               </div>
               <div className="flex justify-center gap-6 mt-4">
                 <div className="flex items-center gap-2">
-                  <div className="w-3 h-3 bg-green-500 rounded" />
+                  <div className="w-3 h-3 bg-success rounded" />
                   <span className="text-sm">Entradas</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <div className="w-3 h-3 bg-red-500 rounded" />
+                  <div className="w-3 h-3 bg-destructive rounded" />
                   <span className="text-sm">Saídas</span>
                 </div>
               </div>
@@ -657,7 +657,7 @@ export const FluxoCaixaTab: React.FC = () => {
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <PieChart className="w-5 h-5 text-green-600" />
+                  <PieChart className="w-5 h-5 text-success" />
                   Entradas por Origem
                 </CardTitle>
               </CardHeader>
@@ -697,7 +697,7 @@ export const FluxoCaixaTab: React.FC = () => {
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <PieChart className="w-5 h-5 text-red-500" />
+                  <PieChart className="w-5 h-5 text-destructive" />
                   Saídas por Categoria
                 </CardTitle>
               </CardHeader>
@@ -893,14 +893,14 @@ export const FluxoCaixaTab: React.FC = () => {
                             <TableCell>
                               <div className="flex items-center gap-2">
                                 {t.tipo === 'entrada' ? (
-                                  <TrendingUp className="w-4 h-4 text-green-600" />
+                                  <TrendingUp className="w-4 h-4 text-success" />
                                 ) : (
-                                  <TrendingDown className="w-4 h-4 text-red-600" />
+                                  <TrendingDown className="w-4 h-4 text-destructive" />
                                 )}
                                 <span className="text-sm">{t.descricao}</span>
                                 {t.reconciliada && (
                                   <span title="Reconciliada">
-                                    <CheckCircle className="w-3 h-3 text-green-600" />
+                                    <CheckCircle className="w-3 h-3 text-success" />
                                   </span>
                                 )}
                               </div>
@@ -915,7 +915,7 @@ export const FluxoCaixaTab: React.FC = () => {
                             <TableCell className="text-sm text-muted-foreground">
                               {t.forma_pagamento || '-'}
                             </TableCell>
-                            <TableCell className={`text-right font-medium ${t.tipo === 'entrada' ? 'text-green-600' : 'text-red-600'}`}>
+                            <TableCell className={`text-right font-medium ${t.tipo === 'entrada' ? 'text-success' : 'text-destructive'}`}>
                               {t.tipo === 'entrada' ? '+' : '-'} {formatarValor(t.valor)}
                             </TableCell>
                             <TableCell>
@@ -924,7 +924,7 @@ export const FluxoCaixaTab: React.FC = () => {
                                   <Button
                                     variant="ghost"
                                     size="icon"
-                                    className={`h-8 w-8 ${t.reconciliada ? 'text-green-600' : 'text-muted-foreground'}`}
+                                    className={`h-8 w-8 ${t.reconciliada ? 'text-success' : 'text-muted-foreground'}`}
                                     onClick={() => handleToggleReconciliacao(t.id, !!t.reconciliada)}
                                     title={t.reconciliada ? 'Remover reconciliação' : 'Marcar como reconciliada'}
                                   >
@@ -987,7 +987,7 @@ export const FluxoCaixaTab: React.FC = () => {
                         }`}
                       >
                         {/* Indicador Lateral de Tipo */}
-                        <div className={`absolute top-0 left-0 bottom-0 w-1.5 ${t.tipo === 'entrada' ? 'bg-green-500' : 'bg-red-500'}`} />
+                        <div className={`absolute top-0 left-0 bottom-0 w-1.5 ${t.tipo === 'entrada' ? 'bg-success' : 'bg-destructive'}`} />
                         
                         <div className="p-4 pl-5">
                           {/* Header: Data e Reconciliação */}
@@ -997,12 +997,12 @@ export const FluxoCaixaTab: React.FC = () => {
                                 {format(new Date(t.data), 'dd MMM yyyy', { locale: ptBR })}
                               </span>
                               {t.reconciliada && (
-                                <Badge variant="secondary" className="h-4 text-[8px] bg-green-100 dark:bg-green-500/15 text-green-700 hover:bg-green-100 border-none px-1">
+                                <Badge variant="secondary" className="h-4 text-[8px] bg-success-subtle text-success hover:bg-success-subtle border-none px-1">
                                   CONFERIDO
                                 </Badge>
                               )}
                             </div>
-                            <span className={`text-base font-black ${t.tipo === 'entrada' ? 'text-green-600' : 'text-red-600'}`}>
+                            <span className={`text-base font-black ${t.tipo === 'entrada' ? 'text-success' : 'text-destructive'}`}>
                               {t.tipo === 'entrada' ? '+' : '-'} {formatarValor(t.valor)}
                             </span>
                           </div>
@@ -1040,7 +1040,7 @@ export const FluxoCaixaTab: React.FC = () => {
                                     <Button
                                       variant="outline"
                                       size="icon"
-                                      className={`h-8 w-8 rounded-full border-none shadow-none ${t.reconciliada ? 'text-green-600 bg-green-50 dark:bg-green-500/10' : 'text-muted-foreground bg-muted/50'}`}
+                                      className={`h-8 w-8 rounded-full border-none shadow-none ${t.reconciliada ? 'text-success bg-success-subtle' : 'text-muted-foreground bg-muted/50'}`}
                                       onClick={() => handleToggleReconciliacao(t.id, !!t.reconciliada)}
                                     >
                                       <CheckCircle2 className="w-4 h-4" />
@@ -1058,7 +1058,7 @@ export const FluxoCaixaTab: React.FC = () => {
                                 {t.referencia_tipo === 'manual' || t.referencia_tipo === 'inscricao' ? (
                                   <AlertDialog>
                                     <AlertDialogTrigger asChild>
-                                      <Button variant="outline" size="icon" className="h-8 w-8 rounded-full border-none shadow-none bg-red-50 dark:bg-red-500/10 text-red-500">
+                                      <Button variant="outline" size="icon" className="h-8 w-8 rounded-full border-none shadow-none bg-destructive-subtle text-destructive">
                                         <Trash2 className="w-4 h-4" />
                                       </Button>
                                     </AlertDialogTrigger>
@@ -1167,7 +1167,7 @@ export const FluxoCaixaTab: React.FC = () => {
                             <TableCell>
                               {d.dia_vencimento ? `Dia ${d.dia_vencimento}` : '-'}
                             </TableCell>
-                            <TableCell className="text-right font-medium text-red-600">
+                            <TableCell className="text-right font-medium text-destructive">
                               {formatarValor(d.valor)}
                             </TableCell>
                             <TableCell>
@@ -1210,7 +1210,7 @@ export const FluxoCaixaTab: React.FC = () => {
                               </Badge>
                             )}
                           </div>
-                          <span className="font-bold text-red-600">{formatarValor(d.valor)}</span>
+                          <span className="font-bold text-destructive">{formatarValor(d.valor)}</span>
                         </div>
                         <div className="flex items-center justify-between pt-2 border-t">
                           <span className="text-xs text-muted-foreground">
@@ -1258,7 +1258,7 @@ export const FluxoCaixaTab: React.FC = () => {
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <ArrowUpCircle className="w-5 h-5 text-green-600" />
+                  <ArrowUpCircle className="w-5 h-5 text-success" />
                   Categorias de Entrada
                 </CardTitle>
               </CardHeader>
@@ -1277,7 +1277,7 @@ export const FluxoCaixaTab: React.FC = () => {
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <ArrowDownCircle className="w-5 h-5 text-red-500" />
+                  <ArrowDownCircle className="w-5 h-5 text-destructive" />
                   Categorias de Saída
                 </CardTitle>
               </CardHeader>

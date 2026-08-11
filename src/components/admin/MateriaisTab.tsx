@@ -292,7 +292,7 @@ export function MateriaisTab() {
                           title={material.destaque ? 'Remover destaque' : 'Destacar'}
                         >
                           {material.destaque ? (
-                            <Star className="w-4 h-4 text-yellow-500 fill-yellow-500" />
+                            <Star className="w-4 h-4 text-warning fill-yellow-500" />
                           ) : (
                             <StarOff className="w-4 h-4" />
                           )}
@@ -305,7 +305,7 @@ export function MateriaisTab() {
                           title={material.publicado ? 'Despublicar' : 'Publicar'}
                         >
                           {material.publicado ? (
-                            <Eye className="w-4 h-4 text-green-500" />
+                            <Eye className="w-4 h-4 text-success" />
                           ) : (
                             <EyeOff className="w-4 h-4" />
                           )}

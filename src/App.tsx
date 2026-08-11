@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect } from "react";
+import { lazy, useEffect } from "react";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -12,6 +12,7 @@ import NotificationPermission from "@/components/pwa/NotificationPermission";
 import OneSignalInit from "@/components/pwa/OneSignalInit";
 import UpdateNotification from "@/components/UpdateNotification";
 import { ROUTES } from "@/constants";
+import { LazyRoute } from "@/components/shared/RouteErrorBoundary";
 
 // Páginas críticas - carregamento imediato
 import Auth from "./pages/Auth";
@@ -39,13 +40,6 @@ const Settings = lazy(() => import("./pages/Settings"));
 const Insights = lazy(() => import("./pages/Insights"));
 const GuardiaoVisoes = lazy(() => import("./pages/GuardiaoVisoes"));
 const NotFound = lazy(() => import("./pages/NotFound"));
-
-// Loading fallback minimalista
-const PageLoader = () => (
-  <div className="min-h-screen flex items-center justify-center">
-    <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-  </div>
-);
 
 // QueryClient otimizado para mobile
 const queryClient = new QueryClient({
@@ -85,7 +79,7 @@ const App = () => {
           <UpdateNotification />
           <BrowserRouter>
           <Routes>
-            <Route path={ROUTES.AUTH} element={<Auth />} />
+            <Route path={ROUTES.AUTH} element={<LazyRoute><Auth /></LazyRoute>} />
             <Route
               element={
                 <ProtectedRoute>
@@ -93,30 +87,30 @@ const App = () => {
                 </ProtectedRoute>
               }
             >
-              <Route path={ROUTES.HOME} element={<Index />} />
-              <Route path={ROUTES.ANAMNESE} element={<Suspense fallback={<PageLoader />}><Anamnese /></Suspense>} />
-              <Route path={ROUTES.CERIMONIAS} element={<Suspense fallback={<PageLoader />}><Cerimonias /></Suspense>} />
-              <Route path={ROUTES.CURSOS} element={<Suspense fallback={<PageLoader />}><Cursos /></Suspense>} />
-              <Route path={ROUTES.MEDICINAS} element={<Suspense fallback={<PageLoader />}><Medicinas /></Suspense>} />
-              <Route path={ROUTES.PARTILHAS} element={<Suspense fallback={<PageLoader />}><Partilhas /></Suspense>} />
-              <Route path={ROUTES.GALERIA} element={<Suspense fallback={<PageLoader />}><Galeria /></Suspense>} />
-              <Route path={ROUTES.LOJA} element={<Suspense fallback={<PageLoader />}><Loja /></Suspense>} />
-              <Route path={ROUTES.BIBLIOTECA} element={<Suspense fallback={<PageLoader />}><Biblioteca /></Suspense>} />
-              <Route path={`${ROUTES.LEITURA}/:ebookId`} element={<Suspense fallback={<PageLoader />}><Leitura /></Suspense>} />
-              <Route path={ROUTES.ESTUDOS} element={<Suspense fallback={<PageLoader />}><Estudos /></Suspense>} />
-              <Route path={ROUTES.ESTUDO_DETALHE} element={<Suspense fallback={<PageLoader />}><EstudoDetalhe /></Suspense>} />
-              <Route path={ROUTES.SOBRE_NOS} element={<Suspense fallback={<PageLoader />}><SobreNos /></Suspense>} />
-              <Route path={ROUTES.HISTORICO} element={<Suspense fallback={<PageLoader />}><Historico /></Suspense>} />
-              <Route path={ROUTES.FAQ} element={<Suspense fallback={<PageLoader />}><FAQ /></Suspense>} />
-              <Route path={ROUTES.EMERGENCIA} element={<Suspense fallback={<PageLoader />}><Emergencia /></Suspense>} />
-              <Route path={ROUTES.CONFIGURACOES} element={<Suspense fallback={<PageLoader />}><Settings /></Suspense>} />
-              <Route path={ROUTES.INSIGHTS} element={<Suspense fallback={<PageLoader />}><Insights /></Suspense>} />
-              <Route path={ROUTES.GUARDIAO_VISOES} element={<Suspense fallback={<PageLoader />}><GuardiaoVisoes /></Suspense>} />
+              <Route path={ROUTES.HOME} element={<LazyRoute><Index /></LazyRoute>} />
+              <Route path={ROUTES.ANAMNESE} element={<LazyRoute><Anamnese /></LazyRoute>} />
+              <Route path={ROUTES.CERIMONIAS} element={<LazyRoute><Cerimonias /></LazyRoute>} />
+              <Route path={ROUTES.CURSOS} element={<LazyRoute><Cursos /></LazyRoute>} />
+              <Route path={ROUTES.MEDICINAS} element={<LazyRoute><Medicinas /></LazyRoute>} />
+              <Route path={ROUTES.PARTILHAS} element={<LazyRoute><Partilhas /></LazyRoute>} />
+              <Route path={ROUTES.GALERIA} element={<LazyRoute><Galeria /></LazyRoute>} />
+              <Route path={ROUTES.LOJA} element={<LazyRoute><Loja /></LazyRoute>} />
+              <Route path={ROUTES.BIBLIOTECA} element={<LazyRoute><Biblioteca /></LazyRoute>} />
+              <Route path={`${ROUTES.LEITURA}/:ebookId`} element={<LazyRoute><Leitura /></LazyRoute>} />
+              <Route path={ROUTES.ESTUDOS} element={<LazyRoute><Estudos /></LazyRoute>} />
+              <Route path={ROUTES.ESTUDO_DETALHE} element={<LazyRoute><EstudoDetalhe /></LazyRoute>} />
+              <Route path={ROUTES.SOBRE_NOS} element={<LazyRoute><SobreNos /></LazyRoute>} />
+              <Route path={ROUTES.HISTORICO} element={<LazyRoute><Historico /></LazyRoute>} />
+              <Route path={ROUTES.FAQ} element={<LazyRoute><FAQ /></LazyRoute>} />
+              <Route path={ROUTES.EMERGENCIA} element={<LazyRoute><Emergencia /></LazyRoute>} />
+              <Route path={ROUTES.CONFIGURACOES} element={<LazyRoute><Settings /></LazyRoute>} />
+              <Route path={ROUTES.INSIGHTS} element={<LazyRoute><Insights /></LazyRoute>} />
+              <Route path={ROUTES.GUARDIAO_VISOES} element={<LazyRoute><GuardiaoVisoes /></LazyRoute>} />
               <Route
                 path={ROUTES.ADMIN}
                 element={
                   <ProtectedRoute requireAdmin>
-                    <Suspense fallback={<PageLoader />}><Admin /></Suspense>
+                    <LazyRoute><Admin /></LazyRoute>
                   </ProtectedRoute>
                 }
               />
@@ -124,12 +118,12 @@ const App = () => {
                 path={ROUTES.FINANCEIRO}
                 element={
                   <ProtectedRoute requireAdmin>
-                    <Suspense fallback={<PageLoader />}><Financeiro /></Suspense>
+                    <LazyRoute><Financeiro /></LazyRoute>
                   </ProtectedRoute>
                 }
               />
             </Route>
-            <Route path="*" element={<Suspense fallback={<PageLoader />}><NotFound /></Suspense>} />
+            <Route path="*" element={<LazyRoute><NotFound /></LazyRoute>} />
           </Routes>
         </BrowserRouter>
         </TooltipProvider>

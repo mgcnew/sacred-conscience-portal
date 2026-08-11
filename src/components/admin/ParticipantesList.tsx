@@ -88,7 +88,7 @@ const HealthIndicators: React.FC<{ anamnese: Anamnese | undefined }> = ({ anamne
       <TooltipProvider>
         <Tooltip>
           <TooltipTrigger>
-            <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-gray-200 dark:bg-muted text-gray-500">
+            <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-muted text-muted-foreground">
               <Info className="w-3 h-3" />
             </span>
           </TooltipTrigger>
@@ -118,9 +118,9 @@ const HealthIndicators: React.FC<{ anamnese: Anamnese | undefined }> = ({ anamne
                 'inline-flex items-center justify-center w-5 h-5 rounded-full',
                 temContraindicacao
                   ? foiLiberado
-                    ? 'bg-amber-100 dark:bg-amber-500/15 text-amber-600'
-                    : 'bg-red-100 dark:bg-red-500/15 text-red-600'
-                  : 'bg-green-100 dark:bg-green-500/15 text-green-600'
+                    ? 'bg-warning-subtle text-warning'
+                    : 'bg-destructive-subtle text-destructive'
+                  : 'bg-success-subtle text-success'
               )}
             >
               <Heart className="w-3 h-3" />
@@ -145,7 +145,7 @@ const HealthIndicators: React.FC<{ anamnese: Anamnese | undefined }> = ({ anamne
             <span
               className={cn(
                 'inline-flex items-center justify-center w-5 h-5 rounded-full',
-                autorizaImagem ? 'bg-green-100 dark:bg-green-500/15 text-green-600' : 'bg-gray-100 text-gray-400'
+                autorizaImagem ? 'bg-success-subtle text-success' : 'bg-muted text-muted-foreground'
               )}
             >
               <Camera className="w-3 h-3" />
@@ -164,7 +164,7 @@ const HealthIndicators: React.FC<{ anamnese: Anamnese | undefined }> = ({ anamne
             <span
               className={cn(
                 'inline-flex items-center justify-center w-5 h-5 rounded-full',
-                permanece ? 'bg-green-100 dark:bg-green-500/15 text-green-600' : 'bg-gray-100 text-gray-400'
+                permanece ? 'bg-success-subtle text-success' : 'bg-muted text-muted-foreground'
               )}
             >
               <Home className="w-3 h-3" />
@@ -181,7 +181,7 @@ const HealthIndicators: React.FC<{ anamnese: Anamnese | undefined }> = ({ anamne
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger>
-              <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-primary/12 dark:bg-primary/20 text-purple-600">
+              <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-primary/12 dark:bg-primary/20 text-primary">
                 <Star className="w-3 h-3" />
               </span>
             </TooltipTrigger>
@@ -197,7 +197,7 @@ const HealthIndicators: React.FC<{ anamnese: Anamnese | undefined }> = ({ anamne
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger>
-              <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-orange-100 dark:bg-orange-500/15 text-orange-600">
+              <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-warning-subtle text-warning">
                 <Utensils className="w-3 h-3" />
               </span>
             </TooltipTrigger>
@@ -247,19 +247,19 @@ const ParticipanteDetails: React.FC<{ anamnese: Anamnese | undefined; userName: 
 
       {/* Contato de emergência */}
       {anamnese.contato_emergencia && (
-        <div className="p-2 bg-red-50 dark:bg-red-950 rounded border border-red-200 dark:border-red-800">
-          <p className="text-xs font-medium text-red-700 dark:text-red-300 mb-1">Emergência:</p>
-          <p className="text-red-600 dark:text-red-400">
+        <div className="p-2 bg-destructive-subtle rounded border border-destructive/30 dark:border-destructive">
+          <p className="text-xs font-medium text-destructive mb-1">Emergência:</p>
+          <p className="text-destructive">
             {anamnese.nome_contato_emergencia || 'Contato'} ({anamnese.parentesco_contato || '-'})
           </p>
-          <p className="font-medium text-red-700 dark:text-red-300">{anamnese.contato_emergencia}</p>
+          <p className="font-medium text-destructive">{anamnese.contato_emergencia}</p>
         </div>
       )}
 
       {/* Condições de saúde */}
       {condicoes.length > 0 && (
         <div>
-          <p className="font-medium text-amber-600 mb-1 flex items-center gap-1">
+          <p className="font-medium text-warning mb-1 flex items-center gap-1">
             <AlertTriangle className="w-3 h-3" /> Condições:
           </p>
           <ul className="text-xs space-y-0.5 text-muted-foreground">
@@ -268,7 +268,7 @@ const ParticipanteDetails: React.FC<{ anamnese: Anamnese | undefined; userName: 
             ))}
           </ul>
           {anamnese.liberado_participar && (
-            <Badge className="mt-1 bg-green-100 dark:bg-green-500/15 text-green-700 text-xs">
+            <Badge className="mt-1 bg-success-subtle text-success text-xs">
               <CheckCircle2 className="w-3 h-3 mr-1" /> Liberado
             </Badge>
           )}
@@ -286,7 +286,7 @@ const ParticipanteDetails: React.FC<{ anamnese: Anamnese | undefined; userName: 
       {/* Alergias */}
       {anamnese.alergias && (
         <div>
-          <p className="font-medium text-xs text-orange-600">Alergias:</p>
+          <p className="font-medium text-xs text-warning">Alergias:</p>
           <p className="text-muted-foreground text-xs">{anamnese.alergias}</p>
         </div>
       )}
@@ -294,7 +294,7 @@ const ParticipanteDetails: React.FC<{ anamnese: Anamnese | undefined; userName: 
       {/* Restrição alimentar */}
       {anamnese.restricao_alimentar && (
         <div>
-          <p className="font-medium text-xs text-orange-600">Restrição Alimentar:</p>
+          <p className="font-medium text-xs text-warning">Restrição Alimentar:</p>
           <p className="text-muted-foreground text-xs">{anamnese.restricao_alimentar}</p>
         </div>
       )}
@@ -438,11 +438,11 @@ const ParticipanteCard: React.FC<{
           {inscricao.profiles?.full_name || 'Sem nome'}
         </button>
         {inscricao.pago ? (
-          <Badge className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100 text-xs shrink-0">
+          <Badge className="bg-success-subtle text-success dark:bg-success-subtle dark:text-success text-xs shrink-0">
             <DollarSign className="w-3 h-3 mr-0.5" /> Pago
           </Badge>
         ) : (
-          <Badge variant="outline" className="text-amber-600 border-amber-300 dark:border-amber-500/40 text-xs shrink-0">
+          <Badge variant="outline" className="text-warning border-warning/30 dark:border-warning/40 text-xs shrink-0">
             Pendente
           </Badge>
         )}
@@ -455,12 +455,12 @@ const ParticipanteCard: React.FC<{
           className={cn(
             'inline-flex items-center justify-center w-6 h-6 rounded-full',
             !anamnese
-              ? 'bg-gray-200 dark:bg-muted text-gray-500'
+              ? 'bg-muted text-muted-foreground'
               : temContraindicacao
                 ? foiLiberado
-                  ? 'bg-amber-100 dark:bg-amber-500/15 text-amber-600'
-                  : 'bg-red-100 dark:bg-red-500/15 text-red-600'
-                : 'bg-green-100 dark:bg-green-500/15 text-green-600'
+                  ? 'bg-warning-subtle text-warning'
+                  : 'bg-destructive-subtle text-destructive'
+                : 'bg-success-subtle text-success'
           )}
         >
           {anamnese ? <Heart className="w-3.5 h-3.5" /> : <Info className="w-3.5 h-3.5" />}
@@ -470,7 +470,7 @@ const ParticipanteCard: React.FC<{
         <span
           className={cn(
             'inline-flex items-center justify-center w-6 h-6 rounded-full',
-            autorizaImagem ? 'bg-green-100 dark:bg-green-500/15 text-green-600' : 'bg-gray-100 text-gray-400'
+            autorizaImagem ? 'bg-success-subtle text-success' : 'bg-muted text-muted-foreground'
           )}
         >
           <Camera className="w-3.5 h-3.5" />
@@ -480,7 +480,7 @@ const ParticipanteCard: React.FC<{
         <span
           className={cn(
             'inline-flex items-center justify-center w-6 h-6 rounded-full',
-            permanece ? 'bg-green-100 dark:bg-green-500/15 text-green-600' : 'bg-gray-100 text-gray-400'
+            permanece ? 'bg-success-subtle text-success' : 'bg-muted text-muted-foreground'
           )}
         >
           <Home className="w-3.5 h-3.5" />
@@ -488,14 +488,14 @@ const ParticipanteCard: React.FC<{
 
         {/* Primeira vez */}
         {primeiraVez && (
-          <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-primary/12 dark:bg-primary/20 text-purple-600">
+          <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-primary/12 dark:bg-primary/20 text-primary">
             <Star className="w-3.5 h-3.5" />
           </span>
         )}
 
         {/* Restrição alimentar */}
         {temRestricaoAlimentar && (
-          <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-orange-100 dark:bg-orange-500/15 text-orange-600">
+          <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-warning-subtle text-warning">
             <Utensils className="w-3.5 h-3.5" />
           </span>
         )}
@@ -566,11 +566,11 @@ const ParticipantesList: React.FC<ParticipantesListProps> = ({
           Inscritos ({totalCount})
         </h4>
         <div className="flex items-center gap-2 flex-wrap">
-          <Badge variant="outline" className="bg-green-50 dark:bg-green-500/10 text-green-700 border-green-200 dark:border-green-500/30 text-xs">
+          <Badge variant="outline" className="bg-success-subtle text-success border-success/30 text-xs">
             <DollarSign className="w-3 h-3 mr-0.5" />
             {pagosCount} pago(s)
           </Badge>
-          <Badge variant="outline" className="text-amber-600 border-amber-300 dark:border-amber-500/40 text-xs">
+          <Badge variant="outline" className="text-warning border-warning/30 dark:border-warning/40 text-xs">
             {totalCount - pagosCount} pendente(s)
           </Badge>
           <div className="flex gap-1">
@@ -587,32 +587,32 @@ const ParticipantesList: React.FC<ParticipantesListProps> = ({
       {/* Legenda compacta */}
       <div className="flex flex-wrap gap-2 mb-3 text-xs text-muted-foreground border-b pb-2">
         <span className="flex items-center gap-1">
-          <span className="w-4 h-4 rounded-full bg-green-100 dark:bg-green-500/15 inline-flex items-center justify-center">
-            <Heart className="w-2.5 h-2.5 text-green-600" />
+          <span className="w-4 h-4 rounded-full bg-success-subtle inline-flex items-center justify-center">
+            <Heart className="w-2.5 h-2.5 text-success" />
           </span>
           Saúde
         </span>
         <span className="flex items-center gap-1">
-          <span className="w-4 h-4 rounded-full bg-green-100 dark:bg-green-500/15 inline-flex items-center justify-center">
-            <Camera className="w-2.5 h-2.5 text-green-600" />
+          <span className="w-4 h-4 rounded-full bg-success-subtle inline-flex items-center justify-center">
+            <Camera className="w-2.5 h-2.5 text-success" />
           </span>
           Imagem
         </span>
         <span className="flex items-center gap-1">
-          <span className="w-4 h-4 rounded-full bg-green-100 dark:bg-green-500/15 inline-flex items-center justify-center">
-            <Home className="w-2.5 h-2.5 text-green-600" />
+          <span className="w-4 h-4 rounded-full bg-success-subtle inline-flex items-center justify-center">
+            <Home className="w-2.5 h-2.5 text-success" />
           </span>
           Permanece
         </span>
         <span className="flex items-center gap-1">
           <span className="w-4 h-4 rounded-full bg-primary/12 dark:bg-primary/20 inline-flex items-center justify-center">
-            <Star className="w-2.5 h-2.5 text-purple-600" />
+            <Star className="w-2.5 h-2.5 text-primary" />
           </span>
           1ª vez
         </span>
         <span className="flex items-center gap-1">
-          <span className="w-4 h-4 rounded-full bg-orange-100 dark:bg-orange-500/15 inline-flex items-center justify-center">
-            <Utensils className="w-2.5 h-2.5 text-orange-600" />
+          <span className="w-4 h-4 rounded-full bg-warning-subtle inline-flex items-center justify-center">
+            <Utensils className="w-2.5 h-2.5 text-warning" />
           </span>
           Restrição
         </span>
@@ -675,11 +675,11 @@ const ParticipantesList: React.FC<ParticipantesListProps> = ({
                     </TableCell>
                     <TableCell className="text-center">
                       {inscricao.pago ? (
-                        <Badge className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100">
+                        <Badge className="bg-success-subtle text-success dark:bg-success-subtle dark:text-success">
                           <DollarSign className="w-3 h-3 mr-1" /> Pago
                         </Badge>
                       ) : (
-                        <Badge variant="outline" className="text-amber-600 border-amber-300 dark:border-amber-500/40">
+                        <Badge variant="outline" className="text-warning border-warning/30 dark:border-warning/40">
                           Pendente
                         </Badge>
                       )}
