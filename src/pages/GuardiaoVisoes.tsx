@@ -209,7 +209,7 @@ const GuardiaoVisoes: React.FC = () => {
   if (!temAcesso) {
     return (
       <div className="max-w-2xl mx-auto px-4 py-12 flex flex-col items-center text-center gap-6">
-        <div className="relative w-20 h-20 rounded-3xl bg-gradient-to-br from-violet-600/20 to-primary/10 flex items-center justify-center">
+        <div className="relative w-20 h-20 rounded-3xl bg-primary/12 flex items-center justify-center">
           <Eye className="w-9 h-9 text-violet-400/60" />
           <div className="absolute -bottom-1 -right-1 w-7 h-7 rounded-full bg-background border-2 border-border flex items-center justify-center">
             <Lock className="w-3.5 h-3.5 text-muted-foreground" />
@@ -253,7 +253,7 @@ const GuardiaoVisoes: React.FC = () => {
       {/* Header */}
       <div className="flex items-center justify-between py-4 shrink-0">
         <div className="flex items-center gap-3">
-          <div className="relative w-10 h-10 rounded-2xl bg-gradient-to-br from-violet-600/30 to-primary/20 flex items-center justify-center shadow-inner">
+          <div className="relative w-10 h-10 rounded-2xl bg-primary/20 flex items-center justify-center shadow-inner">
             <Eye className="w-5 h-5 text-violet-400" />
             <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-emerald-400 border-2 border-background" />
           </div>
@@ -327,7 +327,7 @@ const GuardiaoVisoes: React.FC = () => {
             )}
           >
             {msg.role === 'model' && (
-              <div className="w-7 h-7 rounded-xl bg-gradient-to-br from-violet-600/30 to-primary/20 flex items-center justify-center shrink-0 mr-2 mt-1">
+              <div className="w-7 h-7 rounded-xl bg-primary/20 flex items-center justify-center shrink-0 mr-2 mt-1">
                 <Eye className="w-3.5 h-3.5 text-violet-400" />
               </div>
             )}
@@ -347,7 +347,7 @@ const GuardiaoVisoes: React.FC = () => {
         {/* Loading */}
         {loading && (
           <div className="flex justify-start">
-            <div className="w-7 h-7 rounded-xl bg-gradient-to-br from-violet-600/30 to-primary/20 flex items-center justify-center shrink-0 mr-2 mt-1">
+            <div className="w-7 h-7 rounded-xl bg-primary/20 flex items-center justify-center shrink-0 mr-2 mt-1">
               <Eye className="w-3.5 h-3.5 text-violet-400" />
             </div>
             <div className="bg-muted/60 border border-border/30 rounded-2xl rounded-tl-sm px-4 py-3">
@@ -368,7 +368,7 @@ const GuardiaoVisoes: React.FC = () => {
         {error && (
           error === 'RATE_LIMIT' ? (
             <div className="flex justify-start">
-              <div className="w-7 h-7 rounded-xl bg-gradient-to-br from-violet-600/30 to-primary/20 flex items-center justify-center shrink-0 mr-2 mt-1">
+              <div className="w-7 h-7 rounded-xl bg-primary/20 flex items-center justify-center shrink-0 mr-2 mt-1">
                 <Eye className="w-3.5 h-3.5 text-violet-400" />
               </div>
               <div className="max-w-[80%] rounded-2xl rounded-tl-sm px-4 py-3 bg-muted/60 border border-border/30 text-sm leading-relaxed text-foreground/80">

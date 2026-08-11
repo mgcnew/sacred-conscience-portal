@@ -132,9 +132,9 @@ export const DashboardTab = memo(({
                         </TableCell>
                         <TableCell>
                           {ficha ? (
-                            <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">Preenchida</Badge>
+                            <Badge variant="outline" className="bg-green-50 dark:bg-green-500/10 text-green-700 border-green-200 dark:border-green-500/30">Preenchida</Badge>
                           ) : (
-                            <Badge variant="outline" className="bg-yellow-50 text-yellow-700 border-yellow-200">Pendente</Badge>
+                            <Badge variant="outline" className="bg-yellow-50 dark:bg-yellow-500/10 text-yellow-700 border-yellow-200 dark:border-yellow-500/30">Pendente</Badge>
                           )}
                         </TableCell>
                       </TableRow>
@@ -181,9 +181,9 @@ export const DashboardTab = memo(({
                     </MobileCardRow>
                     <MobileCardRow label="Ficha">
                       {ficha ? (
-                        <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200 text-xs">Preenchida</Badge>
+                        <Badge variant="outline" className="bg-green-50 dark:bg-green-500/10 text-green-700 border-green-200 dark:border-green-500/30 text-xs">Preenchida</Badge>
                       ) : (
-                        <Badge variant="outline" className="bg-yellow-50 text-yellow-700 border-yellow-200 text-xs">Pendente</Badge>
+                        <Badge variant="outline" className="bg-yellow-50 dark:bg-yellow-500/10 text-yellow-700 border-yellow-200 dark:border-yellow-500/30 text-xs">Pendente</Badge>
                       )}
                     </MobileCardRow>
                   </MobileCard>

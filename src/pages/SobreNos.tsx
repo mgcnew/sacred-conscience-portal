@@ -12,9 +12,7 @@ const SobreNos: React.FC = () => {
 
       {/* Hero */}
       <FadeIn>
-        <div className="relative overflow-hidden rounded-3xl mb-8 bg-gradient-to-br from-primary/20 via-primary/8 to-transparent border border-primary/20">
-          <div className="absolute top-0 right-0 w-64 h-64 rounded-full bg-primary/10 blur-3xl pointer-events-none" />
-          <div className="absolute bottom-0 left-0 w-40 h-40 rounded-full bg-primary/8 blur-2xl pointer-events-none" />
+        <div className="relative overflow-hidden rounded-3xl mb-8 bg-primary/12 border border-primary/20">
           <div className="relative z-10 px-6 py-10 text-center">
             <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/15 border border-primary/25 mb-4">
               <Leaf className="w-3.5 h-3.5 text-primary" />
@@ -141,7 +139,7 @@ const SobreNos: React.FC = () => {
 
           {/* CTA final */}
           <FadeIn delay={220}>
-            <div className="rounded-2xl bg-gradient-to-br from-primary/12 to-primary/5 border border-primary/20 p-6 text-center">
+            <div className="rounded-2xl bg-primary/9 border border-primary/20 p-6 text-center">
               <Sparkles className="w-6 h-6 text-primary mx-auto mb-3" />
               <h3 className="font-display text-base font-bold text-foreground mb-2">
                 Se você sente o chamado, permita-se viver essa experiência.
@@ -167,7 +165,7 @@ const SobreNos: React.FC = () => {
             <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6">
               <div className="shrink-0">
                 <div className="relative">
-                  <div className="w-32 h-32 rounded-full border-4 border-primary/20 shadow-lg overflow-hidden bg-gradient-to-br from-primary/20 to-primary/5">
+                  <div className="w-32 h-32 rounded-full border-4 border-primary/20 shadow-lg overflow-hidden bg-primary/12">
                     <img
                       src="/images/txai-raimundo.webp"
                       alt="Txai Raimundo Ferreira Lima"
@@ -272,7 +270,7 @@ const SobreNos: React.FC = () => {
 
           {/* CTA tranquilizador */}
           <FadeIn delay={240}>
-            <div className="rounded-2xl bg-gradient-to-br from-primary/10 to-primary/5 border border-primary/15 p-5 text-center">
+            <div className="rounded-2xl bg-primary/8 border border-primary/15 p-5 text-center">
               <Heart className="w-5 h-5 text-primary mx-auto mb-2" />
               <p className="font-display text-sm font-semibold text-foreground mb-2">
                 Você está em boas mãos.

@@ -82,9 +82,6 @@ const Auth: React.FC = () => {
 
       {/* Orbs decorativos de fundo */}
       <div aria-hidden className="pointer-events-none select-none fixed inset-0 overflow-hidden">
-        <div className="absolute -top-32 -left-32 w-96 h-96 rounded-full bg-primary/10 dark:bg-primary/8 blur-3xl" />
-        <div className="absolute top-1/3 -right-24 w-80 h-80 rounded-full bg-amber-400/8 dark:bg-amber-500/6 blur-3xl" />
-        <div className="absolute -bottom-20 left-1/3 w-72 h-72 rounded-full bg-primary/8 dark:bg-primary/6 blur-3xl" />
         <div
           className="absolute inset-0 opacity-[0.03] dark:opacity-[0.04]"
           style={{
@@ -99,7 +96,6 @@ const Auth: React.FC = () => {
         {/* Logo + Título */}
         <div className="text-center mb-7">
           <div className="relative inline-block mb-3">
-            <div className="absolute inset-0 rounded-full bg-primary/20 blur-2xl scale-110" />
             <div className="relative w-24 h-24 mx-auto">
               <img src="/logo-conciencia.webp" alt="Consciência Divinal" className="w-full h-full object-contain drop-shadow-lg" />
             </div>
@@ -116,7 +112,7 @@ const Auth: React.FC = () => {
         {view === 'login' && (
           <>
             <div className="rounded-2xl border border-border/60 bg-card/90 dark:bg-card/80 backdrop-blur-sm shadow-xl shadow-black/5 dark:shadow-black/20 overflow-hidden">
-              <div className="h-0.5 w-full bg-gradient-to-r from-transparent via-primary/50 to-transparent" />
+              <div className="h-0.5 w-full bg-primary/40" />
 
               <div className="p-6 space-y-5">
                 <div className="space-y-1 text-center">
@@ -128,7 +124,7 @@ const Auth: React.FC = () => {
                   type="button"
                   onClick={handleGoogleLogin}
                   disabled={isLoading}
-                  className="w-full flex items-center justify-center gap-3 h-12 px-4 rounded-xl bg-white dark:bg-white/95 text-gray-700 font-medium text-sm border border-gray-200 hover:bg-gray-50 hover:shadow-md active:scale-[0.99] transition-all duration-150 shadow-sm disabled:opacity-60 disabled:cursor-not-allowed"
+                  className="w-full flex items-center justify-center gap-3 h-12 px-4 rounded-xl bg-white dark:bg-white/95 text-gray-700 font-medium text-sm border border-gray-200 dark:border-border hover:bg-gray-50 hover:shadow-md active:scale-[0.99] transition-all duration-150 shadow-sm disabled:opacity-60 disabled:cursor-not-allowed"
                 >
                   {isLoading
                     ? <Loader2 className="h-5 w-5 animate-spin text-gray-500" />
@@ -161,7 +157,7 @@ const Auth: React.FC = () => {
         {/* ── VIEW: RESET SENHA ── */}
         {view === 'reset' && (
           <div className="rounded-2xl border border-border/60 bg-card/90 dark:bg-card/80 backdrop-blur-sm shadow-xl overflow-hidden">
-            <div className="h-0.5 w-full bg-gradient-to-r from-transparent via-primary/50 to-transparent" />
+            <div className="h-0.5 w-full bg-primary/40" />
             <div className="p-6 space-y-5">
               <div className="flex items-center gap-3">
                 <button type="button" onClick={() => setView('login')} className="p-1.5 rounded-lg hover:bg-muted transition-colors text-muted-foreground shrink-0">

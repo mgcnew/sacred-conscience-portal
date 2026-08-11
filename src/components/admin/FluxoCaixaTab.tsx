@@ -449,7 +449,7 @@ export const FluxoCaixaTab: React.FC = () => {
 
       {/* Alerta de Saldo Baixo */}
       {mostrarAlertaSaldo && (
-        <div className="p-4 rounded-xl bg-red-100 dark:bg-red-900/30 border border-red-300 flex items-center gap-3 animate-in fade-in slide-in-from-top-2 duration-300">
+        <div className="p-4 rounded-xl bg-red-100 dark:bg-red-900/30 border border-red-300 dark:border-red-500/40 flex items-center gap-3 animate-in fade-in slide-in-from-top-2 duration-300">
           <AlertTriangle className="w-6 h-6 text-red-600 shrink-0" />
           <div>
             <p className="font-bold text-red-800 dark:text-red-200">Atenção: Saldo Baixo!</p>
@@ -551,7 +551,7 @@ export const FluxoCaixaTab: React.FC = () => {
         {/* Tab Gráficos */}
         <TabsContent value="resumo" className="space-y-6 animate-in fade-in duration-500">
           {/* Comparativo Mês Atual vs Anterior */}
-          <Card className="overflow-hidden border-none shadow-md bg-gradient-to-br from-card to-muted/30">
+          <Card className="overflow-hidden border-none shadow-md bg-card">
             <CardHeader className="pb-4">
               <CardTitle className="flex items-center gap-2 text-lg">
                 <TrendingUp className="w-5 h-5 text-primary" />
@@ -997,7 +997,7 @@ export const FluxoCaixaTab: React.FC = () => {
                                 {format(new Date(t.data), 'dd MMM yyyy', { locale: ptBR })}
                               </span>
                               {t.reconciliada && (
-                                <Badge variant="secondary" className="h-4 text-[8px] bg-green-100 text-green-700 hover:bg-green-100 border-none px-1">
+                                <Badge variant="secondary" className="h-4 text-[8px] bg-green-100 dark:bg-green-500/15 text-green-700 hover:bg-green-100 border-none px-1">
                                   CONFERIDO
                                 </Badge>
                               )}
@@ -1040,7 +1040,7 @@ export const FluxoCaixaTab: React.FC = () => {
                                     <Button
                                       variant="outline"
                                       size="icon"
-                                      className={`h-8 w-8 rounded-full border-none shadow-none ${t.reconciliada ? 'text-green-600 bg-green-50' : 'text-muted-foreground bg-muted/50'}`}
+                                      className={`h-8 w-8 rounded-full border-none shadow-none ${t.reconciliada ? 'text-green-600 bg-green-50 dark:bg-green-500/10' : 'text-muted-foreground bg-muted/50'}`}
                                       onClick={() => handleToggleReconciliacao(t.id, !!t.reconciliada)}
                                     >
                                       <CheckCircle2 className="w-4 h-4" />
@@ -1058,7 +1058,7 @@ export const FluxoCaixaTab: React.FC = () => {
                                 {t.referencia_tipo === 'manual' || t.referencia_tipo === 'inscricao' ? (
                                   <AlertDialog>
                                     <AlertDialogTrigger asChild>
-                                      <Button variant="outline" size="icon" className="h-8 w-8 rounded-full border-none shadow-none bg-red-50 text-red-500">
+                                      <Button variant="outline" size="icon" className="h-8 w-8 rounded-full border-none shadow-none bg-red-50 dark:bg-red-500/10 text-red-500">
                                         <Trash2 className="w-4 h-4" />
                                       </Button>
                                     </AlertDialogTrigger>

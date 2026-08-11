@@ -366,7 +366,7 @@ const Insights: React.FC = () => {
               label="Medicinas"
               value={stats?.medicinasExperimentadas.length ?? 0}
               sub="experienciadas"
-              iconClass="bg-purple-100 dark:bg-purple-950/40 text-purple-500"
+              iconClass="bg-primary/12 dark:bg-primary/20 dark:bg-purple-950/40 text-purple-500"
             />
             <StatCard
               icon={Calendar}

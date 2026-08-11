@@ -195,11 +195,11 @@ const Cursos: React.FC = () => {
                     loading="lazy"
                   />
                 ) : (
-                  <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/20 to-primary/5">
+                  <div className="w-full h-full flex items-center justify-center bg-primary/12">
                     <GraduationCap className="w-16 h-16 text-primary/30" />
                   </div>
                 )}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+                <div className="absolute inset-0 bg-black/40" />
                 
                 <button
                   type="button"
@@ -221,7 +221,7 @@ const Cursos: React.FC = () => {
 
               <CardHeader className="pb-2 pt-4">
                 {isUserInscrito(curso.id) && (
-                  <Badge className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100 border-green-200 flex gap-1 items-center w-fit mb-2">
+                  <Badge className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100 border-green-200 dark:border-green-500/30 flex gap-1 items-center w-fit mb-2">
                     <CheckCircle2 className="w-3 h-3" /> Inscrito
                   </Badge>
                 )}

@@ -88,7 +88,7 @@ const MedicinaModal = ({ medicinas, currentIndex, onNavigate, onClose }: Medicin
           onError={(e) => { e.currentTarget.style.display = 'none'; }}
         />
         {/* Fallback visível se imagem falhar */}
-        <div className="absolute inset-0 -z-10 flex items-center justify-center bg-gradient-to-br from-muted to-muted/50">
+        <div className="absolute inset-0 -z-10 flex items-center justify-center bg-muted">
           <IconComponent className={`w-16 h-16 opacity-20 ${medicina.cor}`} />
         </div>
       </div>

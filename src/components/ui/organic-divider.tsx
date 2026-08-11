@@ -49,22 +49,22 @@ export const OrganicDivider: React.FC<OrganicDividerProps> = ({
   if (variant === 'dots') {
     return (
       <div className={cn('flex items-center justify-center gap-2 my-4', className)}>
-        <div className="h-px flex-1 bg-gradient-to-r from-transparent to-border/60" />
+        <div className="h-px flex-1 bg-border" />
         <div className="flex gap-1.5">
           <span className="w-1 h-1 rounded-full bg-primary/30" />
           <span className="w-1.5 h-1.5 rounded-full bg-primary/50" />
           <span className="w-1 h-1 rounded-full bg-primary/30" />
         </div>
-        <div className="h-px flex-1 bg-gradient-to-l from-transparent to-border/60" />
+        <div className="h-px flex-1 bg-border" />
       </div>
     );
   }
 
   return (
     <div className={cn('flex items-center justify-center gap-3 my-4', className)}>
-      <div className="h-px flex-1 bg-gradient-to-r from-transparent via-border/70 to-border/40" />
+      <div className="h-px flex-1 bg-border" />
       <LeafSVG />
-      <div className="h-px flex-1 bg-gradient-to-l from-transparent via-border/70 to-border/40" />
+      <div className="h-px flex-1 bg-border" />
     </div>
   );
 };

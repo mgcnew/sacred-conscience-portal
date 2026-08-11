@@ -27,9 +27,9 @@ interface VendasTabProps {
 }
 
 const getStatusBadgeClass = (status: string | null) => {
-  if (status === 'approved') return 'bg-green-100 text-green-700';
-  if (status === 'pending') return 'bg-yellow-100 text-yellow-700';
-  return 'bg-red-100 text-red-700';
+  if (status === 'approved') return 'bg-green-100 dark:bg-green-500/15 text-green-700';
+  if (status === 'pending') return 'bg-yellow-100 dark:bg-yellow-500/15 text-yellow-700';
+  return 'bg-red-100 dark:bg-red-500/15 text-red-700';
 };
 
 const getStatusLabel = (status: string | null) => {

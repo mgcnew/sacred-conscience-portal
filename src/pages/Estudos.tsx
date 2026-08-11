@@ -280,8 +280,7 @@ const Estudos: React.FC = () => {
 
       {/* Hero header */}
       <FadeIn>
-        <div className="relative overflow-hidden rounded-2xl mb-6 bg-gradient-to-br from-sky-500/12 via-primary/6 to-transparent border border-primary/15 px-5 py-6">
-          <div className="absolute top-0 right-0 w-40 h-40 rounded-full bg-sky-400/10 blur-3xl pointer-events-none" />
+        <div className="relative overflow-hidden rounded-2xl mb-6 bg-primary/8 border border-primary/15 px-5 py-6">
           <div className="relative flex items-start justify-between gap-3">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-xl bg-primary/15 border border-primary/20 flex items-center justify-center shrink-0">

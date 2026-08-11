@@ -44,9 +44,8 @@ export const NotificationPermission: React.FC = () => {
 
   return (
     <div className="fixed bottom-20 left-3 right-3 z-50 md:left-auto md:right-4 md:w-[380px] animate-in slide-in-from-bottom-4 duration-500">
-      <div className="relative overflow-hidden rounded-2xl border border-primary/25 bg-gradient-to-br from-card via-card to-primary/5 shadow-xl shadow-black/20">
+      <div className="relative overflow-hidden rounded-2xl border border-primary/25 bg-card shadow-xl shadow-black/20">
         {/* Glow decorativo */}
-        <div className="absolute -top-10 -right-10 w-32 h-32 rounded-full bg-primary/10 blur-2xl pointer-events-none" />
 
         {/* Botão fechar */}
         <button

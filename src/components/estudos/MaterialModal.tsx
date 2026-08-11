@@ -304,7 +304,7 @@ const MaterialModal = ({ material, isOpen, onClose }: MaterialModalProps) => {
             alt={material.titulo}
             className="w-full h-48 sm:h-64 object-cover"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent" />
+          <div className="absolute inset-0 bg-background/70" />
         </div>
       )}
 

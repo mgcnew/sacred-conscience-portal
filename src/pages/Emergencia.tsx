@@ -63,14 +63,14 @@ const Emergencia: React.FC = () => {
                 </a>
               </Button>
               {anamnese?.contato_emergencia ? (
-                <Button variant="outline" className="flex-1 border-red-200 hover:bg-red-50 text-red-700 dark:border-red-800 dark:text-red-400 dark:hover:bg-red-900/20 h-12 text-lg" asChild>
+                <Button variant="outline" className="flex-1 border-red-200 hover:bg-red-50 dark:bg-red-500/10 text-red-700 dark:border-red-800 dark:text-red-400 dark:hover:bg-red-900/20 h-12 text-lg" asChild>
                   <a href={`tel:+${formatPhoneForCall(anamnese.contato_emergencia)}`}>
                     <User className="w-5 h-5 mr-2" />
                     {anamnese.nome_contato_emergencia || 'Contato de Emergência'}
                   </a>
                 </Button>
               ) : (
-                <Button variant="outline" className="flex-1 border-red-200 hover:bg-red-50 text-red-700 dark:border-red-800 dark:text-red-400 dark:hover:bg-red-900/20 h-12 text-lg" asChild>
+                <Button variant="outline" className="flex-1 border-red-200 hover:bg-red-50 dark:bg-red-500/10 text-red-700 dark:border-red-800 dark:text-red-400 dark:hover:bg-red-900/20 h-12 text-lg" asChild>
                   <a href={`tel:+${APP_CONFIG.contacts.whatsappLider}`}>
                     <Phone className="w-5 h-5 mr-2" />
                     Ligar para Guardião

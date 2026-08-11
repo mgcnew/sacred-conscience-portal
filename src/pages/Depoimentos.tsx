@@ -74,7 +74,7 @@ const TestimonialCard = ({
         )} style={{ animationDelay: isNew ? `${(index % 10) * 50}ms` : undefined }}>
             <Card className="group relative overflow-hidden border-none shadow-sm hover:shadow-xl transition-all duration-500 bg-card/50 backdrop-blur-sm border-white/10">
                 {/* Efeito de luz sutil no hover */}
-                <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                <div className="absolute inset-0 bg-primary/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                 
                 <CardContent className="p-6 relative">
                     <div className="flex flex-col gap-4">
@@ -119,7 +119,7 @@ const TestimonialCard = ({
                                         <Button
                                             variant="ghost"
                                             size="sm"
-                                            className="h-8 w-8 p-0 text-green-600 hover:text-green-700 hover:bg-green-50 rounded-full"
+                                            className="h-8 w-8 p-0 text-green-600 hover:text-green-700 hover:bg-green-50 dark:bg-green-500/10 rounded-full"
                                             title="Compartilhar no WhatsApp"
                                             onClick={(e) => {
                                                 e.stopPropagation();
@@ -132,7 +132,7 @@ const TestimonialCard = ({
                                         <Button
                                             variant="ghost"
                                             size="sm"
-                                            className="h-8 w-8 p-0 text-pink-600 hover:text-pink-700 hover:bg-pink-50 rounded-full"
+                                            className="h-8 w-8 p-0 text-pink-600 hover:text-pink-700 hover:bg-pink-50 dark:bg-pink-500/10 rounded-full"
                                             title="Copiar para Instagram"
                                             onClick={(e) => {
                                                 e.stopPropagation();
@@ -225,7 +225,7 @@ function ShareExperienceModal({
                 </p>
             </div>
 
-            <div className="flex items-start space-x-3 p-3 rounded-lg bg-gradient-to-r from-purple-500/10 to-pink-500/10 border border-purple-200 dark:border-purple-800">
+            <div className="flex items-start space-x-3 p-3 rounded-lg bg-primary/10 border border-purple-200 dark:border-purple-800">
                 <Checkbox
                     id="autoriza-instagram"
                     checked={autorizaInstagram}
@@ -556,7 +556,7 @@ const Depoimentos: React.FC = () => {
     return (
         <PageContainer maxWidth="xl" className="relative overflow-visible">
             {/* Elementos Decorativos de Fundo */}
-            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-4xl h-96 bg-gradient-to-b from-primary/5 to-transparent blur-3xl -z-10 pointer-events-none" />
+            
             
             <div className="pt-8 md:pt-12">
                 {/* Header Centralizado e Elegante */}
@@ -640,7 +640,7 @@ const Depoimentos: React.FC = () => {
                 {/* Aviso de depoimento pendente */}
                 {meusDepoimentos && meusDepoimentos.length > 0 && (
                     <div className="max-w-2xl mx-auto mb-12">
-                        <Card className="border-amber-200/50 bg-amber-50/30 dark:bg-amber-950/10 backdrop-blur-sm animate-in fade-in slide-in-from-top-4">
+                        <Card className="border-amber-200 dark:border-amber-500/30/50 bg-amber-50/30 dark:bg-amber-950/10 backdrop-blur-sm animate-in fade-in slide-in-from-top-4">
                             <CardContent className="py-3 px-4 flex items-center justify-center gap-3">
                                 <Clock className="w-4 h-4 text-amber-600 animate-pulse" />
                                 <p className="text-xs text-amber-800 dark:text-amber-200 font-medium">
@@ -753,7 +753,7 @@ const Depoimentos: React.FC = () => {
                                 )}
                                 {!hasNextPage && allDepoimentos.length > 0 && (
                                     <div className="flex flex-col items-center gap-2 opacity-50">
-                                        <div className="h-px w-24 bg-gradient-to-r from-transparent via-primary/30 to-transparent" />
+                                        <div className="h-px w-24 bg-primary/25" />
                                         <span className="text-[10px] uppercase tracking-widest font-bold text-primary">Fim das Partilhas</span>
                                     </div>
                                 )}

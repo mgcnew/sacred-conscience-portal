@@ -46,7 +46,7 @@ const LazyImage: React.FC<LazyImageProps> = ({ src, alt, className, fallback }) 
     <div ref={imgRef} className={cn('relative overflow-hidden bg-muted', className)}>
       {/* Placeholder/Skeleton enquanto carrega */}
       {!isLoaded && !hasError && (
-        <div className="absolute inset-0 animate-pulse bg-gradient-to-r from-muted via-muted-foreground/10 to-muted" />
+        <div className="absolute inset-0 animate-pulse bg-muted" />
       )}
 
       {/* Fallback em caso de erro */}

@@ -107,7 +107,7 @@ const CerimoniasLista: React.FC<CerimoniasListaProps> = ({
                 <Leaf className="w-16 h-16 text-muted-foreground/30" />
               </div>
             )}
-            <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+            <div className="absolute inset-0 bg-black/40" />
             
             <div className="absolute top-2 right-2 flex items-center gap-2">
               {isUltimasVagas(cerimonia.id) && (
@@ -137,7 +137,7 @@ const CerimoniasLista: React.FC<CerimoniasListaProps> = ({
           <CardHeader className="pb-2 pt-4">
             {isUserInscrito(cerimonia.id) && (
               <div className="mb-2">
-                <Badge className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100 border-green-200 flex gap-1 items-center w-fit">
+                <Badge className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100 border-green-200 dark:border-green-500/30 flex gap-1 items-center w-fit">
                   <CheckCircle2 className="w-3 h-3" /> Inscrito
                 </Badge>
               </div>

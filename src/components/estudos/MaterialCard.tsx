@@ -55,12 +55,12 @@ const MaterialCard: React.FC<MaterialCardProps> = ({ material, onClick, onEdit, 
             alt={material.titulo}
             className="h-48 transition-transform group-hover:scale-105"
             fallback={
-              <div className="w-full h-full bg-gradient-to-br from-primary/10 to-primary/5 flex items-center justify-center">
+              <div className="w-full h-full bg-primary/8 flex items-center justify-center">
                 <span className="text-4xl">{categoria?.icon || '📄'}</span>
               </div>
             }
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent pointer-events-none" />
+          <div className="absolute inset-0 bg-black/40 pointer-events-none" />
           <div className="absolute top-3 left-3 flex gap-2">
             <Badge variant="secondary" className="bg-background/90 backdrop-blur-sm">
               {categoria?.icon} {categoria?.label || material.categoria}
@@ -89,7 +89,7 @@ const MaterialCard: React.FC<MaterialCardProps> = ({ material, onClick, onEdit, 
           )}
         </div>
       ) : (
-        <div className="relative h-48 bg-gradient-to-br from-primary/10 to-primary/5 flex items-center justify-center">
+        <div className="relative h-48 bg-primary/8 flex items-center justify-center">
           <span className="text-4xl">{categoria?.icon || '📄'}</span>
           {isRascunho && (
             <Badge variant="outline" className="absolute top-3 left-3">

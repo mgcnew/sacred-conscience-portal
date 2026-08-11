@@ -51,7 +51,7 @@ interface SuccessModalProps {
 // Conteúdo Step 1
 const Step1Content: React.FC<{ ceremonyName: string }> = ({ ceremonyName }) => (
   <div className="space-y-4 text-center">
-    <div className="mx-auto w-14 h-14 rounded-full bg-gradient-to-br from-primary/20 to-primary/10 flex items-center justify-center">
+    <div className="mx-auto w-14 h-14 rounded-full bg-primary/15 flex items-center justify-center">
       <Sparkles className="w-7 h-7 text-primary" />
     </div>
 
@@ -62,7 +62,7 @@ const Step1Content: React.FC<{ ceremonyName: string }> = ({ ceremonyName }) => (
       </p>
     </div>
 
-    <div className="bg-gradient-to-r from-primary/5 via-secondary/5 to-primary/5 p-3 rounded-lg border border-primary/10">
+    <div className="bg-primary/5 p-3 rounded-lg border border-primary/10">
       <Heart className="w-4 h-4 text-primary mx-auto mb-2" />
       <p className="text-xs text-muted-foreground italic leading-relaxed">
         "Uma nova jornada se inicia. Que esta cerimônia traga luz e as transformações que sua alma busca."
@@ -79,7 +79,7 @@ const Step2Content: React.FC<{ itensLevar?: string | null }> = ({ itensLevar }) 
 
   return (
     <div className="space-y-4 text-center">
-      <div className="mx-auto w-14 h-14 rounded-full bg-gradient-to-br from-primary/20 to-primary/10 flex items-center justify-center">
+      <div className="mx-auto w-14 h-14 rounded-full bg-primary/15 flex items-center justify-center">
         <img src="/logo-conciencia.webp" alt="Consciência Divinal" className="w-9 h-9 object-contain" />
       </div>
 

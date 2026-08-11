@@ -722,7 +722,7 @@ const Galeria: React.FC = () => {
                     )}
 
                     {/* Overlay no hover com título/cerimônia */}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/0 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-end p-2.5">
+                    <div className="absolute inset-0 bg-black/45 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-end p-2.5">
                       <div className="w-full">
                         {item.titulo && (
                           <p className="text-white text-xs font-medium line-clamp-2 leading-snug">{item.titulo}</p>

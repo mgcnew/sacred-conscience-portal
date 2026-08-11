@@ -126,7 +126,7 @@ const ConvitePartilhaModal: React.FC = () => {
     <Dialog open={open} onOpenChange={handleSnooze}>
       <DialogContent className="sm:max-w-sm [&>button]:hidden">
         <DialogHeader>
-          <div className="mx-auto w-14 h-14 rounded-full bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center mb-1">
+          <div className="mx-auto w-14 h-14 rounded-full bg-primary/18 flex items-center justify-center mb-1">
             <Heart className="w-7 h-7 text-primary" />
           </div>
           <DialogTitle className="text-center font-display text-lg">

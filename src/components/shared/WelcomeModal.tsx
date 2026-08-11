@@ -64,7 +64,7 @@ const WelcomeModal: React.FC = () => {
             <Quote className="w-8 h-8 text-amber-500/30 absolute -bottom-1 right-0 rotate-180" />
           </div>
 
-          <div className="w-16 h-px bg-gradient-to-r from-transparent via-amber-500/50 to-transparent mx-auto" />
+          <div className="w-16 h-px bg-sacred-gold/50 mx-auto" />
 
           <p className="text-muted-foreground text-sm">
             É uma alegria imensa ter você conosco nesta jornada de autoconhecimento e cura.
@@ -182,12 +182,11 @@ const WelcomeModal: React.FC = () => {
     <Dialog open={isOpen} onOpenChange={handleClose}>
       <DialogContent className="sm:max-w-md w-[calc(100%-2rem)] rounded-2xl p-0 flex flex-col max-h-[90dvh] overflow-hidden">
         {/* Header com gradiente — fixo */}
-        <div className="relative pt-7 pb-4 px-6 bg-gradient-to-b from-muted/60 to-transparent shrink-0">
+        <div className="relative pt-7 pb-4 px-6 bg-muted/40 shrink-0">
           <div className="absolute inset-0 opacity-20 pointer-events-none">
-            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-32 bg-amber-500/30 rounded-full blur-3xl" />
           </div>
 
-          <div className="relative mx-auto mb-3 w-14 h-14 rounded-full bg-gradient-to-br from-amber-500/20 to-amber-600/10 border border-amber-500/30 flex items-center justify-center">
+          <div className="relative mx-auto mb-3 w-14 h-14 rounded-full bg-sacred-gold/15 border border-sacred-gold/30 flex items-center justify-center">
             <Icon className="w-6 h-6 text-amber-600 dark:text-amber-400" />
           </div>
 
@@ -246,7 +245,7 @@ const WelcomeModal: React.FC = () => {
           {isLastStep ? (
             <Button
               onClick={handleClose}
-              className="bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-500 hover:to-amber-600 text-white border-0"
+              className="bg-sacred-gold hover:brightness-110 text-white border-0"
             >
               Começar Jornada
               <Sparkles className="w-4 h-4 ml-2" />

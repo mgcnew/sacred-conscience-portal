@@ -1040,7 +1040,7 @@ const Admin: React.FC = () => {
                             <TableCell>
                               {ficha ? (
                                 <div className="flex items-center gap-2">
-                                  <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">OK</Badge>
+                                  <Badge variant="outline" className="bg-green-50 dark:bg-green-500/10 text-green-700 border-green-200 dark:border-green-500/30">OK</Badge>
                                   {alerta && (
                                     <Badge variant="destructive" className="flex gap-1 items-center">
                                       <AlertTriangle className="w-3 h-3" /> Atenção
@@ -1433,7 +1433,7 @@ const Admin: React.FC = () => {
                           </MobileCardRow>
                           <MobileCardRow label="Ficha">
                             {ficha ? (
-                              <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200 text-xs">OK</Badge>
+                              <Badge variant="outline" className="bg-green-50 dark:bg-green-500/10 text-green-700 border-green-200 dark:border-green-500/30 text-xs">OK</Badge>
                             ) : (
                               <Badge variant="secondary" className="text-xs">Pendente</Badge>
                             )}
@@ -1923,7 +1923,7 @@ const Admin: React.FC = () => {
                                     <DollarSign className="w-3 h-3 mr-1" /> Pago
                                   </Badge>
                                 ) : (
-                                  <Badge variant="outline" className="text-amber-600 border-amber-300">Pendente</Badge>
+                                  <Badge variant="outline" className="text-amber-600 border-amber-300 dark:border-amber-500/40">Pendente</Badge>
                                 )}
                               </div>
                             )}
@@ -1953,7 +1953,7 @@ const Admin: React.FC = () => {
                                 <DollarSign className="w-3 h-3 mr-1" /> Pago
                               </Badge>
                             ) : (
-                              <Badge variant="outline" className="text-amber-600 border-amber-300 text-xs">Pendente</Badge>
+                              <Badge variant="outline" className="text-amber-600 border-amber-300 dark:border-amber-500/40 text-xs">Pendente</Badge>
                             ))}
                           </div>
                         </MobileCardHeader>

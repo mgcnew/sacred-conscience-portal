@@ -111,8 +111,8 @@ const Index: React.FC = () => {
       return (
         <div className={`rounded-2xl border p-4 mb-6 ${
           isNear
-            ? 'bg-gradient-to-r from-amber-500/10 to-amber-500/5 border-amber-500/30'
-            : 'bg-gradient-to-r from-primary/10 via-primary/5 to-transparent border-primary/20'
+            ? 'bg-sacred-gold/10 border-amber-500/30'
+            : 'bg-primary/8 border-primary/20'
         }`}>
           <div className="flex items-center justify-between gap-3">
             <div className="min-w-0">
@@ -138,7 +138,7 @@ const Index: React.FC = () => {
     }
 
     return (
-      <div className="rounded-2xl bg-gradient-to-r from-primary/8 to-transparent border border-primary/15 px-4 py-3 mb-6">
+      <div className="rounded-2xl bg-primary/8 border border-primary/15 px-4 py-3 mb-6">
         <p className="font-display italic text-sm text-muted-foreground text-center leading-relaxed">
           "A medicina não cura, ela revela. O caminho da cura está dentro de você."
         </p>
@@ -186,7 +186,7 @@ const Index: React.FC = () => {
         href="https://www.instagram.com/temploxamaniconscienciadivinal"
         target="_blank"
         rel="noopener noreferrer"
-        className="w-10 h-10 rounded-full bg-gradient-to-tr from-purple-500 to-pink-500 text-white flex items-center justify-center shadow-md active:scale-90 transition-transform"
+        className="w-10 h-10 rounded-full bg-primary text-white flex items-center justify-center shadow-md active:scale-90 transition-transform"
       >
         <Instagram className="w-5 h-5" />
       </a>
@@ -319,14 +319,14 @@ const Index: React.FC = () => {
               <h2 className="font-display text-lg font-bold mb-3 px-0.5">Explore o Templo</h2>
               <div className="grid grid-cols-2 gap-3">
                 {([
-                  { label: 'Cursos', desc: 'Expanda seus conhecimentos', icon: GraduationCap, route: ROUTES.CURSOS, from: 'from-primary/5', to: 'to-primary/10', color: 'text-primary' },
-                  { label: 'Guardião', desc: 'Interprete suas visões', icon: Eye, route: ROUTES.GUARDIAO_VISOES, from: 'from-violet-500/5', to: 'to-violet-500/10', color: 'text-violet-600' },
-                  { label: 'Medicinas', desc: 'Conheça as plantas', icon: Leaf, route: ROUTES.MEDICINAS, from: 'from-green-500/5', to: 'to-green-500/10', color: 'text-green-600' },
-                  { label: 'Estudos', desc: 'Pós-consagração', icon: BookOpen, route: ROUTES.ESTUDOS, from: 'from-blue-500/5', to: 'to-blue-500/10', color: 'text-blue-500' },
-                ] as const).map(({ label, desc, icon: Icon, route, from, to, color }) => (
+                  { label: 'Cursos', desc: 'Expanda seus conhecimentos', icon: GraduationCap, route: ROUTES.CURSOS, tint: 'bg-primary/8', color: 'text-primary' },
+                  { label: 'Guardião', desc: 'Interprete suas visões', icon: Eye, route: ROUTES.GUARDIAO_VISOES, tint: 'bg-sacred-gold/10', color: 'text-sacred-gold' },
+                  { label: 'Medicinas', desc: 'Conheça as plantas', icon: Leaf, route: ROUTES.MEDICINAS, tint: 'bg-primary/8', color: 'text-primary' },
+                  { label: 'Estudos', desc: 'Pós-consagração', icon: BookOpen, route: ROUTES.ESTUDOS, tint: 'bg-sacred-gold/10', color: 'text-sacred-gold' },
+                ] as const).map(({ label, desc, icon: Icon, route, tint, color }) => (
                   <Card
                     key={label}
-                    className={`overflow-hidden cursor-pointer border-none shadow-sm bg-gradient-to-br ${from} ${to} active:scale-95 transition-transform`}
+                    className={`overflow-hidden cursor-pointer border-none shadow-sm ${tint} active:scale-95 transition-transform`}
                     onClick={() => navigate(route)}
                   >
                     <CardContent className="p-4 flex flex-col items-center text-center gap-2">
@@ -392,7 +392,7 @@ const Index: React.FC = () => {
 
             {/* Sua jornada */}
             {inscriptions.length > 0 && (
-              <div className="rounded-xl bg-gradient-to-br from-purple-500/5 to-purple-500/10 border border-purple-500/15 p-4">
+              <div className="rounded-xl bg-primary/8 border border-purple-500/15 p-4">
                 <div className="flex items-center gap-2 mb-3">
                   <Sparkles className="w-4 h-4 text-purple-500" />
                   <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Sua Jornada</p>

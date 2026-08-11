@@ -59,8 +59,7 @@ const CompleteProfileModal: React.FC = () => {
     <Dialog open={true} onOpenChange={() => {}}>
       <DialogContent className="sm:max-w-sm w-[calc(100vw-2rem)] p-0 rounded-2xl border-none shadow-2xl [&>button]:hidden overflow-hidden">
 
-        <div className="relative overflow-hidden bg-gradient-to-br from-primary/15 via-primary/8 to-transparent pt-6 pb-4 px-6 text-center">
-          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-48 h-48 rounded-full bg-primary/15 blur-3xl pointer-events-none" />
+        <div className="relative overflow-hidden bg-primary/10 pt-6 pb-4 px-6 text-center">
           <div className="relative z-10">
             <div className="mx-auto w-14 h-14 rounded-2xl bg-white shadow-md flex items-center justify-center mb-3">
               <img src="/logo-conciencia.webp" alt="Consciência Divinal" className="w-10 h-10 object-contain" />

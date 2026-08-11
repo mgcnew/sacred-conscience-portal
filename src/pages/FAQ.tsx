@@ -172,8 +172,7 @@ const FAQ: React.FC = () => {
 
       {/* Banner de boas-vindas — só aparece ao vir da inscrição */}
       {showWelcome && (
-        <div className="relative overflow-hidden rounded-2xl mb-8 bg-gradient-to-br from-primary/15 via-primary/8 to-transparent border border-primary/20">
-          <div className="absolute top-0 right-0 w-40 h-40 rounded-full bg-primary/10 blur-3xl pointer-events-none" />
+        <div className="relative overflow-hidden rounded-2xl mb-8 bg-primary/10 border border-primary/20">
           <button
             onClick={() => setShowWelcome(false)}
             className="absolute top-3 right-3 text-muted-foreground hover:text-foreground transition-colors p-1"
@@ -293,7 +292,7 @@ const FAQ: React.FC = () => {
 
       {/* Footer CTA */}
       <FadeIn delay={60}>
-      <div className="mt-8 rounded-2xl bg-gradient-to-br from-primary/10 to-primary/5 border border-primary/15 p-6 text-center">
+      <div className="mt-8 rounded-2xl bg-primary/8 border border-primary/15 p-6 text-center">
         <div className="w-10 h-10 rounded-full bg-primary/15 flex items-center justify-center mx-auto mb-3">
           <Heart className="w-5 h-5 text-primary" />
         </div>

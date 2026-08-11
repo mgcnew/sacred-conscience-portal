@@ -125,7 +125,7 @@ export function PhotoCarousel({ photos, isLoading, error }: PhotoCarouselProps) 
                       />
                       {/* Overlay with ceremony info */}
                       {photo.cerimonias && (
-                        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-3">
+                        <div className="absolute bottom-0 left-0 right-0 bg-black/45 p-3">
                           <p className="text-white text-sm font-medium truncate">
                             {photo.cerimonias.nome}
                           </p>

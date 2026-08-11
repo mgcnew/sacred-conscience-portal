@@ -739,8 +739,8 @@ const Anamnese: React.FC = () => {
 
             {/* Linha guia */}
             <div className="absolute bottom-[30%] left-[5%] right-[5%] pointer-events-none">
-              <div className="border-b-2 border-dashed border-slate-300" />
-              <p className="text-[10px] text-slate-300 mt-1 select-none">Assine acima desta linha</p>
+              <div className="border-b-2 border-dashed border-slate-300 dark:border-border" />
+              <p className="text-[10px] text-slate-300 dark:text-muted-foreground mt-1 select-none">Assine acima desta linha</p>
             </div>
 
             <SignatureCanvas
@@ -920,7 +920,7 @@ const Anamnese: React.FC = () => {
 
             {/* Hero card */}
             <Card className="overflow-hidden border-primary/20">
-              <div className="h-1.5 bg-gradient-to-r from-primary/40 via-primary to-primary/40" />
+              <div className="h-1.5 bg-primary" />
               <CardContent className="p-5">
                 <div className="flex items-center gap-4">
                   <div className="relative shrink-0">
@@ -944,7 +944,7 @@ const Anamnese: React.FC = () => {
                         Ficha completa
                       </Badge>
                       {hasContraindicacoes && (
-                        <Badge variant="outline" className="h-5 text-[10px] bg-amber-50 text-amber-700 dark:bg-amber-950/40 dark:text-amber-400 border-amber-200">
+                        <Badge variant="outline" className="h-5 text-[10px] bg-amber-50 text-amber-700 dark:bg-amber-950/40 dark:text-amber-400 border-amber-200 dark:border-amber-500/30">
                           <AlertTriangle className="w-3 h-3 mr-1" />
                           Atenção
                         </Badge>
@@ -1097,7 +1097,7 @@ const Anamnese: React.FC = () => {
               </div>
             </AccordionSection>
 
-            <AccordionSection id="experiencia" icon={Sparkles} title="Experiência Espiritual" iconBg="bg-purple-100 dark:bg-purple-950/40" iconColor="text-purple-600 dark:text-purple-400">
+            <AccordionSection id="experiencia" icon={Sparkles} title="Experiência Espiritual" iconBg="bg-primary/12 dark:bg-primary/20 dark:bg-purple-950/40" iconColor="text-purple-600 dark:text-purple-400">
               <div className="pt-3">
                 <InfoItem label="Já participou de cerimônias" value={formData.ja_consagrou} />
                 {formData.ja_consagrou && (
@@ -1133,7 +1133,7 @@ const Anamnese: React.FC = () => {
                     <p className="text-xs text-muted-foreground mb-2">Assinado digitalmente:</p>
                     <div className="bg-white rounded-lg border p-3 flex flex-col items-center">
                       <img src={formData.assinatura} alt="Assinatura" className="max-h-20 object-contain" />
-                      <p className="text-[10px] text-slate-400 font-mono uppercase mt-2 border-t border-slate-100 pt-2 w-full text-center">
+                      <p className="text-[10px] text-slate-400 font-mono uppercase mt-2 border-t border-slate-100 dark:border-border pt-2 w-full text-center">
                         ID: {user?.id.substring(0, 8)} | {new Date().toLocaleDateString('pt-BR')}
                       </p>
                     </div>
@@ -1283,7 +1283,7 @@ const Anamnese: React.FC = () => {
           </div>
           <div className="h-1.5 bg-muted rounded-full overflow-hidden">
             <div
-              className="h-full bg-gradient-to-r from-primary/70 to-primary rounded-full transition-all duration-500"
+              className="h-full bg-primary rounded-full transition-all duration-500"
               style={{ width: `${calculateProgress()}%` }}
             />
           </div>
@@ -1954,7 +1954,7 @@ const Anamnese: React.FC = () => {
             <>
               <CardHeader>
                 <CardTitle className="font-display text-xl flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-xl bg-purple-100 dark:bg-purple-950/40 flex items-center justify-center shrink-0">
+                  <div className="w-9 h-9 rounded-xl bg-primary/12 dark:bg-primary/20 dark:bg-purple-950/40 flex items-center justify-center shrink-0">
                     <Sparkles className="w-5 h-5 text-purple-600 dark:text-purple-400" />
                   </div>
                   Experiência Espiritual
@@ -1975,7 +1975,7 @@ const Anamnese: React.FC = () => {
                   className={`w-full flex items-center gap-3 p-4 rounded-xl border-2 text-left transition-all ${
                     formData.ja_consagrou
                       ? 'bg-purple-50 dark:bg-purple-950/30 border-purple-500'
-                      : 'bg-background border-border hover:border-purple-300 text-muted-foreground'
+                      : 'bg-background border-border hover:border-primary/40 dark:border-primary/50 text-muted-foreground'
                   }`}
                 >
                   <div className={`w-5 h-5 rounded-full border-2 flex-shrink-0 flex items-center justify-center transition-all ${
@@ -2124,7 +2124,7 @@ const Anamnese: React.FC = () => {
                             ? 'bg-green-50/80 dark:bg-green-950/20 border-green-500'
                             : term.error
                             ? 'border-destructive bg-destructive/5'
-                            : 'border-border hover:border-green-300 bg-background'
+                            : 'border-border hover:border-green-300 dark:border-green-500/40 bg-background'
                         }`}
                       >
                         <div className={`mt-0.5 w-5 h-5 rounded-full border-2 flex-shrink-0 flex items-center justify-center transition-all ${
@@ -2149,7 +2149,7 @@ const Anamnese: React.FC = () => {
                 <div className={`flex items-start gap-3 p-4 rounded-xl border-2 cursor-pointer transition-all ${
                   formData.aceite_uso_imagem
                     ? 'border-amber-400 bg-amber-50/60 dark:bg-amber-950/20'
-                    : 'border-border hover:border-amber-300 bg-background'
+                    : 'border-border hover:border-amber-300 dark:border-amber-500/40 bg-background'
                 }`}
                   onClick={() => updateField('aceite_uso_imagem', !formData.aceite_uso_imagem)}
                 >
@@ -2229,7 +2229,7 @@ const Anamnese: React.FC = () => {
                           alt="Sua assinatura"
                           className="max-h-32 object-contain"
                         />
-                        <div className="mt-2 w-full border-t border-slate-100 pt-2 text-center">
+                        <div className="mt-2 w-full border-t border-slate-100 dark:border-border pt-2 text-center">
                           <p className="text-[10px] text-slate-400 font-mono uppercase">
                             Assinado digitalmente em {new Date().toLocaleDateString('pt-BR')}
                           </p>

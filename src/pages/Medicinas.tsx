@@ -32,7 +32,7 @@ const Medicinas = () => {
               onClick={() => setSelectedIndex(i)}
             >
               {/* Banner com imagem */}
-              <div className="relative h-44 bg-gradient-to-br from-muted to-muted/60 overflow-hidden shrink-0">
+              <div className="relative h-44 bg-muted overflow-hidden shrink-0">
                 <img
                   src={medicina.imagem}
                   alt={medicina.nome}
@@ -40,7 +40,7 @@ const Medicinas = () => {
                   onError={(e) => { e.currentTarget.style.opacity = '0'; }}
                 />
                 {/* Gradient overlay sempre visível */}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent" />
+                <div className="absolute inset-0 bg-black/40" />
 
                 {/* Ícone no canto inferior esquerdo */}
                 <div className="absolute bottom-3 left-3 w-10 h-10 rounded-xl bg-white/15 backdrop-blur-sm border border-white/20 flex items-center justify-center">

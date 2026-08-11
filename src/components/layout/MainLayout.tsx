@@ -111,7 +111,7 @@ const MainLayout: React.FC = () => {
           >
             <Avatar className="w-10 h-10 ring-2 ring-primary/30 ring-offset-2 ring-offset-background shadow-sm">
               <AvatarImage src={userAvatar || undefined} alt={userName} />
-              <AvatarFallback className="bg-gradient-to-br from-primary/25 to-secondary/15 text-primary text-sm font-semibold">
+              <AvatarFallback className="bg-primary/20 text-primary text-sm font-semibold">
                 {userName?.charAt(0)?.toUpperCase() || <User className="w-4 h-4" />}
               </AvatarFallback>
             </Avatar>
@@ -148,7 +148,7 @@ const MainLayout: React.FC = () => {
           >
             <Avatar className="w-9 h-9 ring-2 ring-primary/30 ring-offset-2 ring-offset-background">
               <AvatarImage src={userAvatar || undefined} alt={userName} />
-              <AvatarFallback className="bg-gradient-to-br from-primary/25 to-secondary/15 text-primary text-sm">
+              <AvatarFallback className="bg-primary/20 text-primary text-sm">
                 {userName?.charAt(0)?.toUpperCase() || <User className="w-4 h-4" />}
               </AvatarFallback>
             </Avatar>

@@ -27,7 +27,7 @@ const medicinaBadgeClass = (medicina: string | null) => {
     return 'bg-blue-100 text-blue-700 dark:bg-blue-950/40 dark:text-blue-400';
   if (m.includes('kambô') || m.includes('kambo'))
     return 'bg-amber-100 text-amber-700 dark:bg-amber-950/40 dark:text-amber-400';
-  return 'bg-purple-100 text-purple-700 dark:bg-purple-950/40 dark:text-purple-400';
+  return 'bg-primary/12 dark:bg-primary/20 text-purple-700 dark:bg-purple-950/40 dark:text-purple-400';
 };
 
 export function UpcomingCeremoniesSection({
@@ -104,7 +104,7 @@ export function UpcomingCeremoniesSection({
                     className="w-full h-full object-cover"
                   />
                   {/* Gradiente para proteger legibilidade do conteúdo abaixo */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-background/60 to-transparent" />
+                  <div className="absolute inset-0 bg-background/50" />
                   {/* Data sobreposta no banner */}
                   <div className="absolute bottom-2 left-3 flex items-baseline gap-1">
                     <span className="text-2xl font-bold text-white drop-shadow leading-none">{dayNum}</span>

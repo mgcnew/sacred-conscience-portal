@@ -372,7 +372,7 @@ const Biblioteca: React.FC = () => {
                   {meusEbooksFiltrados.map(item => (
                     <div key={item.id} className="group cursor-pointer" onClick={() => handleLer(item)}>
                       {/* Cover */}
-                      <div className="relative aspect-[2/3] rounded-lg overflow-hidden shadow-md group-hover:shadow-xl transition-all duration-300 bg-gradient-to-br from-amber-100 to-amber-200 dark:from-amber-900 dark:to-amber-800">
+                      <div className="relative aspect-[2/3] rounded-lg overflow-hidden shadow-md group-hover:shadow-xl transition-all duration-300 bg-sacred-gold/15 dark:bg-sacred-gold/20">
                         {item.produto?.imagem_url ? (
                           <img src={item.produto.imagem_url} alt={item.produto.nome} className="w-full h-full object-cover" />
                         ) : (
@@ -390,7 +390,7 @@ const Biblioteca: React.FC = () => {
                         </div>
 
                         {/* Progress bar */}
-                        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-2">
+                        <div className="absolute bottom-0 left-0 right-0 bg-black/50 p-2">
                           <Progress value={item.progresso} className="h-1 mb-1" />
                           <p className="text-[10px] text-white/80 text-center">{item.progresso.toFixed(0)}% lido</p>
                         </div>
@@ -455,7 +455,7 @@ const Biblioteca: React.FC = () => {
                     <div key={ebook.id} className="group">
                       {/* Cover */}
                       <div
-                        className="relative aspect-[2/3] rounded-lg overflow-hidden shadow-md group-hover:shadow-xl transition-all duration-300 bg-gradient-to-br from-blue-100 to-blue-200 dark:from-blue-900 dark:to-blue-800 cursor-pointer"
+                        className="relative aspect-[2/3] rounded-lg overflow-hidden shadow-md group-hover:shadow-xl transition-all duration-300 bg-primary/12 dark:bg-primary/20 cursor-pointer"
                         onClick={() => handleLerPessoal(ebook)}
                       >
                         {ebook.capa_url ? (
@@ -567,7 +567,7 @@ const Biblioteca: React.FC = () => {
                     return (
                       <div key={produto.id} className="group">
                         {/* Cover */}
-                        <div className="relative aspect-[2/3] rounded-lg overflow-hidden shadow-md group-hover:shadow-xl transition-all duration-300 bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-800 dark:to-slate-700">
+                        <div className="relative aspect-[2/3] rounded-lg overflow-hidden shadow-md group-hover:shadow-xl transition-all duration-300 bg-muted dark:bg-muted">
                           {produto.imagem_url ? (
                             <img src={produto.imagem_url} alt={produto.nome} className="w-full h-full object-cover" />
                           ) : (
@@ -594,7 +594,7 @@ const Biblioteca: React.FC = () => {
                           </div>
 
                           {/* Price / read overlay */}
-                          <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 to-transparent pt-6 pb-2 px-2">
+                          <div className="absolute bottom-0 left-0 right-0 bg-black/55 pt-6 pb-2 px-2">
                             {jaPossui ? (
                               <Button
                                 size="sm"

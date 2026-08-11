@@ -142,22 +142,6 @@
   body {
     @apply bg-background text-foreground antialiased;
     font-family: 'Outfit', sans-serif;
-    /* Aura radial — luz irradiando do centro, como clarão de fogueira */
-    background-image: radial-gradient(
-      ellipse 80% 60% at 50% 0%,
-      hsl(148 35% 90% / 0.45) 0%,
-      transparent 70%
-    );
-    background-attachment: fixed;
-  }
-
-  .dark body {
-    background-image: radial-gradient(
-      ellipse 80% 60% at 50% 0%,
-      hsl(148 30% 12% / 0.6) 0%,
-      transparent 70%
-    );
-    background-attachment: fixed;
   }
 
   h1,
@@ -243,21 +227,11 @@
     background: transparent;
   }
   .scrollbar-mystical::-webkit-scrollbar-thumb {
-    background: linear-gradient(
-      to bottom,
-      hsl(var(--primary) / 0.15),
-      hsl(var(--primary) / 0.45),
-      hsl(var(--primary) / 0.15)
-    );
+    background: hsl(var(--primary) / 0.3);
     border-radius: 9999px;
   }
   .scrollbar-mystical::-webkit-scrollbar-thumb:hover {
-    background: linear-gradient(
-      to bottom,
-      hsl(var(--primary) / 0.3),
-      hsl(var(--primary) / 0.7),
-      hsl(var(--primary) / 0.3)
-    );
+    background: hsl(var(--primary) / 0.55);
   }
 
   /* Smooth Animations */
@@ -340,7 +314,7 @@
   @apply shadow-sm;
 }
 
-/* Section headers — borda decorativa gradiente verde→âmbar à esquerda */
+/* Section headers — filete de ouro chapado à esquerda */
 :root .section-title,
 :root h2.font-display {
   @apply text-foreground;
@@ -357,31 +331,38 @@
   height: 80%;
   width: 3px;
   border-radius: 9999px;
-  background: linear-gradient(
-    to bottom,
-    hsl(var(--primary)),
-    hsl(var(--sacred-gold))
-  );
+  background: hsl(var(--sacred-gold));
 }
 
-/* Organic dividers — hr com ornamento de folha central */
+/* Divisores — filete chapado com nó de ouro ao centro,
+   eco da moldura ornamental do logo */
 :root hr {
   border: none;
   position: relative;
   height: 20px;
-  display: flex;
-  align-items: center;
   margin: 1rem 0;
 }
-:root hr::before,
+/* filete contínuo */
+:root hr::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: hsl(var(--border));
+}
+/* nó de ouro ao centro, sobreposto ao filete */
 :root hr::after {
   content: '';
-  flex: 1;
-  height: 1px;
-  background: linear-gradient(to right, transparent, hsl(var(--border) / 0.7), hsl(var(--border) / 0.4));
-}
-:root hr::after {
-  background: linear-gradient(to left, transparent, hsl(var(--border) / 0.7), hsl(var(--border) / 0.4));
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 7px;
+  height: 7px;
+  transform: translate(-50%, -50%) rotate(45deg);
+  background: hsl(var(--sacred-gold));
+  box-shadow: 0 0 0 4px hsl(var(--background));
 }
 :root .divider {
   @apply border-border/70;
@@ -408,35 +389,21 @@
 }
 
 /* ========================================
-   GLOW DE FOGUEIRA — dark mode only
-   Halo âmbar em elementos de destaque,
-   como brasas iluminando na noite da mata
+   RELEVO NO DARK MODE
+   Profundidade por sombra neutra e contorno
+   chapado — sem halo colorido, sem brilho
    ======================================== */
 
-/* Botão primário — brasa suave */
+/* Botão primário — sombra de elevação neutra */
 .dark button[class*="bg-primary"],
 .dark [class*="bg-primary"][role="button"] {
-  box-shadow:
-    0 0 18px -4px hsl(38 95% 46% / 0.35),
-    0 4px 12px -2px hsl(38 95% 46% / 0.2);
+  box-shadow: 0 2px 6px -1px hsl(160 30% 3% / 0.5);
 }
 
-/* Cards de cerimônia / destaque — brilho perimetral */
+/* Cards de cerimônia / destaque — contorno definido */
 .dark [data-slot="card"].ring-primary,
 .dark .card-glow {
-  box-shadow:
-    0 0 0 1px hsl(148 70% 48% / 0.15),
-    0 4px 24px -6px hsl(38 95% 46% / 0.25);
-}
-
-/* Badge "Confirmada" e similares em verde */
-.dark [data-slot="badge"][class*="bg-primary"] {
-  box-shadow: 0 0 8px -2px hsl(148 70% 48% / 0.5);
-}
-
-/* Bottom nav ativa — ponto luminoso */
-.dark nav [class*="bg-primary"] {
-  box-shadow: 0 0 10px -2px hsl(148 70% 48% / 0.6);
+  box-shadow: 0 0 0 1px hsl(148 70% 48% / 0.35);
 }
 
 /* ========================================

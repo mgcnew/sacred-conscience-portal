@@ -40,7 +40,7 @@ const CommitmentContent: React.FC<{
 }> = ({ ceremonyTitle, ceremonyValue }) => (
   <div className="space-y-5 animate-in fade-in slide-in-from-bottom-3 duration-300">
     {/* Resumo da cerimônia */}
-    <div className="flex items-center justify-between p-4 rounded-2xl bg-gradient-to-br from-primary/10 to-primary/5 border border-primary/10">
+    <div className="flex items-center justify-between p-4 rounded-2xl bg-primary/8 border border-primary/10">
       <div className="space-y-0.5 min-w-0 mr-3">
         <p className="text-[10px] uppercase tracking-widest text-muted-foreground font-bold">Cerimônia</p>
         <h4 className="font-display text-sm font-semibold text-foreground line-clamp-2 leading-snug">{ceremonyTitle}</h4>
@@ -134,7 +134,7 @@ const PaymentContent: React.FC<{
     ) : (
       <div className="animate-in fade-in slide-in-from-left-4 duration-300 space-y-5">
         {/* Resumo Compacto */}
-        <div className="flex items-center justify-between p-4 rounded-2xl bg-gradient-to-br from-primary/10 to-primary/5 border border-primary/10">
+        <div className="flex items-center justify-between p-4 rounded-2xl bg-primary/8 border border-primary/10">
           <div className="space-y-0.5">
             <p className="text-[10px] uppercase tracking-widest text-muted-foreground font-bold">Contribuição</p>
             <h4 className="font-display text-sm font-semibold text-foreground line-clamp-1">{ceremonyTitle}</h4>

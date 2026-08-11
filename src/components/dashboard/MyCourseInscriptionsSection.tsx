@@ -133,7 +133,7 @@ export const MyCourseInscriptionsSection: React.FC = () => {
               </div>
 
               {!inscricao.cursos_eventos?.gratuito && !inscricao.pago && (
-                <Badge variant="outline" className="mt-1 text-xs text-amber-600 border-amber-300">
+                <Badge variant="outline" className="mt-1 text-xs text-amber-600 border-amber-300 dark:border-amber-500/40">
                   Pagamento pendente
                 </Badge>
               )}

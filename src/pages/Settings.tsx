@@ -512,7 +512,7 @@ const HelpTab = memo(() => {
               Compartilhe o link do portal com pessoas que possam se interessar.
             </p>
           </div>
-          <Button onClick={handleShare} variant="outline" className="w-full md:w-auto shrink-0 border-green-200 dark:border-green-800 hover:bg-green-50 dark:hover:bg-green-950/30">
+          <Button onClick={handleShare} variant="outline" className="w-full md:w-auto shrink-0 border-green-200 dark:border-green-800 hover:bg-green-50 dark:bg-green-500/10 dark:hover:bg-green-950/30">
             {copied ? (
               <>
                 <Check className="w-4 h-4 mr-2 text-green-600" />
@@ -541,7 +541,7 @@ const HelpTab = memo(() => {
             </a>
             <a 
               href="/emergencia" 
-              className="flex items-center gap-2 p-3 rounded-lg border border-red-200 dark:border-red-900 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors"
+              className="flex items-center gap-2 p-3 rounded-lg border border-red-200 dark:border-red-900 hover:bg-red-50 dark:bg-red-500/10 dark:hover:bg-red-950/30 transition-colors"
             >
               <span className="text-red-500">❤️</span>
               <span className="text-sm text-red-600 dark:text-red-400">Emergência / Suporte</span>

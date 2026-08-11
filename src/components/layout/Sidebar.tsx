@@ -59,7 +59,7 @@ const NavButton: React.FC<{
         isActive
           ? cn(c.bg, c.text, 'font-medium', c.hover)
           : isHighlight
-            ? 'text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/30'
+            ? 'text-red-600 hover:text-red-700 hover:bg-red-50 dark:bg-red-500/10 dark:hover:bg-red-950/30'
             : 'text-muted-foreground hover:text-foreground hover:bg-accent'
       )}
       onClick={onClick}

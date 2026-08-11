@@ -146,7 +146,7 @@ const EstudoDetalhe: React.FC = () => {
                 alt={material.titulo}
                 className="w-full aspect-video object-cover"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-transparent" />
+              <div className="absolute inset-0 bg-background/60" />
             </div>
           )}
 

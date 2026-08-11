@@ -70,9 +70,9 @@ interface CerimoniasHistoricoProps {
 function medicinaBadgeClass(medicina: string | null): string {
   const m = (medicina || '').toLowerCase();
   if (m.includes('ayahuasca') || m.includes('daime')) return 'bg-primary/10 text-primary border-primary/20';
-  if (m.includes('kambo')) return 'bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-300/30';
-  if (m.includes('sananga')) return 'bg-blue-500/10 text-blue-700 dark:text-blue-400 border-blue-300/30';
-  if (m.includes('rapé') || m.includes('rape')) return 'bg-purple-500/10 text-purple-700 dark:text-purple-400 border-purple-300/30';
+  if (m.includes('kambo')) return 'bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-300 dark:border-amber-500/40/30';
+  if (m.includes('sananga')) return 'bg-blue-500/10 text-blue-700 dark:text-blue-400 border-blue-300 dark:border-blue-500/40/30';
+  if (m.includes('rapé') || m.includes('rape')) return 'bg-purple-500/10 text-purple-700 dark:text-purple-400 border-primary/40 dark:border-primary/50/30';
   return 'bg-muted text-muted-foreground border-border';
 }
 
@@ -154,19 +154,19 @@ const ParticipantesDialogContent: React.FC<{
             </div>
             <div className="flex flex-col gap-1 items-end shrink-0">
               {p.cancelada ? (
-                <Badge variant="outline" className="text-[10px] h-5 bg-red-500/10 text-red-600 border-red-200">
+                <Badge variant="outline" className="text-[10px] h-5 bg-red-500/10 text-red-600 border-red-200 dark:border-red-500/30">
                   Cancelado
                 </Badge>
               ) : (
                 <>
                   <Badge
                     variant={p.pago ? 'default' : 'outline'}
-                    className={`text-[10px] h-5 ${!p.pago ? 'border-amber-300 text-amber-700 dark:text-amber-400' : ''}`}
+                    className={`text-[10px] h-5 ${!p.pago ? 'border-amber-300 dark:border-amber-500/40 text-amber-700 dark:text-amber-400' : ''}`}
                   >
                     {p.pago ? '✓ Pago' : 'Pendente'}
                   </Badge>
                   {p.presenca_confirmada && (
-                    <Badge variant="outline" className="text-[10px] h-5 bg-green-500/10 text-green-700 dark:text-green-400 border-green-200">
+                    <Badge variant="outline" className="text-[10px] h-5 bg-green-500/10 text-green-700 dark:text-green-400 border-green-200 dark:border-green-500/30">
                       ✓ Presente
                     </Badge>
                   )}
@@ -529,7 +529,7 @@ const UserHistorico: React.FC<{
                       alt={inscricao.cerimonias.nome || 'Cerimônia'}
                       className="w-full h-full object-cover"
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
+                    <div className="absolute inset-0 bg-black/30" />
                   </div>
                 )}
                 <CardContent className="p-4 space-y-2.5">

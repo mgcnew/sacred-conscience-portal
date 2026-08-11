@@ -423,7 +423,7 @@ const ListaPresentes: React.FC = () => {
                           </Badge>
                         )}
                         {inscrito.anamnese?.uso_medicamentos && (
-                          <Badge variant="outline" className="text-xs bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400">
+                          <Badge variant="outline" className="text-xs bg-primary/12 dark:bg-primary/20 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400">
                             <Pill className="w-3 h-3 mr-1" />
                             Medicamentos
                           </Badge>
@@ -502,7 +502,7 @@ const ListaPresentes: React.FC = () => {
                               )}
                             </div>
                           ) : (
-                            <Badge variant="outline" className="text-xs bg-gray-100 text-gray-600">
+                            <Badge variant="outline" className="text-xs bg-gray-100 dark:bg-muted text-gray-600">
                               <XCircle className="w-3 h-3 mr-1" />
                               Ficha não preenchida
                             </Badge>

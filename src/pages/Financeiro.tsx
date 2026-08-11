@@ -71,8 +71,7 @@ const Financeiro: React.FC = () => {
     <PageContainer maxWidth="2xl">
       <FadeIn>
         {/* Header */}
-        <div className="relative overflow-hidden rounded-2xl mb-6 bg-gradient-to-br from-teal-500/12 via-primary/6 to-transparent border border-primary/15 px-5 py-6">
-          <div className="absolute top-0 right-0 w-40 h-40 rounded-full bg-primary/8 blur-3xl pointer-events-none" />
+        <div className="relative overflow-hidden rounded-2xl mb-6 bg-primary/8 border border-primary/15 px-5 py-6">
           <div className="relative flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-primary/15 border border-primary/20 flex items-center justify-center shrink-0">
               <Wallet className="w-5 h-5 text-primary" />

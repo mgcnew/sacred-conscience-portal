@@ -26,7 +26,7 @@ const CATEGORIAS_OCULTAS: string[] = [];
 
 const categoriaConfig: Record<string, { icon: React.ReactNode; color: string; label: string }> = {
   consagradores: { icon: <Users className="w-3.5 h-3.5" />, color: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400', label: 'Consagradores' },
-  cerimonias:    { icon: <Settings className="w-3.5 h-3.5" />, color: 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400', label: 'Cerimônias' },
+  cerimonias:    { icon: <Settings className="w-3.5 h-3.5" />, color: 'bg-primary/12 dark:bg-primary/20 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400', label: 'Cerimônias' },
   financeiro:    { icon: <Key className="w-3.5 h-3.5" />, color: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400', label: 'Financeiro' },
   depoimentos:   { icon: <Settings className="w-3.5 h-3.5" />, color: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400', label: 'Depoimentos' },
   loja:          { icon: <Settings className="w-3.5 h-3.5" />, color: 'bg-pink-100 text-pink-700 dark:bg-pink-900/30 dark:text-pink-400', label: 'Loja' },
@@ -35,7 +35,7 @@ const categoriaConfig: Record<string, { icon: React.ReactNode; color: string; la
 
 const roleBadge: Record<string, { label: string; className: string }> = {
   admin:       { label: 'Admin', className: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400' },
-  guardiao:    { label: 'Guardião', className: 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400' },
+  guardiao:    { label: 'Guardião', className: 'bg-primary/12 dark:bg-primary/20 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400' },
   consagrador: { label: 'Membro', className: 'bg-muted text-muted-foreground' },
 };
 
