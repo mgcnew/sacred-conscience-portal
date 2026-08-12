@@ -96,6 +96,9 @@ const App = () => {
               <Route path={ROUTES.GALERIA} element={<LazyRoute><Galeria /></LazyRoute>} />
               <Route path={ROUTES.LOJA} element={<LazyRoute><Loja /></LazyRoute>} />
               <Route path={ROUTES.BIBLIOTECA} element={<LazyRoute><Biblioteca /></LazyRoute>} />
+              {/* A rota de upload tem um segmento estático a mais, então o
+                  react-router a prioriza sobre /biblioteca/ler/:ebookId. */}
+              <Route path={`${ROUTES.LEITURA_UPLOAD}/:ebookId`} element={<LazyRoute><Leitura origem="upload" /></LazyRoute>} />
               <Route path={`${ROUTES.LEITURA}/:ebookId`} element={<LazyRoute><Leitura /></LazyRoute>} />
               <Route path={ROUTES.ESTUDOS} element={<LazyRoute><Estudos /></LazyRoute>} />
               <Route path={ROUTES.ESTUDO_DETALHE} element={<LazyRoute><EstudoDetalhe /></LazyRoute>} />

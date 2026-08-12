@@ -13,6 +13,8 @@ export interface EbookMarcador {
   pagina: number;
   titulo: string | null;
   cor: string;
+  /** EPUB CFI: o ponto exato do texto, que sobrevive a mudanças de fonte. */
+  localizacao: string | null;
   created_at: string;
 }
 
@@ -24,6 +26,8 @@ export interface EbookAnotacao {
   pagina: number | null;
   texto: string;
   trecho_selecionado: string | null;
+  /** EPUB CFI: o ponto exato do texto, que sobrevive a mudanças de fonte. */
+  localizacao: string | null;
   created_at: string;
   updated_at: string;
 }

@@ -47,6 +47,13 @@ const BookSkeletonGrid = ({ count = 6 }: { count?: number }) => (
   </div>
 );
 
+/** Formatos que o usuário pode subir. Só o EPUB abre no leitor completo. */
+const FORMATOS_ACEITOS = ['epub', 'pdf', 'docx', 'doc'] as const;
+type FormatoAceito = (typeof FORMATOS_ACEITOS)[number];
+
+const extensaoDe = (nome: string) => nome.split('.').pop()?.toLowerCase() ?? '';
+const ehPdf = (url: string) => /\.pdf(\?|#|$)/i.test(url);
+
 const Biblioteca: React.FC = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -68,8 +75,8 @@ const Biblioteca: React.FC = () => {
   const [isUploading, setIsUploading] = useState(false);
   const capaInputRef = useRef<HTMLInputElement>(null);
 
-  const [pdfReaderOpen, setPdfReaderOpen] = useState(false);
-  const [selectedEbook, setSelectedEbook] = useState<EbookPessoal | null>(null);
+  // Só o PDF continua abrindo em modal; EPUB vai para a tela de leitura.
+  const [pdfAberto, setPdfAberto] = useState<{ url: string; titulo: string; autor: string | null } | null>(null);
 
   // --- Queries ---
   const { data: meusEbooks, isLoading: loadingMeus } = useQuery({
@@ -171,16 +178,31 @@ const Biblioteca: React.FC = () => {
   };
 
   const handleLer = (item: BibliotecaUsuario & { produto: Produto }) => {
-    navigate(`${ROUTES.LEITURA}/${item.produto_id}`, { state: { pagina: item.pagina_atual } });
+    const url = item.produto?.arquivo_url;
+    if (!url) {
+      toast.info('Arquivo indisponível', {
+        description: 'Este título ainda não tem o arquivo anexado. Fale com o templo.',
+      });
+      return;
+    }
+    if (ehPdf(url)) {
+      setPdfAberto({ url, titulo: item.produto.nome, autor: null });
+      return;
+    }
+    navigate(`${ROUTES.LEITURA}/${item.produto_id}`);
   };
 
   const handleLerPessoal = (ebook: EbookPessoal) => {
+    if (ebook.tipo_arquivo === 'epub') {
+      navigate(`${ROUTES.LEITURA_UPLOAD}/${ebook.id}`);
+      return;
+    }
     if (ebook.tipo_arquivo === 'pdf') {
-      setSelectedEbook(ebook);
-      setPdfReaderOpen(true);
+      setPdfAberto({ url: ebook.arquivo_url, titulo: ebook.titulo, autor: ebook.autor });
     } else {
       window.open(ebook.arquivo_url, '_blank');
     }
+    // O EPUB grava a última leitura sozinho, ao acompanhar a posição.
     supabase
       .from('ebooks_pessoais')
       .update({ ultima_leitura: new Date().toISOString() })
@@ -211,9 +233,11 @@ const Biblioteca: React.FC = () => {
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    const validTypes = ['application/pdf', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'application/msword'];
-    if (!validTypes.includes(file.type)) {
-      toast.error('Formato inválido', { description: 'Apenas PDF e Word são aceitos.' });
+    // Valida pela extensão: muitos sistemas entregam .epub como
+    // application/octet-stream, e aí a checagem por MIME rejeitaria o arquivo.
+    const ext = extensaoDe(file.name);
+    if (!FORMATOS_ACEITOS.includes(ext as FormatoAceito)) {
+      toast.error('Formato inválido', { description: 'Aceitamos EPUB, PDF e Word.' });
       return;
     }
     if (file.size > 50 * 1024 * 1024) {
@@ -221,7 +245,7 @@ const Biblioteca: React.FC = () => {
       return;
     }
     setUploadingFile(file);
-    setUploadTitle(file.name.replace(/\.(pdf|docx|doc)$/i, ''));
+    setUploadTitle(file.name.replace(/\.(epub|pdf|docx|doc)$/i, ''));
     setIsUploadModalOpen(true);
   };
 
@@ -253,7 +277,7 @@ const Biblioteca: React.FC = () => {
     if (!uploadingFile || !user || !uploadTitle.trim()) return;
     setIsUploading(true);
     try {
-      const fileExt = uploadingFile.name.split('.').pop()?.toLowerCase();
+      const fileExt = extensaoDe(uploadingFile.name);
       const filePath = `${user.id}/${Date.now()}.${fileExt}`;
       const { error: uploadError } = await supabase.storage.from('ebooks').upload(filePath, uploadingFile);
       if (uploadError) throw uploadError;
@@ -274,7 +298,7 @@ const Biblioteca: React.FC = () => {
       const { error: dbError } = await supabase.from('ebooks_pessoais').insert({
         user_id: user.id, titulo: uploadTitle.trim(), autor: uploadAutor.trim() || null,
         arquivo_url: urlData.publicUrl, capa_url: capaUrl,
-        tipo_arquivo: fileExt as 'pdf' | 'docx' | 'doc', tamanho_bytes: uploadingFile.size,
+        tipo_arquivo: fileExt as FormatoAceito, tamanho_bytes: uploadingFile.size,
       });
       if (dbError) throw dbError;
 
@@ -303,7 +327,7 @@ const Biblioteca: React.FC = () => {
     <PageContainer maxWidth="xl">
       <PageHeader icon={Library} title="Biblioteca" description="Sua estante digital de conhecimento sagrado." />
 
-      <input ref={fileInputRef} type="file" accept=".pdf,.doc,.docx" onChange={handleFileSelect} className="hidden" />
+      <input ref={fileInputRef} type="file" accept=".epub,.pdf,.doc,.docx" onChange={handleFileSelect} className="hidden" />
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
         {/* Pill-style tabs */}
@@ -424,7 +448,9 @@ const Biblioteca: React.FC = () => {
               <CardContent>
                 <Upload className="w-16 h-16 text-muted-foreground mx-auto mb-4 opacity-50" />
                 <h3 className="text-xl font-display text-foreground mb-2">Nenhum ebook enviado</h3>
-                <p className="text-muted-foreground mb-4">Envie seus próprios PDFs ou documentos Word para ler aqui!</p>
+                <p className="text-muted-foreground mb-4">
+                  Envie seus livros em EPUB para ler aqui dentro, com marcadores e anotações. PDF e Word também são aceitos.
+                </p>
                 <Button onClick={() => fileInputRef.current?.click()}>
                   <Upload className="w-4 h-4 mr-2" />
                   Enviar Primeiro Ebook
@@ -462,8 +488,8 @@ const Biblioteca: React.FC = () => {
                           <img src={ebook.capa_url} alt={ebook.titulo} className="w-full h-full object-cover" />
                         ) : (
                           <div className="w-full h-full flex flex-col items-center justify-center p-3 text-center">
-                            <FileText className="w-8 h-8 text-blue-700 dark:text-blue-300 mb-2" />
-                            <span className="text-xs font-medium text-blue-800 dark:text-blue-200 line-clamp-3">{ebook.titulo}</span>
+                            <FileText className="w-8 h-8 text-primary mb-2" />
+                            <span className="text-xs font-medium text-primary line-clamp-3">{ebook.titulo}</span>
                           </div>
                         )}
 
@@ -474,9 +500,17 @@ const Biblioteca: React.FC = () => {
                           </div>
                         </div>
 
-                        {/* File type badge */}
+                        {/* Formato do arquivo: o EPUB se destaca porque é o
+                            único que abre no leitor completo do app. */}
                         <div className="absolute top-2 left-2">
-                          <Badge className="bg-blue-600 text-white text-[10px] px-1.5 uppercase">
+                          <Badge
+                            className={cn(
+                              'text-[10px] px-1.5 uppercase',
+                              ebook.tipo_arquivo === 'epub'
+                                ? 'bg-primary text-primary-foreground'
+                                : 'bg-muted text-muted-foreground',
+                            )}
+                          >
                             {ebook.tipo_arquivo}
                           </Badge>
                         </div>
@@ -737,14 +771,14 @@ const Biblioteca: React.FC = () => {
         </DialogContent>
       </Dialog>
 
-      {/* PDF Reader */}
-      {selectedEbook && (
+      {/* Leitor de PDF (o EPUB abre na tela de leitura, não em modal) */}
+      {pdfAberto && (
         <PdfReaderModal
-          open={pdfReaderOpen}
-          onOpenChange={open => { setPdfReaderOpen(open); if (!open) setSelectedEbook(null); }}
-          pdfUrl={selectedEbook.arquivo_url}
-          title={selectedEbook.titulo}
-          autor={selectedEbook.autor}
+          open
+          onOpenChange={open => { if (!open) setPdfAberto(null); }}
+          pdfUrl={pdfAberto.url}
+          title={pdfAberto.titulo}
+          autor={pdfAberto.autor}
         />
       )}
     </PageContainer>

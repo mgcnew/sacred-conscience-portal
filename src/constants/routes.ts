@@ -24,6 +24,8 @@ export const ROUTES = {
   // Biblioteca
   BIBLIOTECA: '/biblioteca',
   LEITURA: '/biblioteca/ler',
+  // Mesma tela de leitura, mas lendo de ebooks_pessoais em vez de uma compra.
+  LEITURA_UPLOAD: '/biblioteca/ler/upload',
   
   // Estudos/Materiais pós-consagração
   ESTUDOS: '/estudos',

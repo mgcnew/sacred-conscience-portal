@@ -277,6 +277,8 @@ export interface BibliotecaUsuario {
   pagamento_id: string | null;
   pagina_atual: number;
   progresso: number;
+  /** EPUB CFI de onde a leitura parou. Ver Leitura.tsx. */
+  localizacao: string | null;
   ultima_leitura: string | null;
   created_at: string;
   produto?: Produto;
@@ -293,10 +295,12 @@ export interface EbookPessoal {
   autor: string | null;
   capa_url: string | null;
   arquivo_url: string;
-  tipo_arquivo: 'pdf' | 'docx' | 'doc';
+  tipo_arquivo: 'epub' | 'pdf' | 'docx' | 'doc';
   tamanho_bytes: number | null;
   pagina_atual: number;
   progresso: number;
+  /** EPUB CFI de onde a leitura parou. Ver Leitura.tsx. */
+  localizacao: string | null;
   ultima_leitura: string | null;
   created_at: string;
   updated_at: string;
