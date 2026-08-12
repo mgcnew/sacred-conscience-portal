@@ -250,6 +250,77 @@ export const useUpsertConfigLeitura = () => {
 };
 
 // ============================================
+// Acesso ao arquivo do livro
+// ============================================
+
+export interface AcessoLivro {
+  /** URL assinada, de curta duração. */
+  url: string;
+  /** Preenchido só na compra: vira a marca d'água do leitor. */
+  leitor: { nome: string | null; email: string | null } | null;
+}
+
+/**
+ * O bucket `ebooks` é privado. O caminho dentro dele é o que sobra depois de
+ * `/ebooks/` na URL antiga gravada no banco.
+ */
+const caminhoNoBucket = (valor: string): string | null => {
+  if (!valor) return null;
+  if (!valor.startsWith('http')) return valor.replace(/^\/+/, '');
+  const i = valor.indexOf('/ebooks/');
+  if (i === -1) return null;
+  return decodeURIComponent(valor.slice(i + '/ebooks/'.length).split('?')[0]);
+};
+
+/**
+ * Resolve a URL para abrir o livro.
+ *
+ * Compra: passa pela função `ler-ebook`, que confere em biblioteca_usuario
+ * antes de assinar — a pasta da loja não tem policy de leitura, então não há
+ * como um usuário assinar sozinho.
+ * Upload: o arquivo é do próprio dono, que assina direto pelo app.
+ *
+ * A URL não é revalidada enquanto o leitor está aberto: trocar a url no meio
+ * da leitura faria o EpubReader recarregar o livro e perder o lugar. O arquivo
+ * inteiro já foi baixado na abertura, então a expiração não atrapalha.
+ */
+export const useAcessoLivro = (
+  origem: 'compra' | 'upload',
+  id?: string,
+  arquivoUrl?: string | null,
+) => {
+  return useQuery({
+    queryKey: ['acesso-livro', origem, id],
+    enabled: !!id && (origem === 'compra' || !!arquivoUrl),
+    staleTime: Infinity,
+    // Curto de propósito: uma URL guardada por muito tempo chegaria expirada
+    // na próxima abertura.
+    gcTime: 1000 * 60 * 2,
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
+    retry: 1,
+    queryFn: async (): Promise<AcessoLivro> => {
+      if (origem === 'compra') {
+        const { data, error } = await supabase.functions.invoke('ler-ebook', {
+          body: { produto_id: id },
+        });
+        if (error) throw new Error(data?.error || 'Não foi possível liberar o livro.');
+        if (!data?.url) throw new Error(data?.error || 'Livro indisponível.');
+        return { url: data.url, leitor: data.leitor ?? null };
+      }
+
+      const caminho = caminhoNoBucket(arquivoUrl!);
+      if (!caminho) throw new Error('Caminho do arquivo inválido.');
+      const { data, error } = await supabase.storage
+        .from('ebooks')
+        .createSignedUrl(caminho, 60 * 5);
+      if (error || !data?.signedUrl) throw new Error('Não foi possível abrir o arquivo.');
+      return { url: data.signedUrl, leitor: null };
+    },
+  });
+};
+
+// ============================================
 // Upload de Capa
 // ============================================
 

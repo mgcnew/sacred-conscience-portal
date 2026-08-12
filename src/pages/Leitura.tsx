@@ -30,7 +30,7 @@ import EpubReader, {
 import {
   useMarcadores, useCreateMarcador, useDeleteMarcador,
   useAnotacoes, useCreateAnotacao, useUpdateAnotacao, useDeleteAnotacao,
-  useConfigLeitura, useUpsertConfigLeitura,
+  useConfigLeitura, useUpsertConfigLeitura, useAcessoLivro,
 } from '@/hooks/queries/useBiblioteca';
 
 const READING_THEMES = {
@@ -136,6 +136,38 @@ const Leitura: React.FC<Props> = ({ origem = 'compra' }) => {
   }, [origem, compra, upload]);
 
   const carregando = origem === 'compra' ? carregandoCompra : carregandoUpload;
+
+  // O bucket é privado: a URL do arquivo é assinada na hora e vale poucos
+  // minutos. No caso da compra, quem assina é a função ler-ebook, depois de
+  // conferir que a pessoa comprou.
+  const idAcesso = livro?.ehEpub
+    ? (origem === 'compra' ? ebookId : livro.registroId)
+    : undefined;
+  const {
+    data: acesso, isLoading: carregandoAcesso, error: erroAcesso,
+  } = useAcessoLivro(origem, idAcesso, livro?.arquivoUrl);
+
+  // Só livro comprado é protegido: upload é arquivo do próprio dono.
+  const protegido = origem === 'compra';
+  const marcaDagua = protegido && acesso?.leitor
+    ? [acesso.leitor.nome, acesso.leitor.email].filter(Boolean).join(' · ')
+    : null;
+
+  // Bloqueia a impressão da página inteira enquanto o leitor está aberto.
+  useEffect(() => {
+    if (!protegido) return;
+    const style = document.createElement('style');
+    style.textContent = '@media print { body { display: none !important; } }';
+    document.head.appendChild(style);
+    const barrarAtalho = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && ['p', 's'].includes(e.key.toLowerCase())) e.preventDefault();
+    };
+    window.addEventListener('keydown', barrarAtalho);
+    return () => {
+      style.remove();
+      window.removeEventListener('keydown', barrarAtalho);
+    };
+  }, [protegido]);
 
   // Marcadores e anotações apontam para colunas diferentes conforme a origem.
   const marcadorAlvo = useMemo(
@@ -319,13 +351,42 @@ const Leitura: React.FC<Props> = ({ origem = 'compra' }) => {
         </p>
         <div className="flex gap-2">
           <Button variant="outline" onClick={() => navigate(ROUTES.BIBLIOTECA)}>Voltar</Button>
-          <Button asChild>
-            <a href={livro.arquivoUrl} target="_blank" rel="noopener noreferrer">
-              <Download className="w-4 h-4 mr-2" />
-              Abrir arquivo
-            </a>
-          </Button>
+          {/* Só o próprio upload pode ser aberto fora do leitor. */}
+          {!protegido && (
+            <Button asChild>
+              <a href={livro.arquivoUrl} target="_blank" rel="noopener noreferrer">
+                <Download className="w-4 h-4 mr-2" />
+                Abrir arquivo
+              </a>
+            </Button>
+          )}
         </div>
+      </div>
+    );
+  }
+
+  if (carregandoAcesso || !acesso?.url) {
+    const mensagem = erroAcesso instanceof Error ? erroAcesso.message : null;
+    return (
+      <div
+        className="min-h-screen flex flex-col items-center justify-center gap-3 p-6 text-center"
+        style={{ backgroundColor: theme.bg, color: theme.text }}
+      >
+        {mensagem ? (
+          <>
+            <BookOpen className="w-14 h-14 opacity-40" />
+            <p className="font-medium">Não foi possível abrir o livro</p>
+            <p className="text-sm opacity-70 max-w-sm">{mensagem}</p>
+            <Button variant="outline" onClick={() => navigate(ROUTES.BIBLIOTECA)}>
+              Voltar à Biblioteca
+            </Button>
+          </>
+        ) : (
+          <>
+            <Loader2 className="w-10 h-10 animate-spin" />
+            <p className="text-sm opacity-70">Liberando seu exemplar...</p>
+          </>
+        )}
       </div>
     );
   }
@@ -519,11 +580,14 @@ const Leitura: React.FC<Props> = ({ origem = 'compra' }) => {
       <div className="absolute top-[60px] bottom-20 left-0 right-0 mx-auto max-w-2xl px-5">
         <EpubReader
           ref={leitorRef}
-          url={livro.arquivoUrl}
+          url={acesso.url}
           fontSize={fontSize}
           tema={readingTheme}
           temas={READING_THEMES}
           cfiInicial={livro.cfiSalvo}
+          marcaDagua={marcaDagua}
+          bloquearCopia={protegido}
+          permitirBaixar={!protegido}
           onPronto={({ toc: sumario }) => setToc(sumario)}
           onPosicao={setPos}
           onToqueSimples={() => setShowControls(v => !v)}
@@ -555,10 +619,15 @@ const Leitura: React.FC<Props> = ({ origem = 'compra' }) => {
                 step={1}
                 disabled={totalPosicoes === 0}
               />
-              <p className="text-center text-xs mt-1 opacity-60">
+              <p className="text-center text-xs mt-1 opacity-60 truncate">
                 {totalPosicoes > 0
                   ? `${Math.round(percentual)}% lido`
                   : 'Calculando as páginas...'}
+                {/* Dizer que o exemplar é identificado é o que faz a marca
+                    d'água funcionar como desestímulo. */}
+                {marcaDagua && acesso.leitor?.nome && (
+                  <span className="opacity-80"> · exemplar de {acesso.leitor.nome}</span>
+                )}
               </p>
             </div>
             <Button variant="ghost" size="icon" onClick={proxima} style={{ color: theme.text }}>

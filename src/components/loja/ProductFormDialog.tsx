@@ -225,11 +225,9 @@ const ProductFormDialog: React.FC<ProductFormDialogProps> = ({
 
     if (uploadError) throw uploadError;
 
-    const { data: { publicUrl } } = supabase.storage
-      .from('ebooks')
-      .getPublicUrl(filePath);
-
-    return publicUrl;
+    // Guarda o caminho, não uma URL: o bucket é privado e qualquer link só
+    // vale assinado, gerado na hora da leitura pela função ler-ebook.
+    return filePath;
   };
 
   const handleEbookFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {

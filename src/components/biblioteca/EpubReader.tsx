@@ -50,6 +50,15 @@ interface Props {
   onErro?: (mensagem: string) => void;
   /** Toque/clique curto no meio da página, para mostrar e esconder os controles. */
   onToqueSimples?: () => void;
+  /**
+   * Texto carimbado por trás do livro inteiro, bem apagado. Serve para o
+   * conteúdo sair identificado em print ou gravação de tela.
+   */
+  marcaDagua?: string | null;
+  /** Desliga seleção, menu do botão direito, cópia e impressão. */
+  bloquearCopia?: boolean;
+  /** Mostra o botão de baixar quando o arquivo não abre. Nunca em livro comprado. */
+  permitirBaixar?: boolean;
 }
 
 /** Distância mínima, em px, para um arrasto contar como virada de página. */
@@ -60,6 +69,27 @@ const CACHE_PREFIX = 'epub-locations:';
 
 /** O índice de locations é caro de gerar; a chave amarra o cache ao arquivo. */
 const chaveCache = (url: string) => CACHE_PREFIX + url.split('/').slice(-2).join('/');
+
+/**
+ * Ladrilho de marca d'água como SVG embutido. Vai no background do body, então
+ * se repete por todas as páginas e não entra no fluxo do texto.
+ */
+const ladrilhoMarcaDagua = (texto: string, cor: string) => {
+  const limpar = (s: string) => s.replace(/[<>&"]/g, '').trim().slice(0, 42);
+  // Nome e contato em linhas separadas: numa linha só, um nome comprido é
+  // cortado na borda do ladrilho e deixa de identificar quem é.
+  const [primeira, ...resto] = texto.split('·');
+  const linha1 = limpar(primeira);
+  const linha2 = limpar(resto.join('·'));
+  const svg =
+    `<svg xmlns="http://www.w3.org/2000/svg" width="360" height="215">` +
+    `<g transform="rotate(-24 180 107)" fill="${cor}" fill-opacity="0.08" ` +
+    `font-family="sans-serif" text-anchor="middle">` +
+    `<text x="180" y="103" font-size="13">${linha1}</text>` +
+    (linha2 ? `<text x="180" y="121" font-size="10">${linha2}</text>` : '') +
+    `</g></svg>`;
+  return `url("data:image/svg+xml;utf8,${encodeURIComponent(svg)}")`;
+};
 
 const achatarToc = (itens: NavItem[], nivel = 0): EpubTocItem[] =>
   itens.flatMap((item) => [
@@ -74,7 +104,10 @@ const achatarToc = (itens: NavItem[], nivel = 0): EpubTocItem[] =>
  * sobem para a página.
  */
 const EpubReader = forwardRef<EpubReaderHandle, Props>(function EpubReader(
-  { url, fontSize, tema, temas, cfiInicial, onPronto, onPosicao, onErro, onToqueSimples },
+  {
+    url, fontSize, tema, temas, cfiInicial, onPronto, onPosicao, onErro, onToqueSimples,
+    marcaDagua, bloquearCopia = false, permitirBaixar = false,
+  },
   ref,
 ) {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -94,7 +127,7 @@ const EpubReader = forwardRef<EpubReaderHandle, Props>(function EpubReader(
     cbs.current = { onPronto, onPosicao, onErro, onToqueSimples };
   });
 
-  const inicial = useRef({ fontSize, tema, cfiInicial, temas });
+  const inicial = useRef({ fontSize, tema, cfiInicial, temas, marcaDagua, bloquearCopia });
 
   const publicarPosicao = useCallback((cfi: string) => {
     const book = bookRef.current;
@@ -162,6 +195,8 @@ const EpubReader = forwardRef<EpubReaderHandle, Props>(function EpubReader(
         });
         rendicaoRef.current = rendicao;
 
+        const { marcaDagua: marca, bloquearCopia: travar } = inicial.current;
+
         Object.entries(inicial.current.temas).forEach(([nome, t]) => {
           rendicao!.themes.register(nome, {
             // Nada de margem nem padding aqui: no modo paginado o epubjs monta
@@ -170,12 +205,29 @@ const EpubReader = forwardRef<EpubReaderHandle, Props>(function EpubReader(
             // borda direita. A margem de leitura é dada pelo container, fora
             // do iframe.
             'html, body': {
-              background: `${t.bg} !important`,
+              'background-color': `${t.bg} !important`,
+              ...(marca
+                ? {
+                    'background-image': `${ladrilhoMarcaDagua(marca, t.text)} !important`,
+                    'background-repeat': 'repeat !important',
+                  }
+                : {}),
               color: `${t.text} !important`,
               'line-height': '1.7 !important',
               margin: '0 !important',
               padding: '0 !important',
+              ...(travar
+                ? {
+                    '-webkit-user-select': 'none !important',
+                    'user-select': 'none !important',
+                    '-webkit-touch-callout': 'none !important',
+                  }
+                : {}),
             },
+            // Sem regra @media aqui: o epubjs monta o CSS achatando um nível só
+            // (seletor { prop: valor }), então uma at-rule aninhada vira uma
+            // regra inválida e derruba a injeção do tema inteiro. A trava de
+            // impressão fica na página, fora do iframe.
             'p, div, span, li, td, th, blockquote, section, article, figcaption, dd, dt': {
               color: `${t.text} !important`,
             },
@@ -278,6 +330,22 @@ const EpubReader = forwardRef<EpubReaderHandle, Props>(function EpubReader(
         if (e.key === 'ArrowRight' || e.key === 'PageDown') rendicaoRef.current?.next();
         else if (e.key === 'ArrowLeft' || e.key === 'PageUp') rendicaoRef.current?.prev();
       });
+
+      if (inicial.current.bloquearCopia) {
+        // Corta o copiar-e-colar preguiçoso. Não segura quem está decidido —
+        // print de tela não dá para bloquear na web, e é por isso que existe a
+        // marca d'água.
+        doc.addEventListener('contextmenu', (e: Event) => e.preventDefault());
+        doc.addEventListener('copy', (e: Event) => e.preventDefault());
+        doc.addEventListener('cut', (e: Event) => e.preventDefault());
+        doc.addEventListener('dragstart', (e: Event) => e.preventDefault());
+        doc.addEventListener('keydown', (e: KeyboardEvent) => {
+          const tecla = e.key.toLowerCase();
+          if ((e.ctrlKey || e.metaKey) && ['c', 'x', 's', 'p', 'a'].includes(tecla)) {
+            e.preventDefault();
+          }
+        });
+      }
     };
 
     abrir();
@@ -351,12 +419,15 @@ const EpubReader = forwardRef<EpubReaderHandle, Props>(function EpubReader(
             <p className="font-medium mb-1">Não foi possível abrir este livro</p>
             <p className="text-sm opacity-70 max-w-sm">{mensagemErro}</p>
           </div>
-          <Button variant="outline" size="sm" asChild>
-            <a href={url} target="_blank" rel="noopener noreferrer">
-              <Download className="w-4 h-4 mr-2" />
-              Baixar o arquivo
-            </a>
-          </Button>
+          {/* Livro comprado nunca oferece download: a leitura é dentro do app. */}
+          {permitirBaixar && (
+            <Button variant="outline" size="sm" asChild>
+              <a href={url} target="_blank" rel="noopener noreferrer">
+                <Download className="w-4 h-4 mr-2" />
+                Baixar o arquivo
+              </a>
+            </Button>
+          )}
         </div>
       )}
 

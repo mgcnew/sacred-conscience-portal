@@ -54,6 +54,15 @@ type FormatoAceito = (typeof FORMATOS_ACEITOS)[number];
 const extensaoDe = (nome: string) => nome.split('.').pop()?.toLowerCase() ?? '';
 const ehPdf = (url: string) => /\.pdf(\?|#|$)/i.test(url);
 
+/** Caminho dentro do bucket privado `ebooks`, a partir da URL gravada no banco. */
+const caminhoNoBucket = (valor: string): string | null => {
+  if (!valor) return null;
+  if (!valor.startsWith('http')) return valor.replace(/^\/+/, '');
+  const i = valor.indexOf('/ebooks/');
+  if (i === -1) return null;
+  return decodeURIComponent(valor.slice(i + '/ebooks/'.length).split('?')[0]);
+};
+
 const Biblioteca: React.FC = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -150,8 +159,8 @@ const Biblioteca: React.FC = () => {
   const deleteMutation = useMutation({
     mutationFn: async (ebook: EbookPessoal) => {
       if (ebook.arquivo_url) {
-        const path = ebook.arquivo_url.split('/').pop();
-        if (path) await supabase.storage.from('ebooks').remove([`${user?.id}/${path}`]);
+        const caminho = caminhoNoBucket(ebook.arquivo_url);
+        if (caminho) await supabase.storage.from('ebooks').remove([caminho]);
       }
       const { error } = await supabase.from('ebooks_pessoais').delete().eq('id', ebook.id);
       if (error) throw error;
@@ -177,7 +186,7 @@ const Biblioteca: React.FC = () => {
     return format(new Date(date), "dd/MM/yyyy", { locale: ptBR });
   };
 
-  const handleLer = (item: BibliotecaUsuario & { produto: Produto }) => {
+  const handleLer = async (item: BibliotecaUsuario & { produto: Produto }) => {
     const url = item.produto?.arquivo_url;
     if (!url) {
       toast.info('Arquivo indisponível', {
@@ -186,21 +195,43 @@ const Biblioteca: React.FC = () => {
       return;
     }
     if (ehPdf(url)) {
-      setPdfAberto({ url, titulo: item.produto.nome, autor: null });
+      // O bucket é privado: a URL só sai da função, que confere a compra.
+      const { data, error } = await supabase.functions.invoke('ler-ebook', {
+        body: { produto_id: item.produto_id },
+      });
+      if (error || !data?.url) {
+        toast.error('Não foi possível abrir o livro', { description: data?.error });
+        return;
+      }
+      setPdfAberto({ url: data.url, titulo: item.produto.nome, autor: null });
       return;
     }
     navigate(`${ROUTES.LEITURA}/${item.produto_id}`);
   };
 
-  const handleLerPessoal = (ebook: EbookPessoal) => {
+  /** Upload é arquivo do próprio dono: ele mesmo assina a URL. */
+  const assinarProprio = async (arquivoUrl: string) => {
+    const caminho = caminhoNoBucket(arquivoUrl);
+    if (!caminho) return null;
+    const { data } = await supabase.storage.from('ebooks').createSignedUrl(caminho, 60 * 10);
+    return data?.signedUrl ?? null;
+  };
+
+  const handleLerPessoal = async (ebook: EbookPessoal) => {
     if (ebook.tipo_arquivo === 'epub') {
       navigate(`${ROUTES.LEITURA_UPLOAD}/${ebook.id}`);
       return;
     }
+
+    const url = await assinarProprio(ebook.arquivo_url);
+    if (!url) {
+      toast.error('Não foi possível abrir o arquivo');
+      return;
+    }
     if (ebook.tipo_arquivo === 'pdf') {
-      setPdfAberto({ url: ebook.arquivo_url, titulo: ebook.titulo, autor: ebook.autor });
+      setPdfAberto({ url, titulo: ebook.titulo, autor: ebook.autor });
     } else {
-      window.open(ebook.arquivo_url, '_blank');
+      window.open(url, '_blank');
     }
     // O EPUB grava a última leitura sozinho, ao acompanhar a posição.
     supabase
@@ -281,7 +312,6 @@ const Biblioteca: React.FC = () => {
       const filePath = `${user.id}/${Date.now()}.${fileExt}`;
       const { error: uploadError } = await supabase.storage.from('ebooks').upload(filePath, uploadingFile);
       if (uploadError) throw uploadError;
-      const { data: urlData } = supabase.storage.from('ebooks').getPublicUrl(filePath);
 
       let capaUrl: string | null = null;
       if (uploadCapaFile) {
@@ -297,7 +327,8 @@ const Biblioteca: React.FC = () => {
 
       const { error: dbError } = await supabase.from('ebooks_pessoais').insert({
         user_id: user.id, titulo: uploadTitle.trim(), autor: uploadAutor.trim() || null,
-        arquivo_url: urlData.publicUrl, capa_url: capaUrl,
+        // Caminho, não URL: o bucket é privado, o link é assinado na leitura.
+        arquivo_url: filePath, capa_url: capaUrl,
         tipo_arquivo: fileExt as FormatoAceito, tamanho_bytes: uploadingFile.size,
       });
       if (dbError) throw dbError;
