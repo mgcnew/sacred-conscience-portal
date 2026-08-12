@@ -17,6 +17,20 @@ export default {
       },
     },
     extend: {
+      /**
+       * A escala de opacidade do Tailwind só tem múltiplos de 5. O app usa
+       * `/8`, `/9`, `/12`, `/18` e `/35` em 75 lugares — e nenhum deles gerava
+       * regra nenhuma no CSS: eram classes mortas, escritas com intenção e
+       * caladas na compilação. O caso mais visível é o fundo do item ativo da
+       * barra de navegação (`bg-primary/12` e companhia), que nunca apareceu.
+       */
+      opacity: {
+        8: '0.08',
+        9: '0.09',
+        12: '0.12',
+        18: '0.18',
+        35: '0.35',
+      },
       colors: {
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
@@ -98,8 +112,9 @@ export default {
           DEFAULT: "hsl(var(--river))",
           foreground: "hsl(var(--river-foreground))",
         },
-        cream: "hsl(var(--cream))",
-        "warm-white": "hsl(var(--warm-white))",
+        // `cream` e `warm-white` viviam aqui apontando para --cream e
+        // --warm-white, que nunca existiram no index.css: qualquer
+        // `bg-cream` resolvia para hsl() inválido. Ninguém usava. Removidos.
       },
       borderRadius: {
         lg: "var(--radius)",

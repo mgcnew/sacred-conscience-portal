@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Bell, BellOff, Sparkles, X } from 'lucide-react';
 import { usePushNotifications } from '@/hooks/usePushNotifications';
+import { useAuth } from '@/contexts/AuthContext';
 import { cn } from '@/lib/utils';
 
 const DISMISSED_KEY = 'notification-prompt-dismissed';
@@ -9,12 +10,17 @@ const MIN_INTERVAL_MS = 7 * 24 * 60 * 60 * 1000;
 
 export const NotificationPermission: React.FC = () => {
   const { permission, isSupported, requestPermission } = usePushNotifications();
+  const { user } = useAuth();
   const [showPrompt, setShowPrompt] = useState(false);
   const [requesting, setRequesting] = useState(false);
   const [denied, setDenied] = useState(false);
 
   useEffect(() => {
     if (!isSupported || permission === 'granted') return;
+    // O componente vive fora do ProtectedRoute, então sem esta linha o pedido
+    // de permissão aparecia na tela de login, para quem ainda nem tem conta —
+    // e uma recusa ali fica gravada no navegador e vale para sempre.
+    if (!user) return;
 
     const dismissed = localStorage.getItem(DISMISSED_KEY);
     const recentlyDismissed = dismissed && Date.now() - parseInt(dismissed) < MIN_INTERVAL_MS;
@@ -22,7 +28,7 @@ export const NotificationPermission: React.FC = () => {
 
     const timer = setTimeout(() => setShowPrompt(true), 5000);
     return () => clearTimeout(timer);
-  }, [isSupported, permission]);
+  }, [isSupported, permission, user]);
 
   const dismiss = () => {
     setShowPrompt(false);
@@ -50,6 +56,7 @@ export const NotificationPermission: React.FC = () => {
         {/* Botão fechar */}
         <button
           onClick={dismiss}
+          aria-label="Dispensar aviso de notificações"
           className="absolute top-3 right-3 text-muted-foreground hover:text-foreground transition-colors p-1 z-10"
         >
           <X className="w-4 h-4" />

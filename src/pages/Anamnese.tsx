@@ -792,7 +792,9 @@ const Anamnese: React.FC = () => {
   // WhatsApp do líder facilitador para contraindicações (da configuração centralizada)
   const whatsappLider = APP_CONFIG.contacts.whatsappLider;
   const mensagemWhatsApp = encodeURIComponent(
-    `Olá, ${APP_CONFIG.contacts.liderNome.split(' ')[0]}! Sou ${formData.nome_completo} e acabei de preencher minha ficha de anamnese no ${APP_CONFIG.name}. Identifiquei que possuo algumas condições de saúde que podem ser contraindicações e gostaria de conversar antes de participar de uma cerimônia.`
+    // Neutro de propósito: o mesmo texto serve para quem clica no card durante o
+    // preenchimento e para quem clica no modal depois de enviar a ficha.
+    `Olá, ${APP_CONFIG.contacts.liderNome.split(' ')[0]}! Sou ${formData.nome_completo || 'um(a) participante'} e estou preenchendo minha ficha de anamnese no ${APP_CONFIG.name}. Identifiquei que possuo algumas condições de saúde que podem ser contraindicações e gostaria de conversar antes de participar de uma cerimônia.`
   );
 
   if (isFetching) {
@@ -1662,16 +1664,36 @@ const Anamnese: React.FC = () => {
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-5">
+                {/* Este aviso aparece no instante em que a pessoa é honesta sobre
+                    a própria saúde. Antes ele era vermelho e mandava "converse com
+                    o facilitador" sem oferecer nenhuma forma de fazer isso — quem
+                    quer participar tende a desmarcar e mentir, que é justamente o
+                    risco que a ficha existe para evitar. Agora é aviso, não recusa,
+                    e o caminho para a conversa está aqui, no mesmo card. */}
                 {hasContraindicacoes && (
-                  <div className="p-4 bg-destructive/10 border border-destructive/30 rounded-xl flex items-start gap-3">
-                    <AlertTriangle className="w-5 h-5 text-destructive flex-shrink-0 mt-0.5" />
-                    <div>
-                      <p className="font-semibold text-destructive text-sm">Atenção: Contraindicações detectadas</p>
-                      <p className="text-xs text-muted-foreground mt-0.5">
-                        Algumas condições marcadas podem representar contraindicações.
-                        Converse com o facilitador antes de participar.
-                      </p>
+                  <div className="p-4 bg-warning-subtle border border-warning/30 dark:border-warning rounded-xl space-y-3">
+                    <div className="flex items-start gap-3">
+                      <AlertTriangle className="w-5 h-5 text-warning flex-shrink-0 mt-0.5" />
+                      <div>
+                        <p className="font-semibold text-warning text-sm">Vamos conversar antes</p>
+                        <p className="text-xs text-muted-foreground mt-0.5">
+                          Algumas condições que você marcou pedem uma avaliação antes da
+                          consagração. Isso <strong>não impede</strong> sua participação —
+                          quem decide é {APP_CONFIG.contacts.liderNome.split(' ')[0]}, junto com você.
+                          Continue preenchendo com sinceridade; é assim que conseguimos cuidar de você.
+                        </p>
+                      </div>
                     </div>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      className="w-full gap-2"
+                      onClick={() => window.open(`https://wa.me/${whatsappLider}?text=${mensagemWhatsApp}`, '_blank')}
+                    >
+                      <MessageCircle className="w-4 h-4" />
+                      Falar com {APP_CONFIG.contacts.liderNome.split(' ')[0]} agora
+                    </Button>
                   </div>
                 )}
 

@@ -43,7 +43,14 @@ function addEmojiToItem(item: string): string {
 
 interface SuccessModalProps {
   isOpen: boolean;
+  /** Fecha e leva às orientações. */
   onComplete: () => void;
+  /**
+   * Fecha e fica onde está. O modal não tinha saída nenhuma — nem Esc, nem
+   * clique fora, nem X — e a inscrição já está gravada quando ele abre, então
+   * prender a pessoa aqui não protege nada.
+   */
+  onDismiss: () => void;
   ceremonyName: string;
   itensLevar?: string | null;
 }
@@ -51,14 +58,17 @@ interface SuccessModalProps {
 // Conteúdo Step 1
 const Step1Content: React.FC<{ ceremonyName: string }> = ({ ceremonyName }) => (
   <div className="space-y-4 text-center">
+    {/* Era um emoji de festa dois segundos depois da tela que pediu para a
+        pessoa ter certeza. Quem confirma a presença é o templo, então quem
+        aparece aqui é o emblema. */}
     <div className="mx-auto w-14 h-14 rounded-full bg-primary/15 flex items-center justify-center">
-      <Sparkles className="w-7 h-7 text-primary" />
+      <img src="/emblema.png" alt="" width={36} height={36} className="w-9 h-9 object-contain" />
     </div>
 
     <div className="space-y-2">
-      <h3 className="font-display text-xl text-primary">🎉 Parabéns!</h3>
+      <h3 className="font-display text-xl text-primary">Sua presença está confirmada</h3>
       <p className="text-sm">
-        Presença confirmada para <span className="text-primary font-medium">{ceremonyName}</span>
+        <span className="text-primary font-medium">{ceremonyName}</span>
       </p>
     </div>
 
@@ -80,11 +90,11 @@ const Step2Content: React.FC<{ itensLevar?: string | null }> = ({ itensLevar }) 
   return (
     <div className="space-y-4 text-center">
       <div className="mx-auto w-14 h-14 rounded-full bg-primary/15 flex items-center justify-center">
-        <img src="/emblema.png" alt="Consciência Divinal" className="w-9 h-9 object-contain" />
+        <Sparkles className="w-7 h-7 text-primary" />
       </div>
 
       <div className="space-y-2">
-        <h3 className="font-display text-xl text-primary">📝 O que levar?</h3>
+        <h3 className="font-display text-xl text-primary">O que levar</h3>
         <p className="text-xs text-muted-foreground">
           Com cuidado e intenção, prepare o que levar:
         </p>
@@ -102,7 +112,7 @@ const Step2Content: React.FC<{ itensLevar?: string | null }> = ({ itensLevar }) 
   );
 };
 
-const SuccessModal: React.FC<SuccessModalProps> = ({ isOpen, onComplete, ceremonyName, itensLevar }) => {
+const SuccessModal: React.FC<SuccessModalProps> = ({ isOpen, onComplete, onDismiss, ceremonyName, itensLevar }) => {
   const isMobile = useIsMobile();
   const [step, setStep] = useState<1 | 2>(1);
 
@@ -110,6 +120,10 @@ const SuccessModal: React.FC<SuccessModalProps> = ({ isOpen, onComplete, ceremon
   const handleFinish = () => {
     setStep(1);
     onComplete();
+  };
+  const handleDismiss = () => {
+    setStep(1);
+    onDismiss();
   };
 
   if (!isOpen) return null;
@@ -120,7 +134,7 @@ const SuccessModal: React.FC<SuccessModalProps> = ({ isOpen, onComplete, ceremon
   // Mobile: Drawer
   if (isMobile) {
     return (
-      <Drawer open={isOpen} onOpenChange={() => {}}>
+      <Drawer open={isOpen} onOpenChange={(aberto) => { if (!aberto) handleDismiss(); }}>
         <DrawerContent className="max-h-[85vh]">
           <DrawerHeader className="sr-only">
             <DrawerTitle>Confirmação</DrawerTitle>
@@ -129,11 +143,16 @@ const SuccessModal: React.FC<SuccessModalProps> = ({ isOpen, onComplete, ceremon
           <div className="px-4 py-2">
             {step === 1 ? <Step1Content ceremonyName={ceremonyName} /> : <Step2Content itensLevar={itensLevar} />}
           </div>
-          <DrawerFooter>
+          <DrawerFooter className="gap-2">
             <Button onClick={handleClick} className="w-full gap-2">
               {buttonText}
               <ArrowRight className="w-4 h-4" />
             </Button>
+            {step === 2 && (
+              <Button variant="ghost" onClick={handleDismiss} className="w-full text-muted-foreground">
+                Fechar
+              </Button>
+            )}
           </DrawerFooter>
         </DrawerContent>
       </Drawer>
@@ -142,18 +161,23 @@ const SuccessModal: React.FC<SuccessModalProps> = ({ isOpen, onComplete, ceremon
 
   // Desktop: Dialog
   return (
-    <Dialog open={isOpen} onOpenChange={() => {}}>
-      <DialogContent className="sm:max-w-md [&>button]:hidden">
+    <Dialog open={isOpen} onOpenChange={(aberto) => { if (!aberto) handleDismiss(); }}>
+      <DialogContent className="sm:max-w-md">
         <DialogHeader className="sr-only">
           <DialogTitle>Confirmação</DialogTitle>
           <DialogDescription>Inscrição confirmada</DialogDescription>
         </DialogHeader>
         {step === 1 ? <Step1Content ceremonyName={ceremonyName} /> : <Step2Content itensLevar={itensLevar} />}
-        <DialogFooter>
+        <DialogFooter className="flex-col sm:flex-col gap-2">
           <Button onClick={handleClick} className="w-full gap-2">
             {buttonText}
             <ArrowRight className="w-4 h-4" />
           </Button>
+          {step === 2 && (
+            <Button variant="ghost" onClick={handleDismiss} className="w-full text-muted-foreground">
+              Fechar
+            </Button>
+          )}
         </DialogFooter>
       </DialogContent>
     </Dialog>

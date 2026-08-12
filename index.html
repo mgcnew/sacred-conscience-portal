@@ -2,7 +2,10 @@
 <html lang="pt-BR" translate="no">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <!-- Sem `maximum-scale` nem `user-scalable=no`: a congregação é de faixa
+         etária ampla e desligar a pinça de zoom no app inteiro tira de quem
+         enxerga pouco a única saída que sobra quando o texto está pequeno. -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     
     <!-- Desabilitar tradução automática do navegador -->
     <meta name="google" content="notranslate" />
@@ -38,7 +41,11 @@
     <meta name="twitter:card" content="summary_large_image" />
   </head>
 
-  <body style="background:#0e1613;margin:0;">
+  <!-- Sem `background` inline: ele vencia o `bg-background` do tema e pintava
+       de verde-noite o rastro do efeito elástico de rolagem no tema claro.
+       O splash logo abaixo é `position:fixed` e já cobre a tela inteira com a
+       cor certa antes do CSS carregar, então nada pisca. -->
+  <body style="margin:0;">
     <!-- Splash screen — aparece antes do React carregar.
          Paleta da marca: verde-noite da mata (#0e1613) e ouro sagrado (#e59306).
          Cores chapadas, sem gradiente e sem brilho. -->

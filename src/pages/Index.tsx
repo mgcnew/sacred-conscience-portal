@@ -90,11 +90,21 @@ const Index: React.FC = () => {
       .sort((a, b) => a.cerimonia.data.localeCompare(b.cerimonia.data))[0] ?? null;
   }, [inscriptions]);
 
+  /**
+   * As cores vêm da mesma divisão da navegação: Cerimônias, Galeria e
+   * Partilhas são a Roda (ouro), a Loja é a Casa (terra). A Home declarava as
+   * suas próprias — Galeria era `blue-500` aqui e ouro na barra de baixo, a
+   * Loja era `amber-600` aqui e terra lá —, então o mesmo destino trocava de
+   * cor conforme por onde a pessoa chegasse.
+   *
+   * "Eventos" também virou "Cerimônias": era a única tela do app que chamava
+   * a consagração de evento.
+   */
   const quickActions = [
-    { label: 'Eventos', icon: CalendarDays, route: ROUTES.CERIMONIAS, color: 'text-primary', bg: 'bg-primary/10' },
-    { label: 'Galeria', icon: Image, route: ROUTES.GALERIA, color: 'text-blue-500', bg: 'bg-blue-500/10' },
-    { label: 'Partilhas', icon: Users, route: ROUTES.PARTILHAS, color: 'text-primary', bg: 'bg-primary/10' },
-    { label: 'Loja', icon: ShoppingBag, route: ROUTES.LOJA, color: 'text-amber-600', bg: 'bg-amber-500/10' },
+    { label: 'Cerimônias', icon: CalendarDays, route: ROUTES.CERIMONIAS, color: 'text-sacred-gold-ink', bg: 'bg-sacred-gold/12' },
+    { label: 'Galeria', icon: Image, route: ROUTES.GALERIA, color: 'text-sacred-gold-ink', bg: 'bg-sacred-gold/12' },
+    { label: 'Partilhas', icon: Users, route: ROUTES.PARTILHAS, color: 'text-sacred-gold-ink', bg: 'bg-sacred-gold/12' },
+    { label: 'Loja', icon: ShoppingBag, route: ROUTES.LOJA, color: 'text-earth', bg: 'bg-earth/12' },
   ];
 
   const HeroStrip = () => {
@@ -111,7 +121,7 @@ const Index: React.FC = () => {
       return (
         <div className={`rounded-2xl border p-4 mb-6 ${
           isNear
-            ? 'bg-sacred-gold/10 border-amber-500/30'
+            ? 'bg-sacred-gold/10 border-sacred-gold/30'
             : 'bg-primary/8 border-primary/20'
         }`}>
           <div className="flex items-center justify-between gap-3">
@@ -127,7 +137,7 @@ const Index: React.FC = () => {
               )}
             </div>
             <div className="text-right shrink-0">
-              <p className={`text-2xl font-bold leading-none ${isNear ? 'text-amber-600 dark:text-amber-400' : 'text-primary'}`}>
+              <p className={`text-2xl font-bold leading-none ${isNear ? 'text-sacred-gold-ink' : 'text-primary'}`}>
                 {label}
               </p>
               {days > 1 && <p className="text-[10px] text-muted-foreground">restantes</p>}
@@ -137,12 +147,20 @@ const Index: React.FC = () => {
       );
     }
 
+    // Sem cerimônia marcada, aqui ficava a mesma citação que já aparece mais
+    // abaixo na versão do celular — a frase saía duas vezes na mesma tela.
+    // No lugar dela, o passo que a pessoa precisa dar.
     return (
-      <div className="rounded-2xl bg-primary/8 border border-primary/15 px-4 py-3 mb-6">
-        <p className="font-display italic text-sm text-muted-foreground text-center leading-relaxed">
-          "A medicina não cura, ela revela. O caminho da cura está dentro de você."
+      <button
+        type="button"
+        onClick={() => navigate(ROUTES.CERIMONIAS)}
+        className="w-full text-left rounded-2xl bg-primary/8 border border-primary/15 px-4 py-3 mb-6 active:scale-[0.99] transition-transform"
+      >
+        <p className="text-xs text-muted-foreground mb-0.5">Nenhuma cerimônia marcada</p>
+        <p className="font-display font-semibold text-sm text-primary">
+          Ver o calendário do templo
         </p>
-      </div>
+      </button>
     );
   };
 
@@ -186,6 +204,7 @@ const Index: React.FC = () => {
         href="https://www.instagram.com/temploxamaniconscienciadivinal"
         target="_blank"
         rel="noopener noreferrer"
+        aria-label="Instagram do templo"
         className="w-10 h-10 rounded-full bg-primary text-white flex items-center justify-center shadow-md active:scale-90 transition-transform"
       >
         <Instagram className="w-5 h-5" />
@@ -194,7 +213,8 @@ const Index: React.FC = () => {
         href={`https://wa.me/${APP_CONFIG.contacts.whatsappLider}`}
         target="_blank"
         rel="noopener noreferrer"
-        className="w-10 h-10 rounded-full bg-green-500 text-white flex items-center justify-center shadow-md active:scale-90 transition-transform"
+        aria-label="WhatsApp do templo"
+        className="w-10 h-10 rounded-full bg-success text-success-foreground flex items-center justify-center shadow-md active:scale-90 transition-transform"
       >
         <MessageCircle className="w-5 h-5" />
       </a>
@@ -208,6 +228,12 @@ const Index: React.FC = () => {
 
       {/* Main Content */}
       <div className="container max-w-6xl mx-auto px-4 py-5">
+
+        {/* A Home é a única tela sem título — o maior texto dela era um número
+            de contagem de dias. Como um <h1> visível empurraria a próxima
+            cerimônia para fora da dobra no celular, ele fica só para o leitor
+            de tela, que precisa dele para anunciar onde a pessoa está. */}
+        <h1 className="sr-only">Portal do Templo Consciência Divinal</h1>
 
 
 
@@ -229,10 +255,10 @@ const Index: React.FC = () => {
 
             {/* Anamnese alert */}
             {anamnesePending && (
-              <Card className="border-none shadow-sm bg-amber-500/8 overflow-hidden">
-                <div className="bg-amber-500/15 px-4 py-2 flex items-center gap-2">
-                  <AlertCircle className="w-4 h-4 text-amber-700 dark:text-amber-400" />
-                  <span className="text-xs font-bold uppercase tracking-wider text-amber-700 dark:text-amber-400">
+              <Card className="border-none shadow-sm bg-warning-subtle overflow-hidden">
+                <div className="bg-warning/15 px-4 py-2 flex items-center gap-2">
+                  <AlertCircle className="w-4 h-4 text-warning" />
+                  <span className="text-xs font-bold uppercase tracking-wider text-warning">
                     Atenção Necessária
                   </span>
                 </div>
@@ -369,7 +395,7 @@ const Index: React.FC = () => {
               const days = Math.round((date.getTime() - today.getTime()) / 86400000);
               const isNear = days <= 3;
               return (
-                <div className={`rounded-xl border p-4 ${isNear ? 'bg-amber-500/8 border-amber-500/30' : 'bg-primary/5 border-primary/15'}`}>
+                <div className={`rounded-xl border p-4 ${isNear ? 'bg-sacred-gold/10 border-sacred-gold/30' : 'bg-primary/5 border-primary/15'}`}>
                   <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-2">Sua próxima cerimônia</p>
                   <p className="font-display font-semibold text-sm leading-tight mb-1 truncate">
                     {nextUpcomingInscription.cerimonia.nome || 'Cerimônia'}
@@ -378,7 +404,7 @@ const Index: React.FC = () => {
                     <p className="text-xs text-muted-foreground">
                       {nextUpcomingInscription.cerimonia.medicina_principal || ''}
                     </p>
-                    <p className={`text-xl font-bold leading-none ${isNear ? 'text-amber-600 dark:text-amber-400' : 'text-primary'}`}>
+                    <p className={`text-xl font-bold leading-none ${isNear ? 'text-sacred-gold-ink' : 'text-primary'}`}>
                       {days === 0 ? 'Hoje!' : days === 1 ? 'Amanhã!' : `${days}d`}
                     </p>
                   </div>

@@ -12,43 +12,50 @@ interface StatusBadgeProps {
   className?: string;
 }
 
+/**
+ * Cada estado usa o par token/token-subtle correspondente. Antes daqui saíam
+ * `green-100`, `amber-50`, `yellow-50` e `blue-50` — o componente criado para
+ * padronizar status era justamente o que mais ignorava os tokens semânticos,
+ * e por isso mudar o tema não mudava o badge. Os tokens já viram sozinhos no
+ * escuro, então não há mais nenhum par `dark:` para manter em sincronia.
+ */
 const statusConfig: Record<StatusType, {
   classes: string;
   icon: React.ElementType;
   defaultLabel: string;
 }> = {
   success: {
-    classes: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100 border-green-200 dark:border-green-800',
+    classes: 'bg-success-subtle text-success border-success/30',
     icon: CheckCircle2,
     defaultLabel: 'Sucesso',
   },
   warning: {
-    classes: 'bg-amber-50 text-amber-800 dark:bg-amber-950/20 dark:text-amber-200 border-amber-200 dark:border-amber-900',
+    classes: 'bg-warning-subtle text-warning border-warning/30',
     icon: AlertTriangle,
     defaultLabel: 'Atenção',
   },
   error: {
-    classes: 'bg-destructive/10 text-destructive border-destructive/30',
+    classes: 'bg-destructive-subtle text-destructive border-destructive/30',
     icon: XCircle,
     defaultLabel: 'Erro',
   },
   pending: {
-    classes: 'bg-yellow-50 text-yellow-700 dark:bg-yellow-950/20 dark:text-yellow-200 border-yellow-200 dark:border-yellow-800',
+    classes: 'bg-warning-subtle text-warning border-warning/30',
     icon: Clock,
     defaultLabel: 'Pendente',
   },
   info: {
-    classes: 'bg-blue-50 text-blue-800 dark:bg-blue-950/20 dark:text-blue-200 border-blue-200 dark:border-blue-900',
+    classes: 'bg-info-subtle text-info border-info/30',
     icon: AlertTriangle,
     defaultLabel: 'Info',
   },
   paid: {
-    classes: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100 border-green-200 dark:border-green-800',
+    classes: 'bg-success-subtle text-success border-success/30',
     icon: DollarSign,
     defaultLabel: 'Pago',
   },
   unpaid: {
-    classes: 'text-amber-600 border-amber-300 dark:text-amber-400 dark:border-amber-700',
+    classes: 'text-warning border-warning/40',
     icon: Clock,
     defaultLabel: 'Pendente',
   },

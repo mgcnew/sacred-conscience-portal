@@ -15,6 +15,8 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { formatDateCurtoBR } from '@/lib/date-utils';
+import { cn } from '@/lib/utils';
+import { medicinaDoTexto } from '@/constants/medicinas';
 import type { Cerimonia } from '@/types';
 
 interface ListaEsperaInfo {
@@ -110,13 +112,17 @@ const CerimoniasLista: React.FC<CerimoniasListaProps> = ({
             <div className="absolute inset-0 bg-black/40" />
             
             <div className="absolute top-2 right-2 flex items-center gap-2">
+              {/* Era "🔥 Últimas vagas!". A informação é útil e fica; o tom de
+                  liquidação, não — a tela seguinte pede que a pessoa tenha
+                  certeza antes de ocupar a vaga de outra. */}
               {isUltimasVagas(cerimonia.id) && (
-                <Badge className="bg-amber-500 text-white border-none text-xs font-semibold">
-                  🔥 Últimas vagas!
+                <Badge className="bg-warning text-warning-foreground border-none text-xs font-semibold">
+                  Poucas vagas
                 </Badge>
               )}
               <button
                 type="button"
+                aria-label={`Detalhes de ${cerimonia.nome || 'cerimônia'}`}
                 className="h-8 w-8 rounded-full bg-background/80 flex items-center justify-center shadow-md active:scale-95"
                 onClick={(e) => { e.stopPropagation(); onViewInfo(cerimonia); }}
               >
@@ -128,16 +134,27 @@ const CerimoniasLista: React.FC<CerimoniasListaProps> = ({
               <h3 className="text-white font-display text-lg font-semibold drop-shadow-md leading-tight mb-1">
                 {cerimonia.nome || 'Cerimônia'}
               </h3>
-              <Badge className="bg-primary/90 text-primary-foreground border-none font-medium text-xs backdrop-blur-sm">
-                {cerimonia.medicina_principal}
-              </Badge>
+              {/* A etiqueta pega a cor da medicina que abre o texto. Era
+                  `bg-primary/90` para todas: no único lugar do app em que a
+                  pessoa escolhe entre medicinas, todas apareciam iguais. */}
+              {cerimonia.medicina_principal && (
+                <Badge
+                  className={cn(
+                    'border-none font-medium text-xs',
+                    medicinaDoTexto(cerimonia.medicina_principal)?.corBadge ??
+                      'bg-primary text-primary-foreground'
+                  )}
+                >
+                  {cerimonia.medicina_principal.trim()}
+                </Badge>
+              )}
             </div>
           </div>
 
           <CardHeader className="pb-2 pt-4">
             {isUserInscrito(cerimonia.id) && (
               <div className="mb-2">
-                <Badge className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100 border-green-200 dark:border-green-500/30 flex gap-1 items-center w-fit">
+                <Badge className="bg-success-subtle text-success border-success/30 flex gap-1 items-center w-fit">
                   <CheckCircle2 className="w-3 h-3" /> Inscrito
                 </Badge>
               </div>
@@ -189,7 +206,7 @@ const CerimoniasLista: React.FC<CerimoniasListaProps> = ({
           <CardFooter className="pt-4 border-t border-border/50 bg-muted/30 flex flex-col gap-2">
             {isUserInscrito(cerimonia.id) ? (
               <div className="w-full flex flex-col gap-2">
-                <Button className="w-full bg-green-600 hover:bg-green-700 text-white shadow-md cursor-default opacity-90">
+                <Button className="w-full bg-success hover:bg-success text-success-foreground shadow-md cursor-default opacity-90">
                   <CheckCircle2 className="w-4 h-4 mr-2" /> Vaga Garantida
                 </Button>
                 <AlertDialog>
@@ -221,11 +238,11 @@ const CerimoniasLista: React.FC<CerimoniasListaProps> = ({
               <div className="w-full space-y-2">
                 {getPosicaoListaEspera(cerimonia.id) ? (
                   <>
-                    <div className="text-center p-2 bg-amber-100 dark:bg-amber-900/30 rounded-lg">
-                      <p className="text-sm font-medium text-amber-800 dark:text-amber-200">
+                    <div className="text-center p-2 bg-warning-subtle rounded-lg">
+                      <p className="text-sm font-medium text-warning">
                         Você está na lista de espera
                       </p>
-                      <p className="text-xs text-amber-600 dark:text-amber-300">
+                      <p className="text-xs text-warning">
                         Posição: {getPosicaoListaEspera(cerimonia.id)}º lugar
                       </p>
                     </div>
@@ -259,7 +276,7 @@ const CerimoniasLista: React.FC<CerimoniasListaProps> = ({
                 <Button className="w-full bg-muted text-muted-foreground font-medium" onClick={() => onOpenPayment(cerimonia)}>
                   <FileText className="w-4 h-4 mr-2" /> Confirmar Presença
                 </Button>
-                <p className="text-xs text-center text-amber-700 dark:text-amber-400 flex items-center justify-center gap-1">
+                <p className="text-xs text-center text-warning flex items-center justify-center gap-1">
                   <AlertCircle className="w-3 h-3" /> Preencha sua ficha de anamnese primeiro
                 </p>
               </div>

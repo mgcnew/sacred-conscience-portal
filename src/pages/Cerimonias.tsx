@@ -530,6 +530,7 @@ const Cerimonias: React.FC = () => {
       <SuccessModal
         isOpen={isSuccessModalOpen}
         onComplete={() => { setIsSuccessModalOpen(false); navigate(ROUTES.FAQ, { state: { fromInscription: true } }); }}
+        onDismiss={() => setIsSuccessModalOpen(false)}
         ceremonyName={confirmedCeremonyName}
         itensLevar={confirmedItensLevar}
       />

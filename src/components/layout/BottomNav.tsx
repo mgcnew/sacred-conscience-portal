@@ -127,6 +127,9 @@ const BottomNav: React.FC<BottomNavProps> = ({ isAdmin, isSuperAdmin, onSignOut 
           {/* Mais */}
           <button
             onClick={() => setMoreOpen(true)}
+            aria-haspopup="dialog"
+            aria-expanded={moreOpen}
+            aria-label="Mais destinos do portal"
             className="flex flex-col items-center gap-0.5 min-w-[72px] py-2 group"
           >
             <div className="relative flex flex-col items-center">

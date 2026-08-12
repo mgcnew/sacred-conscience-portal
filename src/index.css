@@ -82,7 +82,11 @@
        do templo mas distinguíveis do --primary, para que um badge
        "Confirmado" não se confunda com um botão de ação.
        O erro usa --destructive, já definido acima. */
-    --success: 142 58% 32%;
+    /* 27% de luz, não 32%: a 32% o verde dava 4,26:1 sobre --success-subtle e
+       3,96:1 sobre pergaminho — abaixo dos 4,5 de texto, e pior do que o
+       green-800 cru que o StatusBadge usava antes de migrar para os tokens.
+       A 27% dá 5,56:1 sobre o sutil e 5,16:1 sobre pergaminho. */
+    --success: 142 58% 27%;
     --success-foreground: 0 0% 100%;
     --success-subtle: 142 45% 92%;
 
@@ -317,14 +321,6 @@
     animation: scaleIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   }
 
-  /* Glassmorphism Utilities */
-  .glass {
-    @apply bg-white/10 backdrop-blur-lg border border-white/20;
-  }
-
-  .glass-dark {
-    @apply bg-black/20 backdrop-blur-lg border border-white/10;
-  }
 }
 
 /* ========================================
@@ -607,19 +603,6 @@
   animation: slideInRight 0.3s ease-out forwards;
 }
 
-/* Hover effect suave para cards - apenas desktop */
-@layer components {
-  .card-hover {
-    @apply transition-colors duration-150 ease-out;
-  }
-}
-
-/* Focus ring acessível */
-@layer utilities {
-  .focus-ring {
-    @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background;
-  }
-}
 
 /* ========================================
    MOBILE PERFORMANCE OPTIMIZATIONS
@@ -645,12 +628,6 @@
   button:active, a:active, [role="button"]:active {
     transform: scale(0.97);
     transition: transform 0.05s ease-out;
-  }
-  
-  /* Desabilita hover effects no mobile (economiza processamento) */
-  .card-hover:hover {
-    transform: none;
-    box-shadow: inherit;
   }
 }
 
@@ -733,7 +710,9 @@
 
 /* Botões com área de toque mínima de 44px (recomendação Apple/Google) */
 @media (max-width: 1023px) {
-  button, [role="button"], a {
+  /* `select` entrou na lista: os filtros de cerimônia tinham 32px de altura,
+     porque a regra só cobria button, [role=button] e a. */
+  button, [role="button"], a, select {
     min-height: 44px;
     min-width: 44px;
   }

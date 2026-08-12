@@ -34,8 +34,11 @@ const PageContainer: React.FC<PageContainerProps> = ({
   noPaddingBottom = false,
 }) => {
   return (
+    // Sem `min-h-screen`: o <main> do MainLayout já tem, e somar mais uma
+    // tela inteira ao py-4 e ao pb-20 daqui garantia barra de rolagem em
+    // toda página curta, mesmo sem conteúdo que passasse da dobra.
     <div className={cn(
-      "min-h-screen py-4 md:py-6 bg-background/50",
+      "py-4 md:py-6 bg-background/50",
       noPaddingBottom ? "pb-0" : "pb-20"
     )}>
       <div className={cn('container mx-auto', maxWidthClasses[maxWidth], className)}>

@@ -1,5 +1,17 @@
 import { Leaf, Eye, Wind, Coffee, Flame, Droplets } from 'lucide-react';
 
+/**
+ * As cores das medicinas saíram do arco-íris do Tailwind (`green-600`,
+ * `amber-700`, `yellow-600`, `red-800`, `lime-600`, `slate-500`) e passaram
+ * para a paleta do templo. Cada uma recebe a cor mais próxima do seu próprio
+ * material ou do elemento que o texto da medicina já nomeia — não uma cor
+ * decorativa qualquer.
+ *
+ * São seis medicinas para quatro cores, então há repetição. Ela é deliberada:
+ * Ayahuasca e Kambo dividem o verde porque as duas são medicinas de purga
+ * profunda da floresta, e é a leitura certa. A Defumação fica sem cor própria
+ * porque fumaça não tem cor.
+ */
 export interface Medicina {
   id: string;
   nome: string;
@@ -8,7 +20,15 @@ export interface Medicina {
   beneficios: string[];
   origem: string;
   icone: React.ElementType;
+  /** Classe de texto — ícone na lista e no modal. */
   cor: string;
+  /**
+   * Preenchimento sólido, para quando a medicina vira etiqueta sobre foto.
+   * No card de cerimônia essa etiqueta era `bg-primary/90` para todas: no
+   * único lugar do app em que a pessoa escolhe entre medicinas, todas
+   * apareciam iguais.
+   */
+  corBadge: string;
   imagem: string;
 }
 
@@ -36,7 +56,8 @@ export const MEDICINAS: Medicina[] = [
     ],
     origem: 'Amazônia (Povos Indígenas)',
     icone: Leaf,
-    cor: 'text-green-600 dark:text-green-400',
+    cor: 'text-primary', // o verde do cipó e da folha
+    corBadge: 'bg-primary text-primary-foreground',
     imagem: '/images/medicinas/ayahuasca.webp'
   },
   {
@@ -63,7 +84,8 @@ export const MEDICINAS: Medicina[] = [
     ],
     origem: 'Tribos Indígenas Brasileiras (Acre/Amazônia)',
     icone: Wind,
-    cor: 'text-amber-700 dark:text-amber-500',
+    cor: 'text-river', // o sopro; o texto chama de medicina do elemento Ar
+    corBadge: 'bg-river text-river-foreground',
     imagem: '/images/medicinas/rape.webp'
   },
   {
@@ -86,7 +108,8 @@ export const MEDICINAS: Medicina[] = [
     ],
     origem: 'Povos Kaxinawá e Yawanawá',
     icone: Eye,
-    cor: 'text-yellow-600 dark:text-yellow-400',
+    cor: 'text-sacred-gold-ink', // a ardência; elemento Fogo
+    corBadge: 'bg-sacred-gold text-sacred-gold-foreground',
     imagem: '/images/medicinas/sananga.webp'
   },
   {
@@ -109,7 +132,8 @@ export const MEDICINAS: Medicina[] = [
     ],
     origem: 'Povos Maias e Astecas (América Central)',
     icone: Coffee,
-    cor: 'text-red-800 dark:text-red-400',
+    cor: 'text-earth', // a semente e o marrom da terra
+    corBadge: 'bg-earth text-earth-foreground',
     imagem: '/images/medicinas/cacau.webp'
   },
   {
@@ -135,7 +159,8 @@ export const MEDICINAS: Medicina[] = [
     ],
     origem: 'Povos Katukina, Yawanawá e Matsés (Amazônia)',
     icone: Droplets,
-    cor: 'text-lime-600 dark:text-lime-400',
+    cor: 'text-primary', // a vacina da floresta
+    corBadge: 'bg-primary text-primary-foreground',
     imagem: '/images/medicinas/kambo.webp'
   },
   {
@@ -158,7 +183,37 @@ export const MEDICINAS: Medicina[] = [
     ],
     origem: 'Universal (Xamanismo, Umbanda, Catolicismo, etc.)',
     icone: Flame,
-    cor: 'text-slate-500 dark:text-slate-400',
+    cor: 'text-muted-foreground', // fumaça não tem cor própria
+    corBadge: 'bg-muted text-muted-foreground',
     imagem: '/images/medicinas/defumacao.webp'
   }
 ];
+
+/**
+ * Descobre de que medicina fala um texto livre.
+ *
+ * `cerimonias.medicina_principal` não é uma chave: no banco há
+ * "Ayahuasca,rapé e sananga", "Ayahuasca - Rape - Sananga e Tabaco ",
+ * "Ayahuasca-Rapé-Sanaga " e `null`. Então normalizamos acento e caixa e
+ * pegamos a medicina cujo nome aparece **primeiro** no texto — que é como a
+ * pessoa que escreveu ordenou, do principal para o complementar.
+ *
+ * Devolve null quando nada casa, e quem chama decide o visual neutro.
+ */
+export function medicinaDoTexto(texto?: string | null): Medicina | null {
+  if (!texto) return null;
+  const normaliza = (s: string) =>
+    s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+  const alvo = normaliza(texto);
+
+  let achada: Medicina | null = null;
+  let melhor = Infinity;
+  for (const medicina of MEDICINAS) {
+    const pos = alvo.indexOf(normaliza(medicina.nome.split(' ')[0]));
+    if (pos !== -1 && pos < melhor) {
+      melhor = pos;
+      achada = medicina;
+    }
+  }
+  return achada;
+}
