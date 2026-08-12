@@ -53,7 +53,15 @@ export default defineConfig(({ mode }) => ({
       },
       injectManifest: {
         globPatterns: ["**/*.{js,css,html,ico,png,svg,woff2,webp}"],
-        globIgnores: ["**/OneSignalSDKWorker.js"],
+        globIgnores: [
+          "**/OneSignalSDKWorker.js",
+          // O pdf.js pesa quase meio MB e só é carregado por quem abre um
+          // livro em PDF. No precache, todo mundo baixaria isso na instalação,
+          // inclusive quem nunca entra na Biblioteca. Ele é importado sob
+          // demanda e fica no cache normal do navegador depois da primeira vez.
+          "**/pdf-*.js",
+          "**/pdf.worker*",
+        ],
       },
     }),
   ].filter(Boolean),

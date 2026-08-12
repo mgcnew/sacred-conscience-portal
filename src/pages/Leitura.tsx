@@ -19,7 +19,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   ChevronLeft, ChevronRight, ArrowLeft, Settings, Type, BookOpen, List,
-  Bookmark, BookmarkPlus, StickyNote, Plus, Trash2, Edit2, Download, Loader2,
+  Bookmark, BookmarkPlus, StickyNote, Plus, Trash2, Edit2, Loader2,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { ROUTES } from '@/constants';
@@ -28,6 +28,7 @@ import type { Produto, BibliotecaUsuario, EbookPessoal } from '@/types';
 import EpubReader, {
   type EpubReaderHandle, type EpubTocItem, type EpubPosicao,
 } from '@/components/biblioteca/EpubReader';
+import PdfReader from '@/components/biblioteca/PdfReader';
 import {
   useMarcadores, useCreateMarcador, useDeleteMarcador,
   useAnotacoes, useCreateAnotacao, useUpdateAnotacao, useDeleteAnotacao,
@@ -53,19 +54,25 @@ type NavigatorComWakeLock = Navigator & {
   wakeLock?: { request: (tipo: 'screen') => Promise<SentinelaWakeLock> };
 };
 
+/** Formatos que abrem aqui dentro. O resto não tem leitor. */
+type Formato = 'epub' | 'pdf' | 'outro';
+
 interface LivroAberto {
   /** id em biblioteca_usuario (compra) ou em ebooks_pessoais (upload). */
   registroId: string;
   titulo: string;
   arquivoUrl: string | null;
-  ehEpub: boolean;
+  formato: Formato;
   posicaoSalva: number;
   cfiSalvo: string | null;
 }
 
-const pareceEpub = (url: string | null, tipo?: string | null) => {
-  if (tipo?.toLowerCase() === 'epub') return true;
-  return !!url && /\.epub(\?|#|$)/i.test(url);
+const detectarFormato = (url: string | null, tipo?: string | null): Formato => {
+  const t = tipo?.toLowerCase();
+  if (t === 'epub' || t === 'pdf') return t;
+  if (url && /\.epub(\?|#|$)/i.test(url)) return 'epub';
+  if (url && /\.pdf(\?|#|$)/i.test(url)) return 'pdf';
+  return 'outro';
 };
 
 interface Props {
@@ -127,7 +134,7 @@ const Leitura: React.FC<Props> = ({ origem = 'compra' }) => {
         registroId: compra.id,
         titulo: compra.produto?.nome ?? 'Livro',
         arquivoUrl: compra.produto?.arquivo_url ?? null,
-        ehEpub: pareceEpub(compra.produto?.arquivo_url ?? null),
+        formato: detectarFormato(compra.produto?.arquivo_url ?? null),
         posicaoSalva: compra.pagina_atual ?? 0,
         cfiSalvo: compra.localizacao ?? null,
       };
@@ -137,7 +144,7 @@ const Leitura: React.FC<Props> = ({ origem = 'compra' }) => {
         registroId: upload.id,
         titulo: upload.titulo,
         arquivoUrl: upload.arquivo_url,
-        ehEpub: pareceEpub(upload.arquivo_url, upload.tipo_arquivo),
+        formato: detectarFormato(upload.arquivo_url, upload.tipo_arquivo),
         posicaoSalva: upload.pagina_atual ?? 0,
         cfiSalvo: upload.localizacao ?? null,
       };
@@ -150,8 +157,9 @@ const Leitura: React.FC<Props> = ({ origem = 'compra' }) => {
   // O bucket é privado: a URL do arquivo é assinada na hora e vale poucos
   // minutos. No caso da compra, quem assina é a função ler-ebook, depois de
   // conferir que a pessoa comprou.
-  const idAcesso = livro?.ehEpub
-    ? (origem === 'compra' ? ebookId : livro.registroId)
+  const temLeitor = livro?.formato === 'epub' || livro?.formato === 'pdf';
+  const idAcesso = temLeitor
+    ? (origem === 'compra' ? ebookId : livro!.registroId)
     : undefined;
   const {
     data: acesso, isLoading: carregandoAcesso, error: erroAcesso,
@@ -404,26 +412,21 @@ const Leitura: React.FC<Props> = ({ origem = 'compra' }) => {
     );
   }
 
-  if (!livro.ehEpub) {
+  if (livro.formato === 'outro') {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center p-6 text-center">
         <BookOpen className="w-16 h-16 text-muted-foreground mb-4" />
         <h2 className="text-xl font-medium mb-2">{livro.titulo}</h2>
         <p className="text-muted-foreground mb-4 max-w-sm">
-          O leitor com marcadores e anotações funciona com arquivos EPUB. Este título está em outro formato.
+          O leitor abre EPUB e PDF. Este arquivo está em outro formato.
         </p>
-        <div className="flex gap-2">
-          <Button variant="outline" onClick={() => navigate(ROUTES.BIBLIOTECA)}>Voltar</Button>
-          {/* Só o próprio upload pode ser aberto fora do leitor. */}
-          {!protegido && (
-            <Button asChild>
-              <a href={livro.arquivoUrl} target="_blank" rel="noopener noreferrer">
-                <Download className="w-4 h-4 mr-2" />
-                Abrir arquivo
-              </a>
-            </Button>
-          )}
-        </div>
+        {/* O botão "Abrir arquivo" que ficava aqui apontava para o caminho
+            cru no bucket, que é privado — não abria nem para o dono. Quem
+            precisa do arquivo em Word usa o botão da Biblioteca, que assina
+            a URL antes. */}
+        <Button variant="outline" onClick={() => navigate(ROUTES.BIBLIOTECA)}>
+          Voltar à Biblioteca
+        </Button>
       </div>
     );
   }
@@ -647,21 +650,41 @@ const Leitura: React.FC<Props> = ({ origem = 'compra' }) => {
       {/* Área de leitura: insets fixos para que mostrar/esconder os controles
           não mude o tamanho da página e force o EPUB a repaginar. */}
       <div className="absolute top-[60px] bottom-20 left-0 right-0 mx-auto max-w-2xl px-5">
-        <EpubReader
-          ref={leitorRef}
-          url={acesso.url}
-          fontSize={fontSize}
-          tema={readingTheme}
-          temas={READING_THEMES}
-          cfiInicial={livro.cfiSalvo}
-          marcaDagua={marcaDagua}
-          bloquearCopia={protegido}
-          permitirBaixar={!protegido}
-          onPronto={({ toc: sumario }) => setToc(sumario)}
-          onPosicao={setPos}
-          onToqueSimples={() => setShowControls(v => !v)}
-          onErro={msg => toast.error('Erro ao abrir o livro', { description: msg })}
-        />
+        {/* Os dois leitores falam o mesmo contrato — mesma ref, mesma forma de
+            posição —, então marcadores, anotações, temas e barra de progresso
+            valem para EPUB e PDF sem nenhum caminho separado aqui. */}
+        {livro.formato === 'epub' ? (
+          <EpubReader
+            ref={leitorRef}
+            url={acesso.url}
+            fontSize={fontSize}
+            tema={readingTheme}
+            temas={READING_THEMES}
+            cfiInicial={livro.cfiSalvo}
+            marcaDagua={marcaDagua}
+            bloquearCopia={protegido}
+            permitirBaixar={!protegido}
+            onPronto={({ toc: sumario }) => setToc(sumario)}
+            onPosicao={setPos}
+            onToqueSimples={() => setShowControls(v => !v)}
+            onErro={msg => toast.error('Erro ao abrir o livro', { description: msg })}
+          />
+        ) : (
+          <PdfReader
+            ref={leitorRef}
+            url={acesso.url}
+            fontSize={fontSize}
+            tema={readingTheme}
+            temas={READING_THEMES}
+            cfiInicial={livro.cfiSalvo}
+            marcaDagua={marcaDagua}
+            bloquearCopia={protegido}
+            onPronto={({ toc: sumario }) => setToc(sumario)}
+            onPosicao={setPos}
+            onToqueSimples={() => setShowControls(v => !v)}
+            onErro={msg => toast.error('Erro ao abrir o livro', { description: msg })}
+          />
+        )}
       </div>
 
       {/* Zonas de toque nas laterais, acima do iframe do EPUB. */}
@@ -685,7 +708,8 @@ const Leitura: React.FC<Props> = ({ origem = 'compra' }) => {
               <Slider
                 value={[pos?.posicao ?? 0]}
                 onValueChange={([v]) => leitorRef.current?.irParaPosicao(v)}
-                min={0}
+                // No EPUB as posições começam em zero; no PDF, na página 1.
+                min={livro.formato === 'pdf' ? 1 : 0}
                 max={Math.max(1, totalPosicoes)}
                 step={1}
                 disabled={totalPosicoes === 0}

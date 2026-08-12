@@ -30,7 +30,6 @@ import { ptBR } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
 import type { Produto, BibliotecaUsuario, EbookPessoal } from '@/types';
 import { ROUTES } from '@/constants';
-import PdfReaderModal from '@/components/biblioteca/PdfReaderModal';
 
 // --- Skeleton ---
 const BookSkeleton = () => (
@@ -52,7 +51,6 @@ const FORMATOS_ACEITOS = ['epub', 'pdf', 'docx', 'doc'] as const;
 type FormatoAceito = (typeof FORMATOS_ACEITOS)[number];
 
 const extensaoDe = (nome: string) => nome.split('.').pop()?.toLowerCase() ?? '';
-const ehPdf = (url: string) => /\.pdf(\?|#|$)/i.test(url);
 
 /** Caminho dentro do bucket privado `ebooks`, a partir da URL gravada no banco. */
 const caminhoNoBucket = (valor: string): string | null => {
@@ -84,8 +82,6 @@ const Biblioteca: React.FC = () => {
   const [isUploading, setIsUploading] = useState(false);
   const capaInputRef = useRef<HTMLInputElement>(null);
 
-  // Só o PDF continua abrindo em modal; EPUB vai para a tela de leitura.
-  const [pdfAberto, setPdfAberto] = useState<{ url: string; titulo: string; autor: string | null } | null>(null);
 
   // --- Queries ---
   const { data: meusEbooks, isLoading: loadingMeus } = useQuery({
@@ -186,24 +182,17 @@ const Biblioteca: React.FC = () => {
     return format(new Date(date), "dd/MM/yyyy", { locale: ptBR });
   };
 
-  const handleLer = async (item: BibliotecaUsuario & { produto: Produto }) => {
-    const url = item.produto?.arquivo_url;
-    if (!url) {
+  /**
+   * Livro comprado abre sempre na tela de leitura, em EPUB ou em PDF. O PDF
+   * abria num modal que mandava a URL para o Google Docs Viewer e ainda
+   * mostrava um botão de Download — contornando de uma vez o bucket fechado,
+   * a URL assinada e a marca d'água.
+   */
+  const handleLer = (item: BibliotecaUsuario & { produto: Produto }) => {
+    if (!item.produto?.arquivo_url) {
       toast.info('Arquivo indisponível', {
         description: 'Este título ainda não tem o arquivo anexado. Fale com o templo.',
       });
-      return;
-    }
-    if (ehPdf(url)) {
-      // O bucket é privado: a URL só sai da função, que confere a compra.
-      const { data, error } = await supabase.functions.invoke('ler-ebook', {
-        body: { produto_id: item.produto_id },
-      });
-      if (error || !data?.url) {
-        toast.error('Não foi possível abrir o livro', { description: data?.error });
-        return;
-      }
-      setPdfAberto({ url: data.url, titulo: item.produto.nome, autor: null });
       return;
     }
     navigate(`${ROUTES.LEITURA}/${item.produto_id}`);
@@ -218,7 +207,9 @@ const Biblioteca: React.FC = () => {
   };
 
   const handleLerPessoal = async (ebook: EbookPessoal) => {
-    if (ebook.tipo_arquivo === 'epub') {
+    // EPUB e PDF abrem no leitor, que grava a posição sozinho. Word não tem
+    // leitor: o arquivo é do próprio dono, então abre assinado em outra aba.
+    if (ebook.tipo_arquivo === 'epub' || ebook.tipo_arquivo === 'pdf') {
       navigate(`${ROUTES.LEITURA_UPLOAD}/${ebook.id}`);
       return;
     }
@@ -228,12 +219,8 @@ const Biblioteca: React.FC = () => {
       toast.error('Não foi possível abrir o arquivo');
       return;
     }
-    if (ebook.tipo_arquivo === 'pdf') {
-      setPdfAberto({ url, titulo: ebook.titulo, autor: ebook.autor });
-    } else {
-      window.open(url, '_blank');
-    }
-    // O EPUB grava a última leitura sozinho, ao acompanhar a posição.
+    window.open(url, '_blank');
+
     supabase
       .from('ebooks_pessoais')
       .update({ ultima_leitura: new Date().toISOString() })
@@ -802,16 +789,6 @@ const Biblioteca: React.FC = () => {
         </DialogContent>
       </Dialog>
 
-      {/* Leitor de PDF (o EPUB abre na tela de leitura, não em modal) */}
-      {pdfAberto && (
-        <PdfReaderModal
-          open
-          onOpenChange={open => { if (!open) setPdfAberto(null); }}
-          pdfUrl={pdfAberto.url}
-          title={pdfAberto.titulo}
-          autor={pdfAberto.autor}
-        />
-      )}
     </PageContainer>
   );
 };
