@@ -46,6 +46,11 @@ const MainLayout: React.FC = () => {
   // Páginas sem footer nem scroll externo (ex: chats)
   const isChatPage = location.pathname === ROUTES.GUARDIAO_VISOES;
 
+  // A leitura ocupa a tela inteira: nada de cabeçalho, barra inferior ou
+  // sidebar por cima do livro. Sem isso a navegação do app tapa o rodapé do
+  // leitor e o painel de configurações.
+  const isLeituraPage = location.pathname.startsWith(ROUTES.LEITURA);
+
   // Páginas que não requerem anamnese (a própria página de anamnese e auth)
   const isAnamnesePage = location.pathname === ROUTES.ANAMNESE;
   const requiresAnamnese = !isAnamnesePage && !isLoadingAnamnese && !anamnese;
@@ -93,7 +98,7 @@ const MainLayout: React.FC = () => {
       <AnamneseWelcomeModal />
       <InstallPWAPrompt />
       {/* Desktop Sidebar */}
-      <div className="hidden lg:block">
+      <div className={cn('hidden', !isLeituraPage && 'lg:block')}>
         <Sidebar
           isAdmin={isAdmin}
           collapsed={sidebarCollapsed}
@@ -103,7 +108,10 @@ const MainLayout: React.FC = () => {
       </div>
 
       {/* Mobile Header */}
-      <div className="lg:hidden fixed top-0 left-0 right-0 z-50 bg-background/90 backdrop-blur-md border-b border-border/30 px-4">
+      <div className={cn(
+        'lg:hidden fixed top-0 left-0 right-0 z-50 bg-background/90 backdrop-blur-md border-b border-border/30 px-4',
+        isLeituraPage && 'hidden',
+      )}>
         <div className="flex h-16 items-center justify-between">
           <div
             className="flex items-center gap-2.5 cursor-pointer hover:bg-muted/50 active:bg-muted/70 rounded-xl px-1.5 py-1 -ml-1.5 transition-colors"
@@ -130,15 +138,18 @@ const MainLayout: React.FC = () => {
       </div>
 
       {/* Mobile Bottom Nav */}
-      <BottomNav
-        isAdmin={isAdmin}
-        isSuperAdmin={isSuperAdmin()}
-        onSignOut={handleSignOut}
-      />
+      {!isLeituraPage && (
+        <BottomNav
+          isAdmin={isAdmin}
+          isSuperAdmin={isSuperAdmin()}
+          onSignOut={handleSignOut}
+        />
+      )}
 
       {/* Desktop Topbar (minimal) */}
       <div className={cn(
-        "hidden lg:block fixed top-0 right-0 z-30 h-14 border-b border-border bg-background/95 backdrop-blur-md transition-all duration-300",
+        "hidden fixed top-0 right-0 z-30 h-14 border-b border-border bg-background/95 backdrop-blur-md transition-all duration-300",
+        !isLeituraPage && "lg:block",
         sidebarCollapsed ? "left-16" : "left-56"
       )}>
         <div className="flex h-full items-center justify-between px-6">
@@ -184,17 +195,24 @@ const MainLayout: React.FC = () => {
       <main className={cn(
         "transition-all duration-300",
         isChatPage ? "h-dvh overflow-hidden" : "min-h-screen",
-        "pt-20 lg:pt-14",
-        isChatPage ? "pb-16 lg:pb-0" : "pb-20 lg:pb-0",
-        sidebarCollapsed ? "lg:pl-16" : "lg:pl-56"
+        !isLeituraPage && "pt-20 lg:pt-14",
+        !isLeituraPage && (isChatPage ? "pb-16 lg:pb-0" : "pb-20 lg:pb-0"),
+        !isLeituraPage && (sidebarCollapsed ? "lg:pl-16" : "lg:pl-56")
       )}>
-        <div key={location.pathname} className="page-transition">
+        {/* A leitura não entra na transição de página: o .page-transition anima
+            com transform e vira o bloco de contenção dos filhos position:fixed,
+            zerando a altura da área de leitura. */}
+        {isLeituraPage ? (
           <Outlet />
-        </div>
+        ) : (
+          <div key={location.pathname} className="page-transition">
+            <Outlet />
+          </div>
+        )}
       </main>
 
       {/* Scroll to Top */}
-      {!isChatPage && <ScrollToTop />}
+      {!isChatPage && !isLeituraPage && <ScrollToTop />}
     </div>
   );
 };

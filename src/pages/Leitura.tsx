@@ -45,6 +45,14 @@ type ReadingTheme = keyof typeof READING_THEMES;
 /** De onde veio o livro: uma compra na loja ou um arquivo que o usuário subiu. */
 type Origem = 'compra' | 'upload';
 
+/** Tempo parado até os controles sumirem sozinhos e sobrar só o texto. */
+const OCULTAR_CONTROLES_MS = 4000;
+
+type SentinelaWakeLock = { release: () => Promise<void> };
+type NavigatorComWakeLock = Navigator & {
+  wakeLock?: { request: (tipo: 'screen') => Promise<SentinelaWakeLock> };
+};
+
 interface LivroAberto {
   /** id em biblioteca_usuario (compra) ou em ebooks_pessoais (upload). */
   registroId: string;
@@ -76,6 +84,7 @@ const Leitura: React.FC<Props> = ({ origem = 'compra' }) => {
   const [showControls, setShowControls] = useState(true);
   const [toc, setToc] = useState<EpubTocItem[]>([]);
   const [pos, setPos] = useState<EpubPosicao | null>(null);
+  const [painelAberto, setPainelAberto] = useState(false);
   const [isAnotacaoDialogOpen, setIsAnotacaoDialogOpen] = useState(false);
   const [anotacaoTexto, setAnotacaoTexto] = useState('');
   const [editingAnotacaoId, setEditingAnotacaoId] = useState<string | null>(null);
@@ -153,6 +162,59 @@ const Leitura: React.FC<Props> = ({ origem = 'compra' }) => {
   const marcaDagua = protegido && acesso?.leitor
     ? [acesso.leitor.nome, acesso.leitor.email].filter(Boolean).join(' · ')
     : null;
+
+  // Os controles somem sozinhos e deixam só o texto na tela. Um toque no meio
+  // da página traz de volta. Não some com um painel aberto por cima, senão o
+  // popover perde a âncora e fica flutuando.
+  useEffect(() => {
+    if (!showControls || painelAberto || isAnotacaoDialogOpen) return;
+    const t = setTimeout(() => setShowControls(false), OCULTAR_CONTROLES_MS);
+    return () => clearTimeout(t);
+  }, [showControls, painelAberto, isAnotacaoDialogOpen, pos?.cfi]);
+
+  // Ler não gera toque na tela, e o celular acaba apagando no meio da página.
+  useEffect(() => {
+    const nav = navigator as NavigatorComWakeLock;
+    if (!nav.wakeLock) return;
+    let sentinela: SentinelaWakeLock | null = null;
+    let encerrado = false;
+
+    const segurar = async () => {
+      try {
+        sentinela = await nav.wakeLock!.request('screen');
+      } catch {
+        // negado, bateria baixa ou aba em segundo plano: segue sem
+      }
+    };
+    segurar();
+
+    // O navegador solta o bloqueio ao trocar de aba; recupera na volta.
+    const aoVoltar = () => {
+      if (document.visibilityState === 'visible' && !encerrado) segurar();
+    };
+    document.addEventListener('visibilitychange', aoVoltar);
+
+    return () => {
+      encerrado = true;
+      document.removeEventListener('visibilitychange', aoVoltar);
+      sentinela?.release().catch(() => undefined);
+    };
+  }, []);
+
+  // Barra de status do celular na cor do tema de leitura, para a tela virar
+  // uma coisa só. Volta ao normal ao sair.
+  // Lê de READING_THEMES em vez de `theme`, que só é declarado mais abaixo:
+  // usar a variável antes da declaração — inclusive no array de dependências,
+  // avaliado durante o render — lança ReferenceError.
+  useEffect(() => {
+    const fundo = READING_THEMES[readingTheme].bg;
+    const tags = Array.from(document.querySelectorAll('meta[name="theme-color"]'));
+    const anteriores = tags.map((t) => [t, t.getAttribute('content')] as const);
+    tags.forEach((t) => t.setAttribute('content', fundo));
+    return () => {
+      anteriores.forEach(([t, valor]) => valor !== null && t.setAttribute('content', valor));
+    };
+  }, [readingTheme]);
 
   // Bloqueia a impressão da página inteira enquanto o leitor está aberto.
   useEffect(() => {
@@ -417,7 +479,7 @@ const Leitura: React.FC<Props> = ({ origem = 'compra' }) => {
           </div>
 
           <div className="flex items-center gap-0.5">
-            <Popover>
+            <Popover onOpenChange={setPainelAberto}>
               <PopoverTrigger asChild>
                 <Button variant="ghost" size="icon" style={{ color: marcadoAqui ? '#f59e0b' : theme.text }}>
                   {marcadoAqui ? <Bookmark className="w-5 h-5 fill-current" /> : <BookmarkPlus className="w-5 h-5" />}
@@ -444,7 +506,7 @@ const Leitura: React.FC<Props> = ({ origem = 'compra' }) => {
               <StickyNote className="w-5 h-5" />
             </Button>
 
-            <Popover>
+            <Popover onOpenChange={setPainelAberto}>
               <PopoverTrigger asChild>
                 <Button variant="ghost" size="icon" style={{ color: theme.text }}><Settings className="w-5 h-5" /></Button>
               </PopoverTrigger>
@@ -482,7 +544,7 @@ const Leitura: React.FC<Props> = ({ origem = 'compra' }) => {
               </PopoverContent>
             </Popover>
 
-            <Sheet>
+            <Sheet onOpenChange={setPainelAberto}>
               <SheetTrigger asChild>
                 <Button variant="ghost" size="icon" style={{ color: theme.text }}><List className="w-5 h-5" /></Button>
               </SheetTrigger>
@@ -610,7 +672,9 @@ const Leitura: React.FC<Props> = ({ origem = 'compra' }) => {
       <footer
         className={cn('fixed bottom-0 left-0 right-0 z-50 h-20 transition-all duration-300',
           showControls ? 'translate-y-0 opacity-100' : 'translate-y-full opacity-0')}
-        style={{ backgroundColor: theme.bg }}
+        // Sem a barra do app embaixo, o rodapé encosta na faixa do gesto de
+        // início dos celulares sem botão.
+        style={{ backgroundColor: theme.bg, paddingBottom: 'env(safe-area-inset-bottom)' }}
       >
         <div className="border-t border-current/10 h-full flex items-center px-3">
           <div className="flex items-center justify-between max-w-2xl mx-auto gap-4 w-full">

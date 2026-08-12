@@ -380,7 +380,7 @@ const EpubReader = forwardRef<EpubReaderHandle, Props>(function EpubReader(
       const chave = `${Math.round(width)}x${Math.round(height)}`;
       if (chave === ultimo) return;
       ultimo = chave;
-      rendicaoRef.current?.resize();
+      rendicaoRef.current?.resize(Math.round(width), Math.round(height));
     });
     observador.observe(alvo);
     return () => observador.disconnect();
