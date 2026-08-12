@@ -367,6 +367,25 @@ const EpubReader = forwardRef<EpubReaderHandle, Props>(function EpubReader(
     };
   }, [url, publicarPosicao]);
 
+  // O epubjs mede o container uma vez, ao montar, e monta as colunas com esse
+  // tamanho. Se a página ainda estava se acomodando nesse instante, ele pagina
+  // errado e não refaz sozinho — o resultado é área de leitura em branco.
+  useEffect(() => {
+    const alvo = containerRef.current;
+    if (!alvo || typeof ResizeObserver === 'undefined') return;
+    let ultimo = '';
+    const observador = new ResizeObserver((entradas) => {
+      const { width, height } = entradas[0].contentRect;
+      if (width < 2 || height < 2) return;
+      const chave = `${Math.round(width)}x${Math.round(height)}`;
+      if (chave === ultimo) return;
+      ultimo = chave;
+      rendicaoRef.current?.resize();
+    });
+    observador.observe(alvo);
+    return () => observador.disconnect();
+  }, []);
+
   useEffect(() => {
     rendicaoRef.current?.themes.select(tema);
   }, [tema]);

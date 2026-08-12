@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -391,7 +392,13 @@ const Leitura: React.FC<Props> = ({ origem = 'compra' }) => {
     );
   }
 
-  return (
+  // Vai para o body, fora da árvore do MainLayout. O wrapper .page-transition
+  // anima com transform, e um ancestral com transform vira o bloco de
+  // contenção de qualquer descendente position:fixed — como esse wrapper só
+  // tem filhos fora do fluxo, ele tem altura 0, e a área de leitura herdava
+  // essa altura: o epubjs media 0 de altura e a página ficava em branco.
+  // O portal também põe o leitor acima do cabeçalho e da barra inferior do app.
+  return createPortal(
     <div className="fixed inset-0 overflow-hidden select-none" style={{ backgroundColor: theme.bg, color: theme.text }}>
       {/* Cabeçalho */}
       <header
@@ -654,7 +661,8 @@ const Leitura: React.FC<Props> = ({ origem = 'compra' }) => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </div>
+    </div>,
+    document.body,
   );
 };
 
