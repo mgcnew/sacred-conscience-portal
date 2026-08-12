@@ -82,6 +82,7 @@ export default {
         sacred: {
           gold: "hsl(var(--sacred-gold))",
           "gold-light": "hsl(var(--sacred-gold-light))",
+          "gold-ink": "hsl(var(--sacred-gold-ink))",
           "gold-foreground": "hsl(var(--sacred-gold-foreground))",
         },
         forest: {

@@ -80,7 +80,7 @@ const Step2Content: React.FC<{ itensLevar?: string | null }> = ({ itensLevar }) 
   return (
     <div className="space-y-4 text-center">
       <div className="mx-auto w-14 h-14 rounded-full bg-primary/15 flex items-center justify-center">
-        <img src="/logo-conciencia.webp" alt="Consciência Divinal" className="w-9 h-9 object-contain" />
+        <img src="/emblema.png" alt="Consciência Divinal" className="w-9 h-9 object-contain" />
       </div>
 
       <div className="space-y-2">

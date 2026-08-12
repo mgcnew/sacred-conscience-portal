@@ -1,6 +1,8 @@
 import React from 'react';
+import { useLocation } from 'react-router-dom';
 import { LucideIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { guardiaoDaRota } from '@/constants/guardioes';
 
 interface PageHeaderProps {
   title: string;
@@ -51,6 +53,9 @@ const PageHeader: React.FC<PageHeaderProps> = ({
   className,
 }) => {
   const s = SIZES[size];
+  const { pathname } = useLocation();
+  const guardiao = guardiaoDaRota(pathname);
+
   if (centered) {
     return (
       <div className={cn('text-center mb-8 md:mb-12 animate-fade-in', className)}>
@@ -103,6 +108,15 @@ const PageHeader: React.FC<PageHeaderProps> = ({
           </h1>
           {description && (
             <p className="text-muted-foreground font-body mt-1">{description}</p>
+          )}
+          {/* Em que área do templo esta tela fica, e qual guardião cuida dela.
+              Vem depois do título, nunca antes: um rótulo acima do título é
+              enfeite, aqui embaixo é indicação de lugar. */}
+          {guardiao && (
+            <p className="mt-1.5 text-[11px] font-medium tracking-wide">
+              <span className={guardiao.cor}>{guardiao.area}</span>
+              <span className="text-muted-foreground"> · guarda do {guardiao.nome}</span>
+            </p>
           )}
         </div>
       </div>

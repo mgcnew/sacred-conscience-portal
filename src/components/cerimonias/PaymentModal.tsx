@@ -3,6 +3,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerDescription, DrawerFooter } from "@/components/ui/drawer";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
 import { AlertCircle, CheckCircle2, Copy, CreditCard, Loader2, ArrowLeft, Smartphone, Banknote, ShieldCheck, Leaf, ArrowRight } from "lucide-react";
 import { toast } from 'sonner';
@@ -123,8 +124,8 @@ const PaymentContent: React.FC<{
               <p className="text-2xl font-black text-primary">{formatValue(valorComTaxa)}</p>
             </div>
             <div className="text-right">
-              <Badge variant="secondary" className="bg-green-500/10 text-green-600 hover:bg-green-500/10 border-none text-[10px] py-0 px-2">
-                AUTO-CONFIRMA
+              <Badge variant="secondary" className="bg-success-subtle text-success hover:bg-success-subtle border-none text-[10px] py-0 px-2">
+                CONFIRMA NA HORA
               </Badge>
               <p className="text-[9px] text-muted-foreground mt-1">Processado pelo Mercado Pago</p>
             </div>

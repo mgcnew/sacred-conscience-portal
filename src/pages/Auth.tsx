@@ -81,25 +81,19 @@ const Auth: React.FC = () => {
     <div className="relative min-h-screen flex items-center justify-center overflow-hidden bg-background px-4 py-10">
 
       {/* Orbs decorativos de fundo */}
-      <div aria-hidden className="pointer-events-none select-none fixed inset-0 overflow-hidden">
-        <div
-          className="absolute inset-0 opacity-[0.03] dark:opacity-[0.04]"
-          style={{
-            backgroundImage: 'radial-gradient(circle, hsl(var(--primary)) 1px, transparent 1px)',
-            backgroundSize: '32px 32px',
-          }}
-        />
-      </div>
 
       <div className="relative w-full max-w-sm animate-fade-in">
 
-        {/* Logo + Título */}
+        {/* Emblema + Título. É a única tela em que o emblema tem a atenção
+            toda; sem sombra em volta, o desenho já tem contorno próprio. */}
         <div className="text-center mb-7">
-          <div className="relative inline-block mb-3">
-            <div className="relative w-24 h-24 mx-auto">
-              <img src="/logo-conciencia.webp" alt="Consciência Divinal" className="w-full h-full object-contain drop-shadow-lg" />
-            </div>
-          </div>
+          <img
+            src="/emblema.png"
+            alt="Consciência Divinal"
+            width={112}
+            height={112}
+            className="w-28 h-28 mx-auto mb-4 object-contain"
+          />
           <h1 className="font-display text-2xl font-semibold tracking-wide text-foreground">
             Consciência Divinal
           </h1>
@@ -132,11 +126,11 @@ const Auth: React.FC = () => {
                   }
                 </button>
 
-                <p className="text-center text-xs text-muted-foreground/60">
+                <p className="text-center text-xs text-muted-foreground">
                   <button
                     type="button"
                     onClick={() => setView('reset')}
-                    className="hover:text-muted-foreground transition-colors hover:underline underline-offset-2"
+                    className="hover:text-foreground transition-colors hover:underline underline-offset-2"
                   >
                     Esqueci meu acesso
                   </button>
@@ -144,11 +138,13 @@ const Auth: React.FC = () => {
               </div>
             </div>
 
-            <p className="text-center text-[hsl(38,70%,45%)] dark:text-amber-300/70 italic text-[12px] leading-relaxed font-light mt-5 px-4">
+            {/* A frase é a única voz do templo nesta tela; estava a 2,6:1,
+                clara demais para ser lida. Agora usa a tinta dourada. */}
+            <p className="text-center text-sacred-gold-ink italic text-[13px] leading-relaxed mt-5 px-4">
               "Quem sabe o Criador não trouxe você aqui pra tomar uma xícara de chá conosco"
             </p>
 
-            <p className="text-center text-[11px] text-muted-foreground/50 mt-3">
+            <p className="text-center text-xs text-muted-foreground mt-3">
               Ao continuar, você concorda com nossos termos de uso e política de privacidade.
             </p>
           </>

@@ -65,7 +65,7 @@ const AnamneseWelcomeModal: React.FC = () => {
           <div className="relative z-10">
             <div className="mx-auto w-14 h-14 rounded-2xl bg-white shadow-md flex items-center justify-center mb-3">
               <img
-                src="/logo-conciencia.webp"
+                src="/emblema.png"
                 alt="Consciência Divinal"
                 className="w-10 h-10 object-contain"
               />

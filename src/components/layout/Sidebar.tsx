@@ -16,15 +16,15 @@ import { ROUTES } from '@/constants';
 // Mapa de cores por rota — espelhado do BottomNav
 const NAV_COLORS: Record<string, { icon: string; bg: string; hover: string; text: string }> = {
   [ROUTES.HOME]:           { icon: 'text-primary', bg: 'bg-primary/10', hover: 'hover:bg-primary/15', text: 'text-primary' },
-  [ROUTES.CERIMONIAS]:     { icon: 'text-sacred-gold', bg: 'bg-sacred-gold/10', hover: 'hover:bg-sacred-gold/15', text: 'text-sacred-gold' },
-  [ROUTES.GALERIA]:        { icon: 'text-sacred-gold', bg: 'bg-sacred-gold/10', hover: 'hover:bg-sacred-gold/15', text: 'text-sacred-gold' },
+  [ROUTES.CERIMONIAS]:     { icon: 'text-sacred-gold-ink', bg: 'bg-sacred-gold/10', hover: 'hover:bg-sacred-gold/15', text: 'text-sacred-gold-ink' },
+  [ROUTES.GALERIA]:        { icon: 'text-sacred-gold-ink', bg: 'bg-sacred-gold/10', hover: 'hover:bg-sacred-gold/15', text: 'text-sacred-gold-ink' },
   [ROUTES.ANAMNESE]:       { icon: 'text-primary', bg: 'bg-primary/10', hover: 'hover:bg-primary/15', text: 'text-primary' },
   [ROUTES.INSIGHTS]:       { icon: 'text-primary', bg: 'bg-primary/10', hover: 'hover:bg-primary/15', text: 'text-primary' },
   [ROUTES.MEDICINAS]:      { icon: 'text-river', bg: 'bg-river/10', hover: 'hover:bg-river/15', text: 'text-river' },
   [ROUTES.ESTUDOS]:        { icon: 'text-river', bg: 'bg-river/10', hover: 'hover:bg-river/15', text: 'text-river' },
-  [ROUTES.CURSOS]:         { icon: 'text-sacred-gold', bg: 'bg-sacred-gold/10', hover: 'hover:bg-sacred-gold/15', text: 'text-sacred-gold' },
+  [ROUTES.CURSOS]:         { icon: 'text-sacred-gold-ink', bg: 'bg-sacred-gold/10', hover: 'hover:bg-sacred-gold/15', text: 'text-sacred-gold-ink' },
   [ROUTES.BIBLIOTECA]:     { icon: 'text-river', bg: 'bg-river/10', hover: 'hover:bg-river/15', text: 'text-river' },
-  [ROUTES.PARTILHAS]:      { icon: 'text-sacred-gold', bg: 'bg-sacred-gold/10', hover: 'hover:bg-sacred-gold/15', text: 'text-sacred-gold' },
+  [ROUTES.PARTILHAS]:      { icon: 'text-sacred-gold-ink', bg: 'bg-sacred-gold/10', hover: 'hover:bg-sacred-gold/15', text: 'text-sacred-gold-ink' },
   [ROUTES.LOJA]:           { icon: 'text-earth', bg: 'bg-earth/10', hover: 'hover:bg-earth/15', text: 'text-earth' },
   [ROUTES.CONFIGURACOES]:  { icon: 'text-earth', bg: 'bg-earth/10', hover: 'hover:bg-earth/15', text: 'text-earth' },
   [ROUTES.ADMIN]:          { icon: 'text-earth', bg: 'bg-earth/10', hover: 'hover:bg-earth/15', text: 'text-earth' },
@@ -115,18 +115,23 @@ export const Sidebar: React.FC<SidebarProps> = ({
               collapsed ? 'justify-center px-2' : 'justify-start px-4'
             )}
           >
-            {!collapsed ? (
-              <div className="flex flex-col leading-tight">
+            {/* Recolhida, a barra mostrava as letras "CD" numa caixinha. Um
+                templo com emblema próprio se apresenta pelo emblema. */}
+            <img
+              src="/emblema.png"
+              alt=""
+              width={32}
+              height={32}
+              className="w-8 h-8 object-contain shrink-0"
+            />
+            {!collapsed && (
+              <div className="flex flex-col leading-tight ml-2.5">
                 <span className="font-display text-base font-semibold tracking-wide text-primary">
                   Consciência
                 </span>
                 <span className="font-display text-[11px] font-medium tracking-widest text-muted-foreground">
                   DIVINAL
                 </span>
-              </div>
-            ) : (
-              <div className="w-9 h-9 rounded-xl bg-primary/15 border border-primary/20 flex items-center justify-center shrink-0">
-                <span className="font-display text-sm font-bold text-primary tracking-tight">CD</span>
               </div>
             )}
           </div>

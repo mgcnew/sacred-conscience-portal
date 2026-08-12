@@ -62,7 +62,7 @@ const CompleteProfileModal: React.FC = () => {
         <div className="relative overflow-hidden bg-primary/10 pt-6 pb-4 px-6 text-center">
           <div className="relative z-10">
             <div className="mx-auto w-14 h-14 rounded-2xl bg-white shadow-md flex items-center justify-center mb-3">
-              <img src="/logo-conciencia.webp" alt="Consciência Divinal" className="w-10 h-10 object-contain" />
+              <img src="/emblema.png" alt="Consciência Divinal" className="w-10 h-10 object-contain" />
             </div>
             <h2 className="font-display text-lg font-bold text-foreground leading-snug">
               Complete seu perfil

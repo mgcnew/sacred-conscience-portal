@@ -210,7 +210,7 @@ const GuardiaoVisoes: React.FC = () => {
     return (
       <div className="max-w-2xl mx-auto px-4 py-12 flex flex-col items-center text-center gap-6">
         <div className="relative w-20 h-20 rounded-3xl bg-primary/12 flex items-center justify-center">
-          <Eye className="w-9 h-9 text-sacred-gold/60" />
+          <Eye className="w-9 h-9 text-sacred-gold-ink/60" />
           <div className="absolute -bottom-1 -right-1 w-7 h-7 rounded-full bg-background border-2 border-border flex items-center justify-center">
             <Lock className="w-3.5 h-3.5 text-muted-foreground" />
           </div>
@@ -254,7 +254,7 @@ const GuardiaoVisoes: React.FC = () => {
       <div className="flex items-center justify-between py-4 shrink-0">
         <div className="flex items-center gap-3">
           <div className="relative w-10 h-10 rounded-2xl bg-primary/20 flex items-center justify-center shadow-inner">
-            <Eye className="w-5 h-5 text-sacred-gold" />
+            <Eye className="w-5 h-5 text-sacred-gold-ink" />
             <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-emerald-400 border-2 border-background" />
           </div>
           <div>
@@ -310,7 +310,7 @@ const GuardiaoVisoes: React.FC = () => {
 
       {/* Disclaimer */}
       <div className="flex items-start gap-2 px-3 py-2.5 rounded-xl bg-sacred-gold/8 border border-sacred-gold/15 mb-3 shrink-0">
-        <Sparkles className="w-3.5 h-3.5 text-sacred-gold shrink-0 mt-0.5" />
+        <Sparkles className="w-3.5 h-3.5 text-sacred-gold-ink shrink-0 mt-0.5" />
         <p className="text-[11px] text-muted-foreground leading-relaxed">
           As interpretações são reflexões simbólicas — não verdades absolutas. A sabedoria verdadeira vive dentro de você.
         </p>
@@ -328,7 +328,7 @@ const GuardiaoVisoes: React.FC = () => {
           >
             {msg.role === 'model' && (
               <div className="w-7 h-7 rounded-xl bg-primary/20 flex items-center justify-center shrink-0 mr-2 mt-1">
-                <Eye className="w-3.5 h-3.5 text-sacred-gold" />
+                <Eye className="w-3.5 h-3.5 text-sacred-gold-ink" />
               </div>
             )}
             <div
@@ -348,7 +348,7 @@ const GuardiaoVisoes: React.FC = () => {
         {loading && (
           <div className="flex justify-start">
             <div className="w-7 h-7 rounded-xl bg-primary/20 flex items-center justify-center shrink-0 mr-2 mt-1">
-              <Eye className="w-3.5 h-3.5 text-sacred-gold" />
+              <Eye className="w-3.5 h-3.5 text-sacred-gold-ink" />
             </div>
             <div className="bg-muted/60 border border-border/30 rounded-2xl rounded-tl-sm px-4 py-3">
               <div className="flex gap-1.5 items-center h-5">
@@ -369,7 +369,7 @@ const GuardiaoVisoes: React.FC = () => {
           error === 'RATE_LIMIT' ? (
             <div className="flex justify-start">
               <div className="w-7 h-7 rounded-xl bg-primary/20 flex items-center justify-center shrink-0 mr-2 mt-1">
-                <Eye className="w-3.5 h-3.5 text-sacred-gold" />
+                <Eye className="w-3.5 h-3.5 text-sacred-gold-ink" />
               </div>
               <div className="max-w-[80%] rounded-2xl rounded-tl-sm px-4 py-3 bg-muted/60 border border-border/30 text-sm leading-relaxed text-foreground/80">
                 Neste momento muitas almas estão buscando orientação ao mesmo tempo. O Guardião precisa de um instante de silêncio — tente novamente em alguns momentos. 🌿

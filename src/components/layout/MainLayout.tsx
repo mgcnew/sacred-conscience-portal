@@ -112,28 +112,43 @@ const MainLayout: React.FC = () => {
         'lg:hidden fixed top-0 left-0 right-0 z-50 bg-background/90 backdrop-blur-md border-b border-border/30 px-4',
         isLeituraPage && 'hidden',
       )}>
-        <div className="flex h-16 items-center justify-between">
+        <div className="flex h-16 items-center justify-between gap-2">
+          {/* O emblema vem primeiro: a tela é do templo, e a pessoa está
+              dentro dele. Antes o topo abria com o avatar do próprio usuário,
+              e o templo não aparecia em nenhuma tela do dia a dia. */}
           <div
-            className="flex items-center gap-2.5 cursor-pointer hover:bg-muted/50 active:bg-muted/70 rounded-xl px-1.5 py-1 -ml-1.5 transition-colors"
+            className="flex items-center gap-2.5 min-w-0 cursor-pointer hover:bg-muted/50 active:bg-muted/70 rounded-xl px-1.5 py-1 -ml-1.5 transition-colors"
             onClick={() => navigate(ROUTES.HOME)}
           >
-            <Avatar className="w-10 h-10 ring-2 ring-primary/30 ring-offset-2 ring-offset-background shadow-sm">
-              <AvatarImage src={userAvatar || undefined} alt={userName} />
-              <AvatarFallback className="bg-primary/20 text-primary text-sm font-semibold">
-                {userName?.charAt(0)?.toUpperCase() || <User className="w-4 h-4" />}
-              </AvatarFallback>
-            </Avatar>
-            <div className="flex flex-col gap-0">
+            <img
+              src="/emblema.png"
+              alt="Consciência Divinal"
+              width={36}
+              height={36}
+              className="w-9 h-9 object-contain shrink-0"
+            />
+            <div className="flex flex-col gap-0 min-w-0">
               <span className="text-[10px] text-muted-foreground font-medium leading-none mb-0.5">
                 {getGreeting()}
               </span>
-              <span className="text-sm font-semibold text-foreground truncate max-w-[140px] leading-none">
+              <span className="text-sm font-semibold text-foreground truncate leading-none">
                 {userName?.split(' ')[0] || 'Bem-vindo'}
               </span>
             </div>
           </div>
 
-          <NotificationBell />
+          <div className="flex items-center gap-1 shrink-0">
+            <NotificationBell />
+            <Avatar
+              className="w-8 h-8 cursor-pointer ring-1 ring-border"
+              onClick={() => navigate(ROUTES.CONFIGURACOES)}
+            >
+              <AvatarImage src={userAvatar || undefined} alt={userName} />
+              <AvatarFallback className="bg-muted text-muted-foreground text-xs font-semibold">
+                {userName?.charAt(0)?.toUpperCase() || <User className="w-4 h-4" />}
+              </AvatarFallback>
+            </Avatar>
+          </div>
         </div>
       </div>
 

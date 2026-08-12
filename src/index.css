@@ -55,6 +55,11 @@
     /* Custom Sacred Colors */
     --sacred-gold: 38 95% 46%;
     --sacred-gold-light: 48 96% 89%;
+    /* TINTA dourada: o --sacred-gold é claro demais para virar texto sobre
+       pergaminho — dá 2,12:1, e texto precisa de 4,5:1. Este tom fechado dá
+       5,2:1 e continua lendo como ouro velho. Use --sacred-gold em
+       preenchimento, filete e losango; use a tinta em texto e ícone. */
+    --sacred-gold-ink: 36 88% 29%;
     --forest: 148 68% 27%;
     --forest-light: 148 35% 93%;
 
@@ -81,7 +86,9 @@
     --success-foreground: 0 0% 100%;
     --success-subtle: 142 45% 92%;
 
-    --warning: 32 88% 42%;
+    /* 30% de luz, não 42%: o tom anterior dava 3,07:1 sobre pergaminho, e o
+       aviso obrigatório da anamnese é justamente onde ler errado é perigoso. */
+    --warning: 30 90% 32%;
     --warning-foreground: 0 0% 100%;
     --warning-subtle: 38 90% 92%;
 
@@ -142,6 +149,9 @@
 
     --sacred-gold: 38 95% 58%;
     --sacred-gold-light: 48 80% 18%;
+    /* No escuro o ouro claro já passa folgado (~9,9:1), então a tinta é ele
+       mesmo — o par de tokens existe para o claro, mas é usado nos dois. */
+    --sacred-gold-ink: 38 95% 58%;
     --forest: 148 70% 48%;
     --forest-light: 148 35% 16%;
 

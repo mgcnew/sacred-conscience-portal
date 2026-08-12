@@ -49,9 +49,9 @@ const faqCategories = [
     title: 'Cerimônia',
     emoji: '🕯️',
     color: {
-      pill: 'bg-sacred-gold/10 text-sacred-gold border-sacred-gold/20',
+      pill: 'bg-sacred-gold/10 text-sacred-gold-ink border-sacred-gold/20',
       pillActive: 'bg-sacred-gold text-sacred-gold-foreground border-sacred-gold',
-      icon: 'bg-sacred-gold/10 text-sacred-gold',
+      icon: 'bg-sacred-gold/10 text-sacred-gold-ink',
       card: 'border-sacred-gold/20',
       accent: 'bg-sacred-gold/5',
     },

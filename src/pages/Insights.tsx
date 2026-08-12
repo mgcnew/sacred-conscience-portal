@@ -186,7 +186,7 @@ function EntradaGuardiaoCard({ entry, userId }: { entry: DiarioEntrada; userId: 
       <CardContent className="p-4">
         <div className="flex items-start justify-between gap-2 mb-3">
           <div className="flex items-center gap-2 flex-wrap">
-            <div className="flex items-center gap-1.5 text-sacred-gold dark:text-sacred-gold">
+            <div className="flex items-center gap-1.5 text-sacred-gold-ink dark:text-sacred-gold-ink">
               <Eye className="w-3.5 h-3.5" />
               <span className="text-xs font-medium">Guardião das Visões</span>
             </div>
@@ -203,7 +203,7 @@ function EntradaGuardiaoCard({ entry, userId }: { entry: DiarioEntrada; userId: 
             const texto = bloco.replace(/^(🧑 Você:|🌿 Guardião:)\n/, '');
             return (
               <div key={i} className={cn('rounded-xl px-3 py-2.5 text-sm leading-relaxed', isGuardiao ? 'bg-sacred-gold/8 border border-sacred-gold/15 text-foreground/90' : 'bg-muted/50 text-muted-foreground')}>
-                <p className={cn('text-[10px] font-semibold uppercase tracking-wider mb-1', isGuardiao ? 'text-sacred-gold' : 'text-muted-foreground/60')}>
+                <p className={cn('text-[10px] font-semibold uppercase tracking-wider mb-1', isGuardiao ? 'text-sacred-gold-ink' : 'text-muted-foreground/60')}>
                   {isGuardiao ? '🌿 Guardião' : '🧑 Você'}
                 </p>
                 <p className="whitespace-pre-wrap">{texto}</p>
@@ -365,7 +365,7 @@ const Insights: React.FC = () => {
               label="Medicinas"
               value={stats?.medicinasExperimentadas.length ?? 0}
               sub="experienciadas"
-              iconClass="bg-primary/12 dark:bg-primary/20 text-sacred-gold"
+              iconClass="bg-primary/12 dark:bg-primary/20 text-sacred-gold-ink"
             />
             <StatCard
               icon={Calendar}

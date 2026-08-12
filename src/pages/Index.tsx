@@ -324,7 +324,7 @@ const Index: React.FC = () => {
                     fundo escuro. */}
                 {([
                   { label: 'Cursos', desc: 'Expanda seus conhecimentos', icon: GraduationCap, route: ROUTES.CURSOS, tint: 'bg-earth/10 ring-earth/25', chip: 'bg-earth/15', color: 'text-earth' },
-                  { label: 'Guardião', desc: 'Interprete suas visões', icon: Eye, route: ROUTES.GUARDIAO_VISOES, tint: 'bg-sacred-gold/10 ring-sacred-gold/25', chip: 'bg-sacred-gold/15', color: 'text-sacred-gold' },
+                  { label: 'Guardião', desc: 'Interprete suas visões', icon: Eye, route: ROUTES.GUARDIAO_VISOES, tint: 'bg-sacred-gold/10 ring-sacred-gold/25', chip: 'bg-sacred-gold/15', color: 'text-sacred-gold-ink' },
                   { label: 'Medicinas', desc: 'Conheça as plantas', icon: Leaf, route: ROUTES.MEDICINAS, tint: 'bg-primary/10 ring-primary/25', chip: 'bg-primary/15', color: 'text-primary' },
                   { label: 'Estudos', desc: 'Pós-consagração', icon: BookOpen, route: ROUTES.ESTUDOS, tint: 'bg-river/10 ring-river/25', chip: 'bg-river/15', color: 'text-river' },
                 ] as const).map(({ label, desc, icon: Icon, route, tint, chip, color }) => (

@@ -3,6 +3,7 @@ import { Info, User, Sparkles, Heart, BookOpen, Award, Leaf, Star } from 'lucide
 import { PageContainer } from '@/components/shared';
 import { cn } from '@/lib/utils';
 import FadeIn from '@/components/ui/FadeIn';
+import { GUARDIOES } from '@/constants/guardioes';
 
 const SobreNos: React.FC = () => {
   const [tab, setTab] = useState<'templo' | 'mestre'>('templo');
@@ -137,8 +138,38 @@ const SobreNos: React.FC = () => {
             </div>
           </FadeIn>
 
+          {/* Os quatro guardiões do emblema. É o único lugar do app onde eles
+              são explicados; o cabeçalho de cada página só mostra de quem é a
+              guarda daquela área, na cor do bicho. */}
+          <FadeIn delay={200}>
+            <div className="rounded-2xl border border-border/60 overflow-hidden">
+              <div className="bg-muted/40 px-5 py-3 flex items-center gap-2.5 border-b border-border/40">
+                <img src="/emblema.png" alt="" width={20} height={20} className="w-5 h-5 object-contain" />
+                <span className="text-xs font-bold uppercase tracking-wider text-foreground">
+                  Os quatro guardiões
+                </span>
+              </div>
+              <div className="p-5 space-y-4">
+                <p className="text-sm text-foreground/90 leading-relaxed">
+                  No emblema do templo, quatro bichos rodeiam a árvore da vida. Cada um cuida de
+                  uma parte do portal, e é por isso que cada área tem a sua cor.
+                </p>
+                <ul className="space-y-2.5">
+                  {Object.values(GUARDIOES).map((g) => (
+                    <li key={g.nome} className="flex gap-2.5 text-sm leading-relaxed">
+                      <span className={cn('font-semibold shrink-0 w-16', g.cor)}>{g.nome}</span>
+                      <span className="text-muted-foreground">
+                        <span className="text-foreground/90">{g.area}</span> — guarda {g.guarda}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          </FadeIn>
+
           {/* CTA final */}
-          <FadeIn delay={220}>
+          <FadeIn delay={240}>
             <div className="rounded-2xl bg-primary/9 border border-primary/20 p-6 text-center">
               <Sparkles className="w-6 h-6 text-primary mx-auto mb-3" />
               <h3 className="font-display text-base font-bold text-foreground mb-2">
@@ -198,9 +229,9 @@ const SobreNos: React.FC = () => {
           <FadeIn delay={80}>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               {[
-                { icon: Heart, label: 'Experiência', value: '~50 anos de caminhada', color: 'text-rose-500', bg: 'bg-rose-500/8 border-rose-500/15' },
-                { icon: Award, label: 'Formação', value: 'Casa AUYA', color: 'text-amber-500', bg: 'bg-amber-500/8 border-amber-500/15' },
-                { icon: BookOpen, label: 'Acadêmico', value: 'Bacharel em Teologia', color: 'text-sky-500', bg: 'bg-sky-500/8 border-sky-500/15' },
+                { icon: Heart, label: 'Experiência', value: '~50 anos de caminhada', color: 'text-primary', bg: 'bg-primary/8 border-primary/15' },
+                { icon: Award, label: 'Formação', value: 'Casa AUYA', color: 'text-sacred-gold-ink', bg: 'bg-sacred-gold/8 border-sacred-gold/20' },
+                { icon: BookOpen, label: 'Acadêmico', value: 'Bacharel em Teologia', color: 'text-river', bg: 'bg-river/8 border-river/15' },
               ].map(({ icon: Icon, label, value, color, bg }) => (
                 <div key={label} className={cn('flex items-center gap-3 p-4 rounded-2xl border', bg)}>
                   <Icon className={cn('w-6 h-6 shrink-0', color)} />
