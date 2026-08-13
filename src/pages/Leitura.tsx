@@ -29,6 +29,7 @@ import EpubReader, {
   type EpubReaderHandle, type EpubTocItem, type EpubPosicao,
 } from '@/components/biblioteca/EpubReader';
 import PdfReader from '@/components/biblioteca/PdfReader';
+import { useAutosavePosicao } from '@/hooks/useAutosavePosicao';
 import {
   useMarcadores, useCreateMarcador, useDeleteMarcador,
   useAnotacoes, useCreateAnotacao, useUpdateAnotacao, useDeleteAnotacao,
@@ -288,22 +289,24 @@ const Leitura: React.FC<Props> = ({ origem = 'compra' }) => {
       queryClient.invalidateQueries({ queryKey: ['minha-biblioteca'] });
       queryClient.invalidateQueries({ queryKey: ['ebooks-pessoais'] });
     },
+    onError: () => {
+      // Antes o erro sumia calado e a pessoa só descobria na próxima vez que
+      // abrisse o livro, no lugar errado. O id repetido faz o sonner trocar o
+      // aviso em vez de empilhar um por página virada.
+      toast.error('Não consegui guardar onde você parou', {
+        id: 'salvar-progresso',
+        description: 'Sua conexão pode ter caído. A leitura continua normal.',
+      });
+    },
   });
 
-  const cfiAtual = pos?.cfi;
-  useEffect(() => {
-    if (!cfiAtual || !livro) return;
-    // Vira-página é rápido; gravar a cada virada encheria a fila de requisições.
-    const t = setTimeout(() => {
-      salvarProgresso.mutate({
-        posicao: pos?.posicao ?? 0,
-        percentual: pos?.percentual ?? 0,
-        cfi: cfiAtual,
-      });
-    }, 1500);
-    return () => clearTimeout(t);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [cfiAtual, livro?.registroId]);
+  // Guarda sozinho onde a pessoa parou. A lógica mora num hook próprio porque
+  // é o único jeito de testá-la: esta tela inteira fica atrás do login.
+  useAutosavePosicao({
+    pos,
+    pronto: !!livro,
+    salvar: (progresso, { onError }) => salvarProgresso.mutate(progresso, { onError }),
+  });
 
   // --- Navegação ---
   const proxima = useCallback(() => leitorRef.current?.proxima(), []);

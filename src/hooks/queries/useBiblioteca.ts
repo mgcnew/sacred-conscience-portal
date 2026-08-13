@@ -43,9 +43,25 @@ export interface EbookConfigLeitura {
 // Marcadores
 // ============================================
 
+/**
+ * Chave da lista de marcadores de um livro.
+ *
+ * Existe para que quem lê e quem grava usem exatamente a mesma. A tela chama
+ * `useMarcadores(idUpload, idCompra)` com `undefined` no lado que não se
+ * aplica, e a gravação invalidava com o `null` que vai para a coluna do banco
+ * — e `null` e `undefined` são chaves diferentes para o React Query. O
+ * resultado era o marcador entrar no banco e a lista aberta na tela não
+ * mostrar. Normalizar aqui, num lugar só, é o que impede o par de separar de
+ * novo.
+ */
+export const chaveMarcadores = (
+  ebookPessoalId?: string | null,
+  bibliotecaId?: string | null,
+) => ['ebook-marcadores', ebookPessoalId ?? null, bibliotecaId ?? null] as const;
+
 export const useMarcadores = (ebookPessoalId?: string, bibliotecaId?: string) => {
   return useQuery({
-    queryKey: ['ebook-marcadores', ebookPessoalId, bibliotecaId],
+    queryKey: chaveMarcadores(ebookPessoalId, bibliotecaId),
     queryFn: async () => {
       let query = supabase.from('ebook_marcadores').select('*');
       
@@ -77,8 +93,8 @@ export const useCreateMarcador = () => {
       return data;
     },
     onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ 
-        queryKey: ['ebook-marcadores', variables.ebook_pessoal_id, variables.biblioteca_id] 
+      queryClient.invalidateQueries({
+        queryKey: chaveMarcadores(variables.ebook_pessoal_id, variables.biblioteca_id),
       });
     },
   });
@@ -101,8 +117,8 @@ export const useDeleteMarcador = () => {
       return { ebookPessoalId, bibliotecaId };
     },
     onSuccess: (data) => {
-      queryClient.invalidateQueries({ 
-        queryKey: ['ebook-marcadores', data.ebookPessoalId, data.bibliotecaId] 
+      queryClient.invalidateQueries({
+        queryKey: chaveMarcadores(data.ebookPessoalId, data.bibliotecaId),
       });
     },
   });
@@ -112,9 +128,15 @@ export const useDeleteMarcador = () => {
 // Anotações
 // ============================================
 
+/** Mesma normalização dos marcadores. Ver o comentário em `chaveMarcadores`. */
+export const chaveAnotacoes = (
+  ebookPessoalId?: string | null,
+  bibliotecaId?: string | null,
+) => ['ebook-anotacoes', ebookPessoalId ?? null, bibliotecaId ?? null] as const;
+
 export const useAnotacoes = (ebookPessoalId?: string, bibliotecaId?: string) => {
   return useQuery({
-    queryKey: ['ebook-anotacoes', ebookPessoalId, bibliotecaId],
+    queryKey: chaveAnotacoes(ebookPessoalId, bibliotecaId),
     queryFn: async () => {
       let query = supabase.from('ebook_anotacoes').select('*');
       
@@ -146,8 +168,8 @@ export const useCreateAnotacao = () => {
       return data;
     },
     onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ 
-        queryKey: ['ebook-anotacoes', variables.ebook_pessoal_id, variables.biblioteca_id] 
+      queryClient.invalidateQueries({
+        queryKey: chaveAnotacoes(variables.ebook_pessoal_id, variables.biblioteca_id),
       });
     },
   });
@@ -173,8 +195,8 @@ export const useUpdateAnotacao = () => {
       return { data, ebookPessoalId, bibliotecaId };
     },
     onSuccess: (result) => {
-      queryClient.invalidateQueries({ 
-        queryKey: ['ebook-anotacoes', result.ebookPessoalId, result.bibliotecaId] 
+      queryClient.invalidateQueries({
+        queryKey: chaveAnotacoes(result.ebookPessoalId, result.bibliotecaId),
       });
     },
   });
@@ -197,8 +219,8 @@ export const useDeleteAnotacao = () => {
       return { ebookPessoalId, bibliotecaId };
     },
     onSuccess: (data) => {
-      queryClient.invalidateQueries({ 
-        queryKey: ['ebook-anotacoes', data.ebookPessoalId, data.bibliotecaId] 
+      queryClient.invalidateQueries({
+        queryKey: chaveAnotacoes(data.ebookPessoalId, data.bibliotecaId),
       });
     },
   });
